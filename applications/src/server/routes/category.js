@@ -15,24 +15,9 @@ router.get("/getAllCategories", async (req, res) => {
     }
 });
 
-router.post("/createCategory", async (req, res) => {
-    try {
-        categoryController.createCatgeory(req, res);
-    } catch (error) {
-        res.status(500).send({ message: "Internal Server Error" });
-    }
-});
-
-router.get("/:id", async (req, res) => {
-    try {
-        categoryController.getCategoryById(req, res);
-    } catch (error) {
-        res.status(500).send({ message: "Internal Server Error" });
-    }
-});
-
-router.put("update/:id", categoryController.updateCategory);
-
+router.post("/createCategories", categoryController.createCategory);
+router.get("/getCategoryById/:id", categoryController.getCategoryById);
+router.put("/updateCategories/:id", categoryController.updateCategory);
 router.delete("/delete/:id", categoryController.deleteCategory);
 
 export default router;

@@ -35,18 +35,6 @@ export const getCategoryById = async (id) => {
   return data;
 };
 
-export const createCategory = async (category) => {
-  const { data, error } = await supabase
-    .from(TABLE_NAME)
-    .insert([category])
-    .single();
-  if (error) {
-    console.error("Error creating category:", error);
-    return null;
-  }
-  return data;
-};
-
 export const updateCategory = async (id, dataUpdate) => {
   const { data, error } = await supabase
     .from(TABLE_NAME)
@@ -67,4 +55,16 @@ export const deleteCategory = async (id) => {
     return null;
   }
   return { message: "berhasil dihapus" };
+};
+
+export const createCategory = async (category) => {
+    const { data, error } = await supabase
+        .from(TABLE_NAME)
+        .insert([category])
+        .select();
+    if (error) {
+        console.error("Error creating category:", error);
+        return null;
+    }
+    return { success: true, message: "Category created successfully", data: data[0] };
 };

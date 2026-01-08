@@ -4,6 +4,7 @@ import {
   getCategoryById,
   updateCategory,
   deleteCategory,
+  createCategory,
 } from "../model/Categories.js";
 
 export class categoryController {
@@ -41,16 +42,38 @@ export class categoryController {
   }
 
   static async createCategory(req, res) {
-    const { name, category, price, stock } = req.body;
+    const { category_name } = req.body;
+
+    if (!category_name) {
+      return errorResponse(res, "Category name is required", 400);
+    }
+
     const newCategory = {
-      id: data.length + 1,
-      name,
-      category,
-      price,
-      stock,
+      category_name: category_name,
+      created_at: new Date().toISOString(),
+      updated_at: null,
     };
-    data.push(newCategory);
-    return successResponse(res, newCategory, "Category created successfully");
+    try {
+      const createdCategory = await createCategory(newCategory);
+      if (!createdCategory) {
+        return errorResponse(res, "Failed to create category", 500);
+      }
+
+      if (createdCategory.success === true) {
+        return successResponse(
+          res,
+          createdCategory.data,
+          createdCategory.message,
+        );
+      }
+    } catch (error) {
+      return errorResponse(
+        res,
+        "Internal Server Error during creation",
+        500,
+        error.message
+      );
+    }
   }
 
   static async updateCategory(req, res) {
