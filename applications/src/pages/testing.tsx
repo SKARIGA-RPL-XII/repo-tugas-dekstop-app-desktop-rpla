@@ -6,18 +6,17 @@ import { useProduct } from "../hooks/useProduct";
 
 function TestingPage() {
   const { loading, product } = useProduct();
-
   return (
     <div className="flex justify-center items-center h-screen">
       <div className="grid grid-cols-3 gap-3 w-full max-w-5xl px-5">
         {loading
-          ? Array.from({ length: 6 }).map((item, _) => (
+          ? Array.from({ length: 6 }).map((_, i) => (
               <div
-              key={_ + 1}
+                key={i + 1}
                 className="bg-neutral-900 animate-pulse w-full h-full rounded"
               ></div>
             ))
-          : product?.map((item, _) => (
+          : product?.map((item) => (
               <div
                 key={item?.id}
                 className="bg-white border rounded-lg hover:scale-105 transition-all duration-300 ease-in-out p-3"
