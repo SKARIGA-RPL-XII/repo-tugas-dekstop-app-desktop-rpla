@@ -1,1 +1,0 @@
-generate env gais
