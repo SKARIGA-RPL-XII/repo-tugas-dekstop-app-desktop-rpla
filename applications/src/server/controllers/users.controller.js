@@ -25,8 +25,6 @@ export class usersControllers {
 
   static async createUser(req, res) {
     try {
-      console.log(req);
-
       const payload = createUserSchema.parse(req.body);
       const data = await Users.create(supabase, payload);
       return successResponse(res, data, "User created", 201);
