@@ -2,14 +2,30 @@ import { createBrowserRouter } from "react-router-dom";
 import TestingPage from "../pages/testing";
 import MainLayout from "../layouts/mainLayout";
 import Dashboard from "../pages/dashboard";
+import Login from "../pages/login"; // ⬅️ sesuaikan path Login.jsx kamu
 
 const router = createBrowserRouter([
   {
-    path: "testing",
+    path: "/",
+    element: (
+      <div className="text-center font-bold text-[5rem]">
+        Landing Page
+      </div>
+    ),
+  },
+
+  {
+    path: "/login",
+    element: <Login />, // ✅ ROUTE LOGIN
+  },
+
+  {
+    path: "/testing",
     element: <TestingPage />,
   },
+
   {
-    path: "dashboard",
+    path: "/dashboard",
     element: <MainLayout />,
     children: [
       {
@@ -18,21 +34,17 @@ const router = createBrowserRouter([
       },
     ],
   },
+
   {
-    path: "employe",
-    element: "",
+    path: "/employe",
+    element: <MainLayout />, // bisa diganti nanti
     children: [],
   },
+
   {
-    path: "admin",
-    element: "",
+    path: "/admin",
+    element: <MainLayout />, // bisa diganti nanti
     children: [],
-  },
-  {
-    path: "/",
-    element: (
-      <div className="text-center font-bold text-[5rem]">Landing Page</div>
-    ),
   },
 ]);
 
