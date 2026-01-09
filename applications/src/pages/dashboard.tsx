@@ -196,9 +196,9 @@ Lihat Semua <span className="text-base font-extrabold">&gt;</span>
               w-8 h-8
               flex items-center justify-center
               rounded-sm
-              bg-[#EEF2FF]
               text-[#5565FF]
-              hover:bg-[#00ccff]
+              cursor-pointer
+              hover:scale-105
               hover:text-white
               transition">
                 <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
