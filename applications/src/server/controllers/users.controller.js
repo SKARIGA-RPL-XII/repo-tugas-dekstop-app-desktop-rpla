@@ -7,7 +7,7 @@ import { formatFieldError } from "../utils/formatFieldError.js";
 export class usersControllers {
   static async getUsers(req, res) {
     try {
-      const data = await Users.getAll(supabase);
+      const data = await Users.getAll(supabase , req.query);
       return successResponse(res, data, "Users retrieved");
     } catch (e) {
       return errorResponse(res, e.message);
