@@ -23,7 +23,7 @@ const Navbar = () => {
   return (
     <nav className="sticky top-0 w-full h-[70px] border-b border-[#EBF1F6] bg-white flex items-center justify-between px-6 z-20 relative">
       {/* ===== BUTTON TOGGLE SIDEBAR ===== */}
-      <button className="absolute -left-4 top-1/2 -translate-y-1/2 w-[25px] h-[25px] rounded-full bg-[#5565FF] z-20 shadow-md flex items-center justify-center">
+      <button className="absolute -left-4 top-1/2 -translate-y-1/2 w-[25px] h-[25px] rounded-full bg-[#5565FF] z-50 shadow-md flex items-center justify-center">
         <svg
           className="rotate-180"
           width="30"

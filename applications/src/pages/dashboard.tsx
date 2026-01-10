@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { ArrowUpFromLine } from "lucide-react";
 import Chart from "react-apexcharts";
+import { ApexOptions } from "apexcharts";
 
 const Dashboard = () => {
   /* ================= CARD ATAS ================= */
@@ -127,34 +128,29 @@ const Dashboard = () => {
   ];
 
   /* ================= CHART ================= */
-  const [chartOptions] = useState({
-    chart: { type: "bar", height: 248 },
-    plotOptions: {
-      bar: {
-        horizontal: false,
-        columnWidth: "55%",
-        borderRadius: 5,
-        borderRadiusApplication: "end",
-      },
+
+const [chartOptions] = useState<ApexOptions>({
+  chart: {
+    type: "bar",
+    height: 248,
+  },
+  plotOptions: {
+    bar: {
+      horizontal: false,
+      columnWidth: "55%",
+      borderRadius: 5,
+      borderRadiusApplication: "end",
     },
-    dataLabels: { enabled: false },
-    stroke: { show: true, width: 2, colors: ["transparent"] },
-    xaxis: {
-      categories: [
-        "Feb",
-        "Mar",
-        "Apr",
-        "May",
-        "Jun",
-        "Jul",
-        "Aug",
-        "Sep",
-        "Oct",
-      ],
-    },
-    fill: { opacity: 1 },
-    colors: ["#5565FF", "#00E096"],
-  });
+  },
+  dataLabels: { enabled: false },
+  stroke: { show: true, width: 2, colors: ["transparent"] },
+  xaxis: {
+    categories: ["Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct"],
+  },
+  fill: { opacity: 1 },
+  colors: ["#5565FF", "#00E096"],
+});
+
 
   const [series] = useState([
     { name: "Tertinggi", data: [44, 55, 57, 56, 61, 58, 63, 60, 66] },
@@ -162,7 +158,7 @@ const Dashboard = () => {
   ]);
 
   return (
-    <div className="w-full h-full flex flex-col gap-5 p-4 md:p-4">
+    <div className="w-full h-full flex flex-col gap-5 ">
       {/* ================= CARD ATAS ================= */}
       <div className="flex flex-col md:flex-row gap-4 md:gap-6">
         {cards.map((card) => (

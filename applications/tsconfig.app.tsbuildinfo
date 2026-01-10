@@ -1,13 +1,1 @@
-{
-  "root": [
-    "./src/app.tsx",
-    "./src/main.tsx",
-    "./src/vite-env.d.ts",
-    "./src/hooks/useproduct.ts",
-    "./src/pages/testing.tsx",
-    "./src/routes/routes.tsx",
-    "./src/server/services/testingproduct.ts",
-    "./src/utils/apiclient.ts"
-  ],
-  "version": "5.9.3"
-}
+{"root":["./src/app.tsx","./src/main.tsx","./src/vite-env.d.ts","./src/components/navbar.tsx","./src/components/sidebar.tsx","./src/hooks/useproduct.ts","./src/pages/dashboard.tsx","./src/pages/kategori.tsx","./src/pages/login.tsx","./src/pages/pengguna.tsx","./src/pages/errors/notfound.tsx","./src/pages/layouts/mainlayout.tsx","./src/routes/routes.tsx","./src/utils/apiclient.ts"],"version":"5.9.3"}

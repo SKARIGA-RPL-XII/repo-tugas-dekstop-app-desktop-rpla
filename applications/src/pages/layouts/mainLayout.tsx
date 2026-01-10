@@ -9,13 +9,13 @@ const MainLayout = () => {
 
       <div
         className="
-    flex-1 flex flex-col bg-[#F6F6F6]
+    flex-1 flex flex-col
     md:ml-[275px]
   "
       >
         <Navbar />
 
-        <main className="flex-1 p-6 overflow-y-auto">
+        <main className="flex-1 lg:p-6 p-4 overflow-y-auto overflow-hidden">
           <Outlet />
         </main>
       </div>
