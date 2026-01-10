@@ -1,13 +1,14 @@
 import { createBrowserRouter } from "react-router-dom";
 import MainLayout from "../pages/layouts/mainLayout";
 import Dashboard from "../pages/dashboard";
+import Login from "../pages/login"; // ⬅️ sesuaikan path Login.jsx kamu
+import NotFound from "../pages/errors/NotFound";
 import Pengguna from "../pages/pengguna";
 import Kategori from "../pages/kategori";
-import NotFound from "../pages/errors/NotFound";
 
 const router = createBrowserRouter([
   {
-    path: "admin",
+    path: "/dashboard",
     element: <MainLayout />,
     children: [
       {
@@ -29,8 +30,12 @@ const router = createBrowserRouter([
     ],
   },
   {
-    path: "employe",
-    element: "",
+    path: "/login",
+    element: <Login />,
+  },
+  {
+    path: "/employe",
+    element: <MainLayout />,
     children: [],
   },
   {
