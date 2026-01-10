@@ -4,7 +4,8 @@ import { authMiddleware, adminMiddleware } from "../middlewares/auth.middleware.
 
 const router = Router();
 
-router.get("/categories", authMiddleware, adminMiddleware, categoryController.filterCategories);  
+router.get("/categories/filter", authMiddleware, adminMiddleware, categoryController.filterCategories);  
+router.get("/categories", authMiddleware, adminMiddleware, categoryController.getCategories);
 router.get("/categories/:id", authMiddleware, adminMiddleware, categoryController.getCategoryById);
 router.post("/categories", authMiddleware, adminMiddleware, categoryController.createCategory);
 router.put("/categories/:id", authMiddleware, adminMiddleware, categoryController.updateCategory);
