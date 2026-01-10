@@ -23,7 +23,7 @@ export class categoryController {
       return errorResponse(res, "Failed to filter categories", 500, error.message);
     }
   }
-  
+
   static async getCategories(req, res) {
     try {
       const data = await getAllCategories();
@@ -54,7 +54,6 @@ export class categoryController {
         error.message
       );
     }
-    F;
   }
 
   static async createCategory(req, res) {

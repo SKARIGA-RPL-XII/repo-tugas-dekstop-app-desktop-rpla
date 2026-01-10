@@ -42,8 +42,7 @@ export const updateCategory = async (id, dataUpdate) => {
         .eq("id", id)
         .select();
     if (error) {
-        console.error(`Error updating category with id ${id}:`, error);
-        return null;
+        formatFieldError(error);
     }
     return { data: data[0], error: error };
 };
@@ -51,8 +50,7 @@ export const updateCategory = async (id, dataUpdate) => {
 export const deleteCategory = async (id) => {
     const { data, error } = await supabase.from(TABLE_NAME).delete().eq("id", id);
     if (error) {
-        console.error(`Error deleting category with id ${id}:`, error);
-        return null;
+        formatFieldError(error);
     }
     return { message: "berhasil dihapus" };
 };
@@ -63,8 +61,7 @@ export const createCategory = async (category) => {
         .insert([category])
         .select();
     if (error) {
-        console.error("Error creating category:", error);
-        return null;
+        formatFieldError(error);
     }
     return { success: true, message: "Category created successfully", data: data[0] };
 };
@@ -84,6 +81,7 @@ export const filterCategoriesModel = async ({ created_at, page = 1, limit = 10, 
     query = query.range(offset, offset + limit - 1);
 
     const { data, error } = await query;
-    if (error) throw error;
+    if (error)
+        formatFieldError(error);
     return { data, page, limit, count: data ? data.length : 0 };
 }
