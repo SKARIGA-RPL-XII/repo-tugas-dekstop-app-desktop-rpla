@@ -7,10 +7,15 @@ const MainLayout = () => {
     <div className="flex min-h-screen bg-[#F6F6F6]">
       <Sidebar />
 
-      <div className="flex-1 flex flex-col bg-[#F6F6F6]">
+      <div
+        className="
+    flex-1 flex flex-col bg-[#F6F6F6]
+    md:ml-[275px]
+  "
+      >
         <Navbar />
 
-        <main className="flex-1 p-6 overflow-auto">
+        <main className="flex-1 p-6 overflow-y-auto">
           <Outlet />
         </main>
       </div>
