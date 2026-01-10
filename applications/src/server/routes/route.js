@@ -9,6 +9,6 @@ const router = Router();
 router.use("/auth", authRoute);
 router.use(userRoute);
 router.use(productRoute);
-router.use("/category", categoryRoute);
+router.use(categoryRoute);
 
 export { router as route };
