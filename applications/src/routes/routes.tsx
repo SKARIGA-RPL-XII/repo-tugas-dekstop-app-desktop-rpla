@@ -1,17 +1,51 @@
 import { createBrowserRouter } from "react-router-dom";
-import TestingPage from "../pages/testing";
+import MainLayout from "../pages/layouts/mainLayout";
+import Login from "../pages/login";
+import NotFound from "../pages/errors/NotFound";
+import Pengguna from "../pages/pengguna";
+import Kategori from "../pages/kategori";
+import Dashboard from "../pages/dashboard";
 
-export const router = () => {
-  return createBrowserRouter([
-    {
-      path: "testing",
-      element: <TestingPage />,
-    },
-    {
-      path: "/",
-      element: (
-        <div className="text-center font-bold text-[5rem]">Landing Page</div>
-      ),
-    },
-  ]);
-};
+const router = createBrowserRouter([
+  {
+    path: "admin",
+    element: <MainLayout />,
+    children: [
+      {
+        index: true,
+        element: <Dashboard />,
+      },
+      {
+        path: "dashboard",
+        element: <Dashboard />,
+      },
+      {
+        path: "Kategori",
+        element: <Kategori />,
+      },
+      {
+        path: "pengguna",
+        element: <Pengguna />,
+      },
+    ],
+  },
+  {
+    path: "/login",
+    element: <Login />,
+  },
+  {
+    path: "/employe",
+    element: <MainLayout />,
+    children: [],
+  },
+  {
+    path: "/",
+    element: <Login />,
+  },
+  {
+    path: "*",
+    element: <NotFound />,
+  },
+]);
+
+export default router;
