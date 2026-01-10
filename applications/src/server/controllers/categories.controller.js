@@ -5,7 +5,7 @@ import {
   updateCategory,
   deleteCategory,
   createCategory,
-} from "../model/Categories.js";
+} from "../model/categories.model.js";
 
 export class categoryController {
   static async getCategories(req, res) {
