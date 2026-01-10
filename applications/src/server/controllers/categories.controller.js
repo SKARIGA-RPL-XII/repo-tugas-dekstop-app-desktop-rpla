@@ -5,9 +5,25 @@ import {
   updateCategory,
   deleteCategory,
   createCategory,
-} from "../model/Categories.js";
+} from "../model/categories.model.js";
 
 export class categoryController {
+  static async filterCategories(req, res) {
+    try {
+      const { created_at, page = 1, limit = 10, search = "" } = req.query;
+      const params = {
+        created_at,
+        page: parseInt(page, 10),
+        limit: parseInt(limit, 10),
+        search
+      };
+      const result = await filterCategoriesModel(params);
+      return successResponse(res, result, "Filtered categories fetched successfully");
+    } catch (error) {
+      return errorResponse(res, "Failed to filter categories", 500, error.message);
+    }
+  }
+  
   static async getCategories(req, res) {
     try {
       const data = await getAllCategories();
