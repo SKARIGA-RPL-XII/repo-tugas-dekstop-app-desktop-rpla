@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "./ToastContext";
 import { X } from "lucide-react";
 import { cn } from "../../utils/cn";
+import { isElectron } from "../../utils/electron";
 
 const toastColors = {
   success: "bg-green-500 text-white",
@@ -12,8 +13,9 @@ const toastColors = {
 
 export const ToastViewport: React.FC = () => {
   const { toasts, removeToast } = useToast();
+   const electron = isElectron();
   return (
-    <div className="fixed top-5 right-5 flex flex-col gap-2 z-50">
+    <div className={`fixed ${electron ? "top-13" : "top-5"} right-5 flex flex-col gap-2 z-50`}>
       <AnimatePresence initial={false}>
         {toasts.map((toast) => (
           <motion.div

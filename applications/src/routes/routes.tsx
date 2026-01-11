@@ -6,48 +6,32 @@ import Pengguna from "../pages/pengguna";
 import Dashboard from "../pages/admin/dashboards";
 import Category from "../pages/admin/categories";
 import ProtectedRoute from "../components/ProtectedRoute";
+import App from "../App";
 
 const router = createBrowserRouter([
   {
-    path: "/admin",
-    element: (
-      <ProtectedRoute>
-        <MainLayout />
-      </ProtectedRoute>
-    ),
+    element: <App />,
     children: [
       {
-        index: true,
-        element: <Dashboard />,
+        path: "/admin",
+        element: (
+          <ProtectedRoute>
+            <MainLayout />
+          </ProtectedRoute>
+        ),
+        children: [
+          { index: true, element: <Dashboard /> },
+          { path: "dashboard", element: <Dashboard /> },
+          { path: "kategori", element: <Category /> },
+          { path: "pengguna", element: <Pengguna /> },
+        ],
       },
-      {
-        path: "dashboard",
-        element: <Dashboard />,
-      },
-      {
-        path: "kategori",
-        element: <Category />,
-      },
-      {
-        path: "pengguna",
-        element: <Pengguna />,
-      },
+      { path: "/login", element: <Login /> },
+      { path: "/", element: <Login /> },
+      { path: "*", element: <NotFound /> },
     ],
   },
-
-  {
-    path: "/login",
-    element: <Login />,
-  },
-
-  {
-    path: "/",
-    element: <Login />,
-  },
-  {
-    path: "*",
-    element: <NotFound />,
-  },
 ]);
+
 
 export default router;

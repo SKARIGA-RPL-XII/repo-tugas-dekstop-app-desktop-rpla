@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Outlet } from "react-router-dom";
 import Navbar from "../../components/layouts/navbar";
 import Sidebar from "../../components/layouts/sidebar";
+import { isElectron } from "../../utils/electron";
 
 const MainLayout = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -37,9 +38,10 @@ const MainLayout = () => {
   };
 
   const buttonLeft = isMobile ? 20 : isCollapsed ? 85 : 260;
+  const electron = isElectron();
 
   return (
-    <div className="flex h-screen bg-[#F6F6F6]">
+    <div className={`flex h-screen bg-[#F6F6F6]`}>
       {/* ===== SIDEBAR ===== */}
       <Sidebar
         collapsed={isCollapsed}
@@ -51,7 +53,7 @@ const MainLayout = () => {
       {/* ===== TOGGLE BUTTON ===== */}
       <button
         onClick={toggleSidebar}
-        className={`fixed top-9 -translate-y-1/2 w-[25px] h-[25px] rounded-full
+        className={`fixed top-9 ${electron ? "mt-10" : ""} cursor-pointer -translate-y-1/2 w-[25px] h-[25px] rounded-full
           bg-[#5565FF] text-white z-50 shadow-md flex items-center justify-center
           transition-all ${animateButton}`}
         style={{ left: buttonLeft }}
