@@ -7,7 +7,7 @@ import {
   Trash2,
 } from "lucide-react"
 
-import DeleteAlert from "../../components/DeleteAlert"
+import DeleteAlert from "../../components/Modals/DeleteAlert"
 import Pagination from "../../components/Pagination"
 import { useNavigate } from "react-router-dom";
 
