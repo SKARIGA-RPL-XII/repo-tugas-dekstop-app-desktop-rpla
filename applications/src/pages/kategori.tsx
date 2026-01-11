@@ -1,13 +1,55 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { Trash2, Pencil, Search, Calendar } from "lucide-react"
+
+import DeleteAlert from "../components/DeleteAlert"
+import Pagination from "../components/Pagination"
 
 const Kategori = () => {
   const [openModal, setOpenModal] = useState(false)
-  const [namaKategori, setNamaKategori] = useState("")
-  const [openTambah, setOpenTambah] = useState(false)
-    const [openEdit, setOpenEdit] = useState(false)
-    const [openHapus, setOpenHapus] = useState(false)
-    const [selectedKategori, setSelectedKategori] = useState<string>("")
+  const [openEdit, setOpenEdit] = useState(false)
+  const [openHapus, setOpenHapus] = useState(false)
 
+  const [namaKategori, setNamaKategori] = useState("")
+  const [selectedKategori, setSelectedKategori] = useState("")
+
+  const [search, setSearch] = useState("")
+  const [filterDate, setFilterDate] = useState("")
+
+  // ================= PAGINATION =================
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 3
+
+  const dataKategori = [
+    { id: 1, nama: "Barang", total: "120 Produk", tanggal: "2026-12-12" },
+    { id: 2, nama: "Minuman", total: "80 Produk", tanggal: "2026-12-10" },
+    { id: 3, nama: "Makanan", total: "50 Produk", tanggal: "2026-12-09" },
+    { id: 4, nama: "Snack", total: "40 Produk", tanggal: "2026-12-08" },
+    { id: 5, nama: "Frozen", total: "20 Produk", tanggal: "2026-12-07" },
+  ]
+
+  // ================= FILTER =================
+  const filteredData = dataKategori.filter((item) => {
+    const matchSearch = item.nama
+      .toLowerCase()
+      .includes(search.toLowerCase())
+
+    const matchDate = filterDate ? item.tanggal === filterDate : true
+
+    return matchSearch && matchDate
+  })
+
+  // ================= PAGINATION LOGIC =================
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage)
+
+  const paginatedData = filteredData.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  )
+
+  // reset halaman saat filter/search berubah
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [search, filterDate])
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-6 font-montserrat relative">
@@ -27,15 +69,40 @@ const Kategori = () => {
           onClick={() => setOpenModal(true)}
           className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2"
         >
-          <span className="text-lg">+</span>
-          Tambah Kategori
+          + Tambah Kategori
         </button>
       </div>
 
       {/* CARD */}
       <div className="bg-white rounded-2xl shadow-sm p-6">
-        {/* TABLE */}
         <div className="overflow-x-auto">
+
+          {/* SEARCH & FILTER (TIDAK DIUBAH) */}
+          <div className="flex items-center gap-4 mb-6">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Telusuri sesuatu..."
+                className="h-10 w-64 pl-9 pr-4 border border-gray-200 rounded-md text-sm"
+              />
+            </div>
+
+            <label className="h-10 flex items-center gap-2 px-4 border border-gray-200 rounded-md text-sm text-gray-500 cursor-pointer">
+              <Calendar className="w-4 h-4 text-gray-400" />
+              <span>Filter Tanggal Pembuatan</span>
+              <input
+                type="date"
+                value={filterDate}
+                onChange={(e) => setFilterDate(e.target.value)}
+                className="absolute opacity-0 pointer-events-none"
+              />
+            </label>
+          </div>
+
+          {/* TABLE */}
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-slate-100 text-gray-600">
@@ -46,207 +113,177 @@ const Kategori = () => {
                 <th className="py-3 px-4 text-center rounded-r-lg">Aksi</th>
               </tr>
             </thead>
+
             <tbody className="divide-y divide-gray-100">
-              {[1,2,3].map((i) => (
-                <tr key={i} className="hover:bg-gray-50">
-                  <td className="py-3 px-4">{i}</td>
-                  <td className="py-3 px-4">Barang</td>
-                  <td className="py-3 px-4">120 Produk</td>
-                  <td className="py-3 px-4">12 Desember 2026</td>
+              {paginatedData.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="py-6 text-center text-sm text-gray-400">
+                    Data tidak ditemukan
+                  </td>
+                </tr>
+              )}
+
+              {paginatedData.map((item, i) => (
+                <tr key={item.id} className="hover:bg-gray-50">
+                  <td className="py-3 px-4">
+                    {(currentPage - 1) * itemsPerPage + i + 1}
+                  </td>
+                  <td className="py-3 px-4">{item.nama}</td>
+                  <td className="py-3 px-4">{item.total}</td>
+                  <td className="py-3 px-4">
+                    {new Date(item.tanggal).toLocaleDateString("id-ID", {
+                      day: "2-digit",
+                      month: "long",
+                      year: "numeric",
+                    })}
+                  </td>
                   <td className="py-3 px-4">
                     <div className="flex justify-center gap-2">
-                        <button
+                      <button
                         onClick={() => {
-                            setSelectedKategori("Barang")
-                            setNamaKategori("Barang")
-                            setOpenEdit(true)
+                          setSelectedKategori(item.nama)
+                          setNamaKategori(item.nama)
+                          setOpenEdit(true)
                         }}
-                        className="w-8 h-8 rounded-full border border-orange-400 text-orange-500 hover:bg-orange-50"
-                        >
-                        ✏️
-                        </button>
+                        className="w-8 h-8 flex items-center justify-center rounded-full border border-orange-400 text-orange-500 hover:bg-orange-50"
+                      >
+                        <Pencil className="w-4 h-4" />
+                      </button>
 
-                        <button
+                      <button
                         onClick={() => {
-                            setSelectedKategori("Barang")
-                            setOpenHapus(true)
+                          setSelectedKategori(item.nama)
+                          setOpenHapus(true)
                         }}
-                        className="w-8 h-8 rounded-full border border-red-400 text-red-500 hover:bg-red-50"
-                        >
-                        🗑️
-                        </button>
+                        className="w-8 h-8 flex items-center justify-center rounded-full border border-red-400 text-red-500 hover:bg-red-50"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
                     </div>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
+
+          {/* PAGINATION (STYLE TIDAK DIUBAH) */}
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+          />
         </div>
       </div>
 
-     {/* ================= MODAL ================= */}
-        {openModal && (
+      {/* modal modalan pokok e */}
+      {openModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
-
-            {/* OVERLAY */}
-            <div
+          <div
             onClick={() => setOpenModal(false)}
             className="absolute inset-0 bg-black/30 backdrop-blur-[2px]"
-            />
+          />
 
-            {/* MODAL BOX */}
-            <div className="relative bg-white w-full max-w-xl rounded-lg shadow-[0_8px_30px_rgba(0,0,0,0.12)] z-10">
-
-            {/* HEADER */}
+          <div className="relative bg-white w-full max-w-xl rounded-lg shadow-lg z-10">
             <div className="flex justify-between items-center px-6 py-3 bg-slate-100 rounded-t-lg">
-                <h2 className="text-sm font-medium text-gray-800">
+              <h2 className="text-sm font-medium text-gray-800">
                 Tambah Kategori Produk
-                </h2>
-                <button
-                onClick={() => setOpenModal(false)}
-                className="text-gray-400 hover:text-gray-600 text-lg leading-none"
-                >
-                ×
-                </button>
+              </h2>
+              <button onClick={() => setOpenModal(false)}>×</button>
             </div>
 
-            {/* BODY */}
             <div className="px-6 py-5">
-                <label className="text-xs font-medium text-gray-600 block mb-2">
+              <label className="text-xs font-medium text-gray-600 block mb-2">
                 Nama Kategori<span className="text-red-500">*</span>
-                </label>
-                <input
-                type="text"
+              </label>
+              <input
                 value={namaKategori}
                 onChange={(e) => setNamaKategori(e.target.value)}
-                placeholder="Masukkan nama kategori untuk produk Anda"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                />
+                className="w-full px-3 py-2 border rounded-md text-sm focus:ring-1 focus:ring-indigo-500"
+              />
             </div>
 
-            {/* FOOTER */}
-            <div className="flex justify-end gap-2 px-6 py-3 bg-white rounded-b-lg">
-            <button
+            <div className="flex justify-end gap-2 px-6 py-3">
+              <button
                 onClick={() => setOpenModal(false)}
-                className="px-4 py-1.5 rounded-md text-sm bg-gray-400 text-white hover:bg-gray-500"
-            >
+                className="px-4 py-1.5 rounded-md bg-gray-400 text-white"
+              >
                 Batal
-            </button>
-            <button
-                className="px-4 py-1.5 rounded-md text-sm bg-indigo-600 text-white hover:bg-indigo-700"
-            >
+              </button>
+              <button
+                onClick={() => {
+                  console.log("Tambah kategori:", namaKategori)
+                  setNamaKategori("")
+                  setOpenModal(false)
+                }}
+                className="px-4 py-1.5 rounded-md bg-indigo-600 text-white"
+              >
                 Tambah
-            </button>
+              </button>
             </div>
-
-
-            </div>
+          </div>
         </div>
-        )}
-        {/* =============== END MODAL =============== */}
-        {/* =============== edit & delete MODAL =============== */}
-        {openEdit && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center">
-                <div
+      )}
+
+      {/* modal modalan pisan  */}
+      {openEdit && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div
+            onClick={() => setOpenEdit(false)}
+            className="absolute inset-0 bg-black/30 backdrop-blur-[2px]"
+          />
+
+          <div className="relative bg-white w-full max-w-xl rounded-lg shadow-lg z-10">
+            <div className="flex justify-between items-center px-6 py-3 bg-slate-100">
+              <h2 className="text-sm font-medium text-gray-800">
+                Edit Kategori Produk
+              </h2>
+              <button onClick={() => setOpenEdit(false)}>×</button>
+            </div>
+
+            <div className="px-6 py-5">
+              <label className="text-xs font-medium text-gray-600 block mb-2">
+                Nama Kategori
+              </label>
+              <input
+                value={namaKategori}
+                onChange={(e) => setNamaKategori(e.target.value)}
+                className="w-full px-3 py-2 border rounded-md text-sm"
+              />
+            </div>
+
+            <div className="flex justify-end gap-2 px-6 py-3">
+              <button
                 onClick={() => setOpenEdit(false)}
-                className="absolute inset-0 bg-black/30 backdrop-blur-[2px]"
-                />
-
-                <div className="relative bg-white w-full max-w-xl rounded-lg overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.12)] z-10">
-
-                {/* HEADER */}
-                <div className="flex justify-between items-center px-6 py-3 bg-slate-100">
-                    <h2 className="text-sm font-medium text-gray-800">
-                    Edit Kategori Produk
-                    </h2>
-                    <button
-                    onClick={() => setOpenEdit(false)}
-                    className="text-gray-400 hover:text-gray-600 text-lg"
-                    >
-                    ×
-                    </button>
-                </div>
-
-                {/* BODY */}
-                <div className="px-6 py-5">
-                    <label className="text-xs font-medium text-gray-600 block mb-2">
-                    Nama Kategori<span className="text-red-500">*</span>
-                    </label>
-                    <input
-                    type="text"
-                    value={namaKategori}
-                    onChange={(e) => setNamaKategori(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-indigo-500 outline-none"
-                    />
-                </div>
-
-                {/* FOOTER */}
-                <div className="flex justify-end gap-2 px-6 py-3">
-                    <button
-                    onClick={() => setOpenEdit(false)}
-                    className="px-4 py-1.5 rounded-md text-sm bg-gray-400 text-white hover:bg-gray-500"
-                    >
-                    Batal
-                    </button>
-                    <button
-                    className="px-4 py-1.5 rounded-md text-sm bg-indigo-600 text-white hover:bg-indigo-700"
-                    >
-                    Simpan
-                    </button>
-                </div>
-
-                </div>
+                className="px-4 py-1.5 rounded-md bg-gray-400 text-white"
+              >
+                Batal
+              </button>
+              <button
+                onClick={() => {
+                  console.log("Edit kategori:", selectedKategori, namaKategori)
+                  setOpenEdit(false)
+                }}
+                className="px-4 py-1.5 rounded-md bg-indigo-600 text-white"
+              >
+                Simpan
+              </button>
             </div>
-            )}
-            {openHapus && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center">
-                <div
-                onClick={() => setOpenHapus(false)}
-                className="absolute inset-0 bg-black/30 backdrop-blur-[2px]"
-                />
-
-                <div className="relative bg-white w-full max-w-md rounded-lg overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.12)] z-10">
-
-                {/* HEADER */}
-                <div className="px-6 py-4 bg-slate-100">
-                    <h2 className="text-sm font-medium text-gray-800">
-                    Hapus Kategori
-                    </h2>
-                </div>
-
-                {/* BODY */}
-                <div className="px-6 py-5 text-sm text-gray-600">
-                    Apakah Anda yakin ingin menghapus kategori
-                    <span className="font-medium text-gray-800">
-                    {" "}“{selectedKategori}”
-                    </span>?
-                    <br />
-                    Tindakan ini tidak dapat dibatalkan.
-                </div>
-
-                {/* FOOTER */}
-                <div className="flex justify-end gap-2 px-6 py-3">
-                    <button
-                    onClick={() => setOpenHapus(false)}
-                    className="px-4 py-1.5 rounded-md text-sm bg-gray-300 text-gray-700 hover:bg-gray-400"
-                    >
-                    Batal
-                    </button>
-                    <button
-                    className="px-4 py-1.5 rounded-md text-sm bg-red-600 text-white hover:bg-red-700"
-                    >
-                    Hapus
-                    </button>
-                </div>
-
-                </div>
-            </div>
-        )}
-
-        {/* =============== END MODAL =============== */}
+          </div>
+        </div>
+      )}
 
 
 
+      <DeleteAlert
+        open={openHapus}
+        description={
+          <>
+            Data <b>"{selectedKategori}"</b> akan dihapus permanen.
+          </>
+        }
+        onCancel={() => setOpenHapus(false)}
+        onConfirm={() => setOpenHapus(false)}
+      />
     </div>
   )
 }
