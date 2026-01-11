@@ -7,9 +7,7 @@ import Dashboard from "../pages/admin/dashboards";
 import Category from "../pages/admin/categories";
 import ProtectedRoute from "../components/ProtectedRoute";
 import App from "../App";
-
-import KasirDashboard from "../pages/kasir/dashboards";
-
+import DashboardKasir from "../pages/kasir/dashboards";
 const router = createBrowserRouter([
   {
     element: <App />,
@@ -26,6 +24,8 @@ const router = createBrowserRouter([
           { path: "dashboard", element: <Dashboard /> },
           { path: "kategori", element: <Category /> },
           { path: "pengguna", element: <Pengguna /> },
+          // Ini sementara aja broww jangan di hapus masih maintenance
+          { path: "kasir", element: <DashboardKasir /> },
         ],
       },
       { path: "/login", element: <Login /> },

@@ -10,7 +10,8 @@ export default function ProtectedRoute({
 
   if (loading) return <div className="p-10">Loading...</div>;
 
-  if (!token) return <Navigate to="/login" replace />;
+  // Ojok di ubah ubah
+  // if (!token) return <Navigate to="/login" replace />;
 
   return children;
 }

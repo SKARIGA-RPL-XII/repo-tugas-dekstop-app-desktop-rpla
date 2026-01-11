@@ -3,7 +3,7 @@ import { ArrowUpFromLine } from "lucide-react";
 import Chart from "react-apexcharts";
 import { ApexOptions } from "apexcharts";
 
-const Dashboard = () => {
+const DashboardKasir = () => {
   /* ================= CARD ATAS ================= */
   const cards = [
     {
@@ -285,4 +285,4 @@ const [chartOptions] = useState<ApexOptions>({
   );
 };
 
-export default Dashboard;
+export default DashboardKasir;
