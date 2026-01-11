@@ -3,13 +3,18 @@ import MainLayout from "../pages/layouts/mainLayout";
 import Login from "../pages/auth/login";
 import NotFound from "../pages/errors/NotFound";
 import Pengguna from "../pages/pengguna";
-import Dashboard from "../pages/dashboard";
+import Dashboard from "../pages/admin/dashboards";
 import Category from "../pages/admin/categories";
+import ProtectedRoute from "../components/ProtectedRoute";
 
 const router = createBrowserRouter([
   {
-    path: "admin",
-    element: <MainLayout />,
+    path: "/admin",
+    element: (
+      <ProtectedRoute>
+        <MainLayout />
+      </ProtectedRoute>
+    ),
     children: [
       {
         index: true,
@@ -20,7 +25,7 @@ const router = createBrowserRouter([
         element: <Dashboard />,
       },
       {
-        path: "Kategori",
+        path: "kategori",
         element: <Category />,
       },
       {
@@ -29,15 +34,12 @@ const router = createBrowserRouter([
       },
     ],
   },
+
   {
     path: "/login",
     element: <Login />,
   },
-  {
-    path: "/employe",
-    element: <MainLayout />,
-    children: [],
-  },
+
   {
     path: "/",
     element: <Login />,

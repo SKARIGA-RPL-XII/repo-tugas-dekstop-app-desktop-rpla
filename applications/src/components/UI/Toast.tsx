@@ -13,7 +13,7 @@ const toastColors = {
 export const ToastViewport: React.FC = () => {
   const { toasts, removeToast } = useToast();
   return (
-    <div className="fixed bottom-5 right-5 flex flex-col gap-2 z-50">
+    <div className="fixed top-5 right-5 flex flex-col gap-2 z-50">
       <AnimatePresence initial={false}>
         {toasts.map((toast) => (
           <motion.div
