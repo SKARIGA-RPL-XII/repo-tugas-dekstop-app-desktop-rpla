@@ -87,7 +87,7 @@
   align-items: center;
   gap: 12px;
   padding: 8px 16px;
-  margin: 0 8px;
+  margin:10px 8px;
   border-radius: 10px;
   color: #5e5e5e;
   transition: all 0.2s ease;
@@ -102,6 +102,7 @@
   background-color: #5565ff;
   color: white;
 }
+
 
 .tab {
   padding: 6px 12px;
@@ -121,6 +122,59 @@
   color: #5565ff;
 }
 
+/* Sidebar mantul */
+@keyframes sidebarBounceCollapse {
+  0% { width: 275px; }
+  60% { width: 90px; }
+  80% { width: 102px; }
+  100% { width: 100px; }
+}
+
+@keyframes sidebarBounceExpand {
+  0% { width: 100px; }
+  60% { width: 280px; }
+  80% { width: 270px; }
+  100% { width: 275px; }
+}
+
+.animate-collapse {
+  animation: sidebarBounceCollapse 0.6s ease-out forwards;
+}
+
+.animate-expand {
+  animation: sidebarBounceExpand 0.6s ease-out forwards;
+}
+
+/* Tombol toggle mantul */
+@keyframes buttonBounceCollapse {
+  0% { left: 260px; }
+  60% { left: 80px; }
+  80% { left: 90px; }
+  100% { left: 85px; }
+}
+
+@keyframes buttonBounceExpand {
+  0% { left: 85px; }
+  60% { left: 270px; }
+  80% { left: 255px; }
+  100% { left: 260px; }
+}
+
+.animate-collapse-button {
+  animation: buttonBounceCollapse 0.6s ease-out forwards;
+}
+
+.animate-expand-button {
+  animation: buttonBounceExpand 0.6s ease-out forwards;
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #6366f1 #ffffff;
+}
+
+/* Chrome, Edge, Safari */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -132,8 +186,8 @@
 
 ::-webkit-scrollbar-thumb {
   background: linear-gradient(180deg, #6366f1, #4f46e5);
-  border-radius: 20px;
-  border: 2px solid #020617;
+  border-radius: 9999px;
+  border: 2px solid #ffffff;
 }
 
 ::-webkit-scrollbar-thumb:hover {
