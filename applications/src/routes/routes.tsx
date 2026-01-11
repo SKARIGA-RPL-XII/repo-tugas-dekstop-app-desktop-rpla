@@ -7,6 +7,8 @@ import Dashboard from "../pages/admin/dashboards";
 import Category from "../pages/admin/categories";
 import ProtectedRoute from "../components/ProtectedRoute";
 
+import KasirDashboard from "../pages/kasir/dashboards";
+
 const router = createBrowserRouter([
   {
     path: "/admin",
@@ -32,6 +34,10 @@ const router = createBrowserRouter([
         path: "pengguna",
         element: <Pengguna />,
       },
+      {
+        path: "kasir",
+        element: <KasirDashboard />,
+      }
     ],
   },
 
