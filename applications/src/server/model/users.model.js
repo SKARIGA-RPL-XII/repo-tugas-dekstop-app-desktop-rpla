@@ -3,12 +3,34 @@ import bcrypt from "bcryptjs";
 export class Users {
   static tableName = "users";
 
-  static async getAll(db) {
-    const { data, error } = await db.from(this.tableName).select("*");
+  static async getAll(db, query = {}) {
+    try {
+      const page = parseInt(query.page, 10) || 1;
+      const limit = parseInt(query.limit, 10) || 10;
+      const search = query.search || "";
 
-    if (error) throw new Error(error.message);
+      let supabaseQuery = db.from(this.tableName).select("*");
 
-    return data;
+      if (search) {
+        supabaseQuery = supabaseQuery.ilike("username", `%${search}%`);
+      }
+
+      const from = (page - 1) * limit;
+      const to = from + limit - 1;
+
+      supabaseQuery = supabaseQuery.range(from, to);
+
+      const { data, error, count } = await supabaseQuery;
+
+      if (error) throw new Error(error.message);
+
+      return {
+        data: data || [],
+        count: count ?? data?.length ?? 0,
+      };
+    } catch (err) {
+      throw new Error(err.message);
+    }
   }
 
   static async create(db, payload) {
