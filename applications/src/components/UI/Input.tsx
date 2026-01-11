@@ -18,7 +18,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
               "border bg-white border-slate-200 focus:border-none focus:ring-primary",
             error: "border-red-500 focus:ring-red-500",
             disabled:
-              "border-border bg-muted text-muted-foreground cursor-not-allowed",
+              "border-border bg-muted-foreground/50 text-muted-foreground cursor-not-allowed",
           }[variant],
           className
         )}
