@@ -1,10 +1,10 @@
 import { createBrowserRouter } from "react-router-dom";
 import MainLayout from "../pages/layouts/mainLayout";
-import Login from "../pages/login";
+import Login from "../pages/auth/login";
 import NotFound from "../pages/errors/NotFound";
 import Pengguna from "../pages/pengguna";
-import Kategori from "../pages/kategori";
 import Dashboard from "../pages/dashboard";
+import Category from "../pages/admin/categories";
 
 const router = createBrowserRouter([
   {
@@ -21,7 +21,7 @@ const router = createBrowserRouter([
       },
       {
         path: "Kategori",
-        element: <Kategori />,
+        element: <Category />,
       },
       {
         path: "pengguna",
