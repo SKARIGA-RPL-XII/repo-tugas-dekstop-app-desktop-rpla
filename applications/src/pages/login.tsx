@@ -1,7 +1,9 @@
+import { useNavigate } from "react-router-dom";
 import logo from "../assets/logo.png";
-import rightImage from "../assets/Right.png";
+import rightImage from "../assets/right.png";
 
 export default function Login() {
+  const navigate = useNavigate();
   return (
     <div className="min-h-screen flex bg-white relative overflow-hidden">
       
@@ -96,7 +98,8 @@ export default function Login() {
           alt="Illustration"
           className="
             absolute
-            inset-0
+            -top-0.2
+            right-62
             w-full
             h-full
             object0-contain          "
