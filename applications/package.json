@@ -15,6 +15,7 @@
     "electron:build": "npm run build && electron-builder"
   },
   "dependencies": {
+    "@radix-ui/react-progress": "^1.1.8",
     "@radix-ui/react-separator": "^1.1.8",
     "@supabase/supabase-js": "^2.90.1",
     "@tailwindcss/vite": "^4.1.18",
@@ -29,6 +30,7 @@
     "express": "^5.2.1",
     "framer-motion": "^12.25.0",
     "jsonwebtoken": "^9.0.3",
+    "jwt-decode": "^4.0.0",
     "lucide-react": "^0.562.0",
     "react": "^18.3.1",
     "react-apexcharts": "^1.9.0",

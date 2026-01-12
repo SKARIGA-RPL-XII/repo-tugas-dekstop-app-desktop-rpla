@@ -1,17 +1,24 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { hasRole } from "../utils/auth";
+import AppLoader from "./AppLoader";
 
-export default function ProtectedRoute({
-  children,
-}: {
+interface ProtectedRouteProps {
   children: JSX.Element;
-}) {
+  allowedRoles?: string[];
+}
+
+export default function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) {
   const { token, loading } = useAuth();
 
-  if (loading) return <div className="p-10">Loading...</div>;
+   if (loading) {
+    return <AppLoader onDone={() => {}} />;
+  }
+  if (!token) return <Navigate to="/login" replace />;
 
-  // Ojok di ubah ubah
-  // if (!token) return <Navigate to="/login" replace />;
+  if (allowedRoles && !hasRole(token, allowedRoles)) {
+    return <Navigate to="/403" replace />;
+  }
 
   return children;
 }

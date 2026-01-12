@@ -8,6 +8,8 @@ import Category from "../pages/admin/categories";
 import ProtectedRoute from "../components/ProtectedRoute";
 import App from "../App";
 import DashboardKasir from "../pages/kasir/dashboards";
+import ProtectedAuth from "../components/ProtectedAuth";
+import Forbidden from "../pages/errors/Forbidden";
 const router = createBrowserRouter([
   {
     element: <App />,
@@ -15,7 +17,7 @@ const router = createBrowserRouter([
       {
         path: "/admin",
         element: (
-          <ProtectedRoute>
+          <ProtectedRoute allowedRoles={["admin"]}>
             <MainLayout />
           </ProtectedRoute>
         ),
@@ -24,16 +26,40 @@ const router = createBrowserRouter([
           { path: "dashboard", element: <Dashboard /> },
           { path: "kategori", element: <Category /> },
           { path: "pengguna", element: <Pengguna /> },
-          // Ini sementara aja broww jangan di hapus masih maintenance
-          { path: "kasir", element: <DashboardKasir /> },
         ],
       },
-      { path: "/login", element: <Login /> },
-      { path: "/", element: <Login /> },
+      {
+        path: "/cashier",
+        element: (
+          <ProtectedRoute allowedRoles={["cashier"]}>
+            <MainLayout />
+          </ProtectedRoute>
+        ),
+        children: [
+          { index: true, element: <DashboardKasir /> },
+          { path: "dashboard", element: <DashboardKasir /> },
+        ],
+      },
+      {
+        path: "/login",
+        element: (
+          <ProtectedAuth>
+            <Login />
+          </ProtectedAuth>
+        ),
+      },
+      {
+        path: "/",
+        element: (
+          <ProtectedAuth>
+            <Login />
+          </ProtectedAuth>
+        ),
+      },
       { path: "*", element: <NotFound /> },
+      { path: "403", element: <Forbidden /> },
     ],
   },
 ]);
-
 
 export default router;
