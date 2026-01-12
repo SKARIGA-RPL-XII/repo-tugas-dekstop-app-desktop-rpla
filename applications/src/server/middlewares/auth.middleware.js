@@ -32,7 +32,7 @@ export const authMiddleware = (req, res, next) => {
   }
 };
 
-export const adminMiddleware = (req, res, next) => {  
+export const adminMiddleware = (req, res, next) => {
   if (!req.user) {
     return res.status(401).json({
       success: false,
@@ -40,7 +40,7 @@ export const adminMiddleware = (req, res, next) => {
     });
   }
 
-  if (req.user.role !== "user") {
+  if (req.user.role !== "admin") {
     return res.status(403).json({
       success: false,
       message: "Forbidden: Admin only",
@@ -49,4 +49,3 @@ export const adminMiddleware = (req, res, next) => {
 
   next();
 };
-
