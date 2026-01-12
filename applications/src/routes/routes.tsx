@@ -3,61 +3,37 @@ import MainLayout from "../pages/layouts/mainLayout";
 import Login from "../pages/auth/login";
 import NotFound from "../pages/errors/NotFound";
 import Pengguna from "../pages/pengguna";
-import Dashboard from "../pages/dashboard";
+import Dashboard from "../pages/admin/dashboards";
 import Category from "../pages/admin/categories";
-import Kasir from "../pages/kasir/kasir";
-
+import ProtectedRoute from "../components/ProtectedRoute";
+import App from "../App";
+import DashboardKasir from "../pages/kasir/dashboards";
 const router = createBrowserRouter([
   {
-    path: "admin",
-    element: <MainLayout />,
+    element: <App />,
     children: [
       {
-        index: true,
-        element: <Dashboard />,
+        path: "/admin",
+        element: (
+          <ProtectedRoute>
+            <MainLayout />
+          </ProtectedRoute>
+        ),
+        children: [
+          { index: true, element: <Dashboard /> },
+          { path: "dashboard", element: <Dashboard /> },
+          { path: "kategori", element: <Category /> },
+          { path: "pengguna", element: <Pengguna /> },
+          // Ini sementara aja broww jangan di hapus masih maintenance
+          { path: "kasir", element: <DashboardKasir /> },
+        ],
       },
-      {
-        path: "dashboard",
-        element: <Dashboard />,
-      },
-      {
-        path: "Kategori",
-        element: <Category />,
-      },
-      {
-        path: "pengguna",
-        element: <Pengguna />,
-      },
+      { path: "/login", element: <Login /> },
+      { path: "/", element: <Login /> },
+      { path: "*", element: <NotFound /> },
     ],
-  },
-  {
-    path: "kasir",
-    element: <MainLayout />,
-    children: [
-      
-      {
-        path: "kasir",
-        element: <Kasir />,
-      },
-    ],
-  },
-  {
-    path: "/login",
-    element: <Login />,
-  },
-  {
-    path: "/employe",
-    element: <MainLayout />,
-    children: [],
-  },
-  {
-    path: "/",
-    element: <Login />,
-  },
-  {
-    path: "*",
-    element: <NotFound />,
   },
 ]);
+
 
 export default router;

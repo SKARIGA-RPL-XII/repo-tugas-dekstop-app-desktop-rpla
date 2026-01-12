@@ -193,3 +193,39 @@
 ::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(180deg, #818cf8, #6366f1);
 }
+
+.draggable {
+  -webkit-app-region: drag;
+}
+
+.no-drag {
+  -webkit-app-region: no-drag;
+}
+
+/* Toolbar wrapper */
+.titlebar {
+  height: 40px;
+  background-color: #0f172a;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 10px;
+  -webkit-app-region: drag;
+  user-select: none; /* disable text selection */
+}
+
+.titlebar button {
+  -webkit-app-region: no-drag;
+  background: transparent;
+  border: none;
+  color: white;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.titlebar button:hover {
+  background: rgba(255,255,255,0.1);
+}

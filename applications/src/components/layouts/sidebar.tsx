@@ -1,6 +1,7 @@
 import { NavLink } from "react-router-dom";
 import Logo from "../../assets/logo.png";
 import LogoCollapsed from "../../assets/logo-collapse.svg";
+import { isElectron } from "../../utils/electron";
 
 type MenuItem = {
   label: string;
@@ -137,14 +138,21 @@ const menu: MenuGroup[] = [
   },
 ];
 
-const Sidebar = ({ collapsed, mobileOpen, setMobileOpen, animateClass }: SidebarProps) => {
+const electron = isElectron();
+
+const Sidebar = ({
+  collapsed,
+  mobileOpen,
+  setMobileOpen,
+  animateClass,
+}: SidebarProps) => {
   return (
     <>
       {/* Desktop sidebar */}
       <aside
         className={`hidden md:flex fixed top-0 left-0 h-screen bg-white border-r border-[#EBF1F6] flex-col transition-all duration-300 ${
           collapsed ? "w-[100px]" : "w-[275px]"
-        } ${animateClass ? animateClass : ""}`}
+        } ${animateClass ? animateClass : ""} ${electron ? "mt-10" : ""}`}
       >
         <div className="py-6 mb-6 flex justify-center">
           <img
