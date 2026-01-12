@@ -5,6 +5,7 @@ import NotFound from "../pages/errors/NotFound";
 import Pengguna from "../pages/pengguna";
 import Dashboard from "../pages/dashboard";
 import Category from "../pages/admin/categories";
+import Kasir from "../pages/kasir/kasir";
 
 const router = createBrowserRouter([
   {
@@ -26,6 +27,17 @@ const router = createBrowserRouter([
       {
         path: "pengguna",
         element: <Pengguna />,
+      },
+    ],
+  },
+  {
+    path: "kasir",
+    element: <MainLayout />,
+    children: [
+      
+      {
+        path: "kasir",
+        element: <Kasir />,
       },
     ],
   },
