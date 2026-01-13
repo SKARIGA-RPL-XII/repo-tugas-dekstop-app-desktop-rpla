@@ -26,3 +26,13 @@ export interface AuthContextType {
   login: (payload: LoginPayload, remember: boolean) => Promise<void>;
   logout: () => Promise<void>;
 }
+
+export type JwtPayload = {
+  role: string;
+  exp: number;
+};
+
+export interface ProtectedRouteProps {
+  children: JSX.Element;
+  allowedRoles?: string[];
+}

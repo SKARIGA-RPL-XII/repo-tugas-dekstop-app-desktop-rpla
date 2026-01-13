@@ -1,21 +1,32 @@
 import { createRoot } from "react-dom/client";
-import "./index.css";
 import { RouterProvider } from "react-router-dom";
-import router from "./routes/routes.tsx";
-import { ToastProvider } from "./components/UI/ToastContext.tsx";
-import { ToastViewport } from "./components/UI/Toast.tsx";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { AuthProvider } from "./context/AuthContext.tsx";
+import { AuthProvider } from "./context/AuthContext";
+import { ToastProvider } from "./components/UI/ToastContext";
+import { ToastViewport } from "./components/UI/Toast";
+import router from "./routes/routes";
+import AppLoader from "./components/AppLoader";
+import { useState } from "react";
+import "./index.css";
+import "./bootstrap";
 
 const queryClient = new QueryClient();
 
-createRoot(document.getElementById("root")!).render(
-  <ToastProvider>
-    <AuthProvider>
-      <QueryClientProvider client={queryClient}>
-        <RouterProvider router={router} />
-      </QueryClientProvider>
-    </AuthProvider>
-    <ToastViewport />
-  </ToastProvider>
-);
+function Root() {
+  const [ready, setReady] = useState(false);
+
+  if (!ready) return <AppLoader onDone={() => setReady(true)} />;
+
+  return (
+    <ToastProvider>
+      <AuthProvider>
+        <QueryClientProvider client={queryClient}>
+          <RouterProvider router={router} />
+        </QueryClientProvider>
+        <ToastViewport />
+      </AuthProvider>
+    </ToastProvider>
+  );
+}
+
+createRoot(document.getElementById("root")!).render(<Root />);
