@@ -10,6 +10,7 @@ import App from "../App";
 import DashboardKasir from "../pages/kasir/dashboards";
 import ProtectedAuth from "../components/ProtectedAuth";
 import Forbidden from "../pages/errors/Forbidden";
+import { ProfilePage } from "../pages/auth/profile";
 const router = createBrowserRouter([
   {
     element: <App />,
@@ -26,6 +27,7 @@ const router = createBrowserRouter([
           { path: "dashboard", element: <Dashboard /> },
           { path: "kategori", element: <Category /> },
           { path: "pengguna", element: <Pengguna /> },
+          { path: "profil-saya", element: <ProfilePage /> },
         ],
       },
       {
