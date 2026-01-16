@@ -30,23 +30,36 @@ export default function SplashScreen({ onFinish }: SplashScreenProps) {
   return (
     <div className="fixed inset-0 flex items-center justify-center overflow-hidden">
       <div className="relative w-[900px] h-[400px] flex items-center justify-center">
-        {/* Ini portal e ta komentar soale masih salah */}
+        
+        <div className="absolute inset-0 bg-white z-10" />
 
-        {/* <AnimatePresence>
+        <AnimatePresence>
           {step <= 2 && (
             <motion.div
-              className="absolute w-[620px] h-[140px] rounded-full bg-[#E5D9C8] bottom-32 left-1/2 -translate-x-1/2 z-20"
-              initial={{ scaleY: 0, y: 100 }}
-              animate={{ scaleY: 1, y: 0 }}
-              exit={{ scaleY: 0, y: 100 }}
-              transition={{ duration: 0.3, ease: "easeInOut" }}
+              key="oval-base"
+              className="absolute bottom-20 left-1/2 -translate-x-1/2 bg-[#F2E9E0] z-20"
+              style={{
+                width: 620,
+                height: 140,
+                borderRadius: "70% / 90%",
+              }}
+              initial={{ scale: 1, opacity: 1, y: 0 }}
+              animate={{
+                scale: step >= 1 ? 0.6 : 1,
+                opacity: step >= 1 ? 0 : 1,
+                y: step >= 1 ? 30 : 0,
+              }}
+              exit={{ scale: 0, opacity: 0, y: 40 }}
+              transition={{ duration: 0.65, ease: "easeOut" }}
             />
           )}
-        </AnimatePresence> */}
+        </AnimatePresence>
 
         <motion.img
           src="/src/assets/logo-collapse.svg"
-          className="absolute w-44 z-10"
+          className={`absolute w-44 ${
+            step <= 0 ? "z-0" : "z-30"
+          }`}
           draggable="false"
           initial={{ y: 120, scale: 0.5, opacity: 0 }}
           animate={{
@@ -65,16 +78,16 @@ export default function SplashScreen({ onFinish }: SplashScreenProps) {
 
         <AnimatePresence>
           {step >= 5 && (
-            <div className="absolute left-[50%] translate-x-[-20px] w-[360px] h-[90px] overflow-hidden">
+            <div className="absolute left-[50%] translate-x-[-20px] w-[360px] h-[90px] overflow-hidden z-40">
               <motion.div
-                className="absolute inset-0 bg-white z-20"
+                className="absolute inset-0 bg-white z-10"
                 initial={{ x: 0 }}
                 animate={{ x: "100%" }}
                 transition={{ duration: 0.9, ease: "easeInOut" }}
               />
               <motion.img
                 src="/src/assets/logo-skarpos.png"
-                className="w-full"
+                className="w-full z-40"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.3 }}
