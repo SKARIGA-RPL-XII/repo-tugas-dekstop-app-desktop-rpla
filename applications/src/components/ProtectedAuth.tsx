@@ -8,8 +8,8 @@ export default function ProtectedAuth({ children }: { children: JSX.Element }) {
   if (loading) return <AppLoader onDone={() => {}}/>;
 
   if (token && user) {
-    if (user.role === "admin") return <Navigate to="/admin" replace />;
-    if (user.role === "cashier") return <Navigate to="/cashier" replace />;
+    if (user.role === "admin") return <Navigate to="/admin/dashboard" replace />;
+    if (user.role === "cashier") return <Navigate to="/cashier/dashboard" replace />;
   }
 
   return children;

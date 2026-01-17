@@ -8,7 +8,6 @@ import { useToast } from "../../components/UI/ToastContext";
 import SplashScreen from "../../components/SplashScreen";
 
 export default function Login() {
-  const navigate = useNavigate();
   const { login, loading } = useAuth();
   const { addToast } = useToast();
 
@@ -44,7 +43,6 @@ export default function Login() {
         description: "Welcome back 👋",
         type: "success",
       });
-      navigate("/admin/dashboard");
     } catch (err: any) {
       const apiErrors = err?.response?.data?.errors;
       const message = err?.response?.data?.message || "Login gagal";
