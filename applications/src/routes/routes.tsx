@@ -40,6 +40,7 @@ const router = createBrowserRouter([
         children: [
           { index: true, element: <DashboardKasir /> },
           { path: "dashboard", element: <DashboardKasir /> },
+          { path: "profil-saya", element: <ProfilePage /> },
         ],
       },
       {
