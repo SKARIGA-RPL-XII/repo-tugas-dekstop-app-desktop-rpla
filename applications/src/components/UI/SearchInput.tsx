@@ -18,7 +18,7 @@ export const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
       value: propValue,
       onValueChange,
       onSearch,
-      debounceTime = 400,
+      debounceTime = 800,
       className,
       ...props
     },

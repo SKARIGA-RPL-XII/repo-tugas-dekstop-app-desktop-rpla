@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { Trash2, Pencil, Search, Calendar, Eye } from "lucide-react";
 
-import DeleteAlert from "../../components/DeleteAlert";
-import Pagination from "../../components/Pagination";
+import DeleteAlert from "../../../components/Modals/DeleteAlert";
+import Pagination from "../../../components/Pagination";
 import { useNavigate } from "react-router-dom";
 
 const Produk = () => {

@@ -2,7 +2,6 @@ import { createBrowserRouter } from "react-router-dom";
 import MainLayout from "../pages/layouts/mainLayout";
 import Login from "../pages/auth/login";
 import NotFound from "../pages/errors/NotFound";
-import Pengguna from "../pages/pengguna";
 import Dashboard from "../pages/admin/dashboards";
 import Category from "../pages/admin/categories";
 import ProtectedRoute from "../components/ProtectedRoute";
@@ -11,6 +10,8 @@ import DashboardKasir from "../pages/kasir/dashboards";
 import ProtectedAuth from "../components/ProtectedAuth";
 import Forbidden from "../pages/errors/Forbidden";
 import { ProfilePage } from "../pages/auth/profile";
+import Pengguna from "../pages/admin/pengguna";
+import Produk from "../pages/admin/produk";
 const router = createBrowserRouter([
   {
     element: <App />,
@@ -27,6 +28,7 @@ const router = createBrowserRouter([
           { path: "dashboard", element: <Dashboard /> },
           { path: "kategori", element: <Category /> },
           { path: "pengguna", element: <Pengguna /> },
+          { path: "Produk", element: <Produk /> },
           { path: "profil-saya", element: <ProfilePage /> },
         ],
       },

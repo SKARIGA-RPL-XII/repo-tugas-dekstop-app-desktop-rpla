@@ -4,56 +4,68 @@ import { cn } from "../../utils/cn";
 import { X } from "lucide-react";
 import { Button } from "./Button";
 
+type AlertDialogSize = "sm" | "md" | "lg" | "xl";
+
+const sizeMap: Record<AlertDialogSize, string> = {
+  sm: "max-w-sm",
+  md: "max-w-md",
+  lg: "max-w-2xl",
+  xl: "max-w-5xl",
+};
+
 interface AlertDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   children: ReactNode;
-  className?:string
+  size?: AlertDialogSize;
+  className?: string;
 }
 
-interface AlertDialogSectionProps {
+interface SectionProps {
   children: ReactNode;
   className?: string;
 }
 
-interface AlertDialogHeaderProps {
-  children: React.ReactNode;
+interface HeaderProps {
+  children: ReactNode;
   className?: string;
   onClose?: () => void;
 }
 
+/* ===================== MAIN DIALOG ===================== */
 export const AlertDialog: React.FC<AlertDialogProps> = ({
   open,
   onOpenChange,
   children,
-  className
+  size = "md",
+  className,
 }) => {
   return (
     <AnimatePresence>
       {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
+          {/* BACKDROP */}
           <motion.div
             className="absolute inset-0 bg-black/30 backdrop-blur-sm"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
             onClick={() => onOpenChange(false)}
           />
 
+          {/* MODAL */}
           <motion.div
-            className="relative z-10 w-full max-w-md"
-            initial={{ opacity: 0, scale: 0.5 }}
-            animate={{ opacity: 1, scale: 1.05 }}
-            exit={{ opacity: 0, scale: 1.1 }}
-            transition={{
-              type: "spring",
-              stiffness: 700,
-              damping: 15,
-              mass: 0.6,
-            }}
+            className={cn(
+              "relative z-10 w-full px-4",
+              sizeMap[size],
+              className
+            )}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ type: "spring", stiffness: 600, damping: 25 }}
           >
-            <div className={cn("bg-white overflow-hidden rounded-xl" , className)}>
+            <div className="bg-white rounded-xl overflow-hidden shadow-xl">
               {children}
             </div>
           </motion.div>
@@ -63,16 +75,7 @@ export const AlertDialog: React.FC<AlertDialogProps> = ({
   );
 };
 
-export const AlertDialogTrigger: React.FC<{ children: ReactNode; onClick?: () => void }> = ({
-  children,
-  onClick,
-}) => {
-  return (
-    <span onClick={onClick} className="cursor-pointer">
-      {children}
-    </span>
-  );
-};
+/* ===================== SECTIONS ===================== */
 
 export const AlertDialogHeader: React.FC<AlertDialogHeaderProps> = ({
   children,
@@ -82,11 +85,13 @@ export const AlertDialogHeader: React.FC<AlertDialogHeaderProps> = ({
   return (
     <div
       className={cn(
-        "flex items-center justify-between p-4 bg-gray-100 border-b border-gray-200",
+        "flex items-center justify-between p-4 bg-gray-100",
         className
       )}
     >
-      <div className="text-lg font-semibold text-gray-900">{children}</div>
+      <div className="text-lg font-semibold text-gray-900">
+        {children}
+      </div>
 
       {onClose && (
         <Button
@@ -101,38 +106,39 @@ export const AlertDialogHeader: React.FC<AlertDialogHeaderProps> = ({
   );
 };
 
-export const AlertDialogContent: React.FC<AlertDialogSectionProps> = ({
-  children,
-  className,
-}) => {
-  return <div className={cn("p-5", className)}>{children}</div>;
-};
 
-export const AlertDialogFooter: React.FC<AlertDialogSectionProps> = ({
+export const AlertDialogContent: React.FC<SectionProps> = ({
   children,
   className,
-}) => {
-  return (
-    <div className={cn("flex justify-end gap-2 p-4", className)}>
-      {children}
-    </div>
-  );
-};
+}) => <div className={cn("px-6 py-6", className)}>{children}</div>;
 
-export const AlertDialogTitle: React.FC<AlertDialogSectionProps> = ({
+export const AlertDialogFooter: React.FC<SectionProps> = ({
   children,
   className,
-}) => {
-  return (
-    <h2 className={cn("text-lg font-semibold text-gray-900", className)}>
-      {children}
-    </h2>
-  );
-};
+}) => (
+  <div
+    className={cn(
+      "flex justify-end gap-2 px-6 py-4",
+      className
+    )}
+  >
+    {children}
+  </div>
+);
 
-export const AlertDialogDescription: React.FC<AlertDialogSectionProps> = ({
+
+export const AlertDialogTitle: React.FC<SectionProps> = ({
   children,
   className,
-}) => {
-  return <p className={cn("text-sm text-gray-600", className)}>{children}</p>;
-};
+}) => (
+  <h2 className={cn("text-lg font-semibold text-gray-900", className)}>
+    {children}
+  </h2>
+);
+
+export const AlertDialogDescription: React.FC<SectionProps> = ({
+  children,
+  className,
+}) => (
+  <p className={cn("text-sm text-gray-600", className)}>{children}</p>
+);
