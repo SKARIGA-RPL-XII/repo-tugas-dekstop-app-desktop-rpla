@@ -162,7 +162,7 @@ export default function Kasir() {
               <div className="font-semibold text-[14px] flex gap-2 ">
                 <ShoppingCart className="w-6 h-6" /> Produk Ditambahkan
                 <label className="text-[11px] font-semibold text-white w-5 h-5 bg-[#5565FF] justify-center flex items-center rounded-full">
-                  3
+                  {cart?.length}
                 </label>
               </div>
               {cart.length !== 0 && (
