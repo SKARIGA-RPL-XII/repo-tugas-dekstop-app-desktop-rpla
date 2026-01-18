@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { ChevronDown, Mail, User, LogOut, Loader2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { getInitial, getRandomColor } from "../../utils/avatar";
 import { useToast } from "../UI/ToastContext";
@@ -7,6 +8,8 @@ import { useToast } from "../UI/ToastContext";
 const Navbar = () => {
   const { user, logout, loading } = useAuth();
   const { addToast } = useToast();
+  const navigate = useNavigate();
+
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -29,7 +32,6 @@ const Navbar = () => {
   const handleLogout = async () => {
     try {
       await logout();
-
       addToast({
         title: "Logout berhasil",
         description: "Sampai jumpa lagi 👋",
@@ -42,6 +44,11 @@ const Navbar = () => {
         type: "error",
       });
     }
+  };
+
+  const handleGoToProfile = () => {
+    navigate(" profil-saya");
+    setDropdownOpen(false);
   };
 
   return (
@@ -90,7 +97,10 @@ const Navbar = () => {
             <hr className="border-[#E5E5E5]" />
 
             <div className="flex gap-2">
-              <button className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-[#5565FF] text-white rounded-md hover:bg-[#4250D3] transition">
+              <button
+                onClick={handleGoToProfile}
+                className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-[#5565FF] text-white rounded-md hover:bg-[#4250D3] transition"
+              >
                 <User className="w-4 h-4" />
                 <span>Profil Saya</span>
               </button>

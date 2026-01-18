@@ -1,19 +1,16 @@
 import { createBrowserRouter } from "react-router-dom";
-import App from "../App";
 import MainLayout from "../pages/layouts/mainLayout";
 import Login from "../pages/auth/login";
 import NotFound from "../pages/errors/NotFound";
-
+import Pengguna from "../pages/pengguna";
 import Dashboard from "../pages/admin/dashboards";
 import Category from "../pages/admin/categories";
-import DashboardKasir from "../pages/kasir/dashboards";
-
-import Pengguna from "../pages/admin/pengguna";
-import PenggunaDetail from "../pages/admin/pengguna/detail";
-
 import ProtectedRoute from "../components/ProtectedRoute";
-import Produk from "../pages/produk";
-
+import App from "../App";
+import DashboardKasir from "../pages/kasir/dashboards";
+import ProtectedAuth from "../components/ProtectedAuth";
+import Forbidden from "../pages/errors/Forbidden";
+import { ProfilePage } from "../pages/auth/profile";
 const router = createBrowserRouter([
   {
     element: <App />,
@@ -21,7 +18,7 @@ const router = createBrowserRouter([
       {
         path: "/admin",
         element: (
-          <ProtectedRoute>
+          <ProtectedRoute allowedRoles={["admin"]}>
             <MainLayout />
           </ProtectedRoute>
         ),
@@ -29,25 +26,40 @@ const router = createBrowserRouter([
           { index: true, element: <Dashboard /> },
           { path: "dashboard", element: <Dashboard /> },
           { path: "kategori", element: <Category /> },
-          { path: "produk", element: <Produk /> },
-
-
-          {
-            path: "pengguna",
-            children: [
-              { index: true, element: <Pengguna /> },
-              { path: "detail/:id", element: <PenggunaDetail /> },
-            ],
-          },
-
-          // sementara (maintenance)
-          { path: "kasir", element: <DashboardKasir /> },
+          { path: "pengguna", element: <Pengguna /> },
+          { path: "profil-saya", element: <ProfilePage /> },
         ],
       },
-
-      { path: "/login", element: <Login /> },
-      { path: "/", element: <Login /> },
+      {
+        path: "/cashier",
+        element: (
+          <ProtectedRoute allowedRoles={["cashier"]}>
+            <MainLayout />
+          </ProtectedRoute>
+        ),
+        children: [
+          { index: true, element: <DashboardKasir /> },
+          { path: "dashboard", element: <DashboardKasir /> },
+        ],
+      },
+      {
+        path: "/login",
+        element: (
+          <ProtectedAuth>
+            <Login />
+          </ProtectedAuth>
+        ),
+      },
+      {
+        path: "/",
+        element: (
+          <ProtectedAuth>
+            <Login />
+          </ProtectedAuth>
+        ),
+      },
       { path: "*", element: <NotFound /> },
+      { path: "403", element: <Forbidden /> },
     ],
   },
 ]);
