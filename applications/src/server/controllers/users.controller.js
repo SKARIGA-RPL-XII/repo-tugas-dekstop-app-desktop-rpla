@@ -50,13 +50,14 @@ export class UsersController {
         );
       }
 
-      const { email, password, username , role } = validation.data;
+      const { email, password, username, role, is_blocked } = validation.data;
 
       const payload = {
         email: email,
         password: password,
         username: username,
         role: role,
+        is_blocked: is_blocked,
       };
 
       const newUser = await Users.create(supabase, payload);
@@ -82,7 +83,17 @@ export class UsersController {
 
   static async updateUser(req, res) {
     try {
-      const payload = updateUserSchema.safeParse(req.body);
+      const validation = updateUserSchema.safeParse(req.body);
+      if (!validation.success) {
+        return errorResponse(
+          res,
+          "Validation error",
+          400,
+          validation.error.errors.map((e) => e.message).join(", "),
+        );
+      }
+
+      const payload = validation.data;
 
       const updatedUser = await Users.update(supabase, req.params.id, payload);
 
