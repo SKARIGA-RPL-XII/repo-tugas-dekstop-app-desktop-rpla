@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import logo from "../../assets/logo.png";
 import rightImage from "../../assets/right.png";
 import { useAuth } from "../../context/AuthContext";
