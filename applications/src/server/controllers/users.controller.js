@@ -50,13 +50,13 @@ export class UsersController {
         );
       }
 
-      const { email, password, username, name } = validation.data;
+      const { email, password, username , role } = validation.data;
 
       const payload = {
         email: email,
         password: password,
         username: username,
-        name: name,
+        role: role,
       };
 
       const newUser = await Users.create(supabase, payload);
