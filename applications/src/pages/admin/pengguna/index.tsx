@@ -1,7 +1,6 @@
 import { Eye, EyeOff } from "lucide-react";
 import { useEffect, useState } from "react";
 
-
 import {
   ContainerHeaderPage,
   HeaderActions,
@@ -55,7 +54,8 @@ const Pengguna = () => {
   } = useUserDialog();
 
   const {
-    data, meta,
+    data,
+    meta,
     filters: userFilters,
     setFilters: setUserFilters,
     loading,
@@ -74,18 +74,16 @@ const Pengguna = () => {
 
   const { addToast } = useToast();
 
-  const isLoading =
-    loading || createLoading || updateLoading || deleteLoading;
+  const isLoading = loading || createLoading || updateLoading || deleteLoading;
 
   const columns = getUserColumns({
-    openEdit,       
+    openEdit,
     openDelete,
     isLoading,
     openDetail: openEdit,
   });
 
   useEffect(() => {
-
     if (mode === "edit" && selected) {
       setFormField("username", selected.username ?? "");
       setFormField("email", selected.email ?? "");
@@ -96,8 +94,6 @@ const Pengguna = () => {
       setFormField("password_confirmation", "");
     }
 
-
-
     if (mode === "create") {
       setFormField("password", "");
       setFormField("password_confirmation", "");
@@ -106,16 +102,17 @@ const Pengguna = () => {
     }
   }, [mode, selected]);
 
-
-
-
   const handleSubmit = async () => {
     try {
       setErrors({});
 
-      /* ================= CREATE ================= */
       if (mode === "create") {
-        if (!form.username || !form.email || !form.password || !form.password_confirmation) {
+        if (
+          !form.username ||
+          !form.email ||
+          !form.password ||
+          !form.password_confirmation
+        ) {
           return addToast({
             title: "field wajib diisi",
             description: "Harap isi semua field yang ada pada form",
@@ -155,7 +152,6 @@ const Pengguna = () => {
         });
       }
 
-      /* ================= EDIT ================= */
       if (mode === "edit" && selected) {
         const isChanged =
           form.username !== selected.username ||
@@ -222,6 +218,7 @@ const Pengguna = () => {
         });
       }
 
+      refetch();
       close();
     } catch (err: any) {
       console.log(err);
@@ -232,8 +229,6 @@ const Pengguna = () => {
       });
     }
   };
-
-
 
   const handleDelete = async () => {
     if (!selected?.id) return;
@@ -247,8 +242,6 @@ const Pengguna = () => {
     }
 
     try {
-
-
       await deleteUser(selected.id);
 
       addToast({
@@ -257,8 +250,8 @@ const Pengguna = () => {
         type: "success",
       });
 
+      refetch();
       closeDelete();
-      refetch(); 
     } catch (err: any) {
       addToast({
         title: "Failed to delete user",
@@ -268,6 +261,9 @@ const Pengguna = () => {
     }
   };
 
+  // useEffect(() => {
+  //   refetch();
+  // }, []);
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-6">
@@ -285,7 +281,6 @@ const Pengguna = () => {
       </ContainerHeaderPage>
 
       <Card>
-
         <HeaderTableContainer>
           <HeaderTableSearch
             value={filters.search}
@@ -313,7 +308,11 @@ const Pengguna = () => {
         />
       </Card>
 
-      <AlertDialog open={open} onOpenChange={close} className="max-w-5xl w-full">
+      <AlertDialog
+        open={open}
+        onOpenChange={close}
+        className="max-w-5xl w-full"
+      >
         <AlertDialogHeader className="bg-gray-100 px-8 py-4 font-semibold">
           {mode === "edit" ? "Edit Pengguna" : "Tambah Pengguna Baru"}
         </AlertDialogHeader>
@@ -352,9 +351,7 @@ const Pengguna = () => {
               value={form.password_confirmation}
               show={showConfirmPassword}
               setShow={setShowConfirmPassword}
-              onChange={(v) =>
-                setFormField("password_confirmation", v)
-              }
+              onChange={(v) => setFormField("password_confirmation", v)}
               placeholder={
                 mode === "edit"
                   ? "Kosongkan jika tidak ingin mengubah"
@@ -370,16 +367,17 @@ const Pengguna = () => {
             <SelectBlock
               label="Status"
               value={form.is_blocked ? "blocked" : "active"}
-              onChange={(v) =>
-                setFormField("is_blocked", v === "blocked")
-              }
+              onChange={(v) => setFormField("is_blocked", v === "blocked")}
               options={["active", "blocked"]}
             />
           </div>
         </AlertDialogContent>
 
         <AlertDialogFooter className="px-8 py-4">
-          <Button className="bg-muted-foreground hover:bg-muted-foreground/50" onClick={close}>
+          <Button
+            className="bg-muted-foreground hover:bg-muted-foreground/50"
+            onClick={close}
+          >
             Batal
           </Button>
           <Button type="button" onClick={handleSubmit}>
@@ -398,8 +396,13 @@ const Pengguna = () => {
   );
 };
 
-
-const InputBlock = ({ label, value, onChange, type = "text", required }: any) => (
+const InputBlock = ({
+  label,
+  value,
+  onChange,
+  type = "text",
+  required,
+}: any) => (
   <div>
     <label className="text-sm font-medium text-gray-700 mb-2 block">
       {label} {required && <span className="text-red-500">*</span>}

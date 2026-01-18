@@ -9,7 +9,9 @@ export class Users {
       const limit = parseInt(query.limit, 10) || 10;
       const search = query.search || "";
 
-      let supabaseQuery = db.from(this.tableName).select("*");
+      let supabaseQuery = db
+        .from(this.tableName)
+        .select("*", { count: "exact" });
 
       if (search) {
         supabaseQuery = supabaseQuery.ilike("username", `%${search}%`);

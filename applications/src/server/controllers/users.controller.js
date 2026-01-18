@@ -9,12 +9,12 @@ export class UsersController {
     try {
       const {
         data,
-        count,
         page = 1,
         limit = 10,
+        count
       } = await Users.getAll(supabase, req.query);
 
-      return successResponse(res, data, "Users retrieved successfully", 200, {
+      return successResponse(res, data , "Users retrieved successfully", 200, {
         page: parseInt(page, 10),
         limit: parseInt(limit, 10),
         count,

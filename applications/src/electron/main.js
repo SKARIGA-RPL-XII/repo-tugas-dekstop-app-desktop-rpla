@@ -12,6 +12,9 @@ function createWindow() {
     width: 1200,
     height: 800,
     frame: false,
+    minWidth: 500,
+    minHeight: 640,
+    resizable: true,
     webPreferences: {
       preload: path.join(__dirname, "preload.cjs"),
       contextIsolation: true,

@@ -5,7 +5,6 @@ import {
   Shield,
   Calendar,
   Info,
-  X,
   Pencil,
   Lock,
 } from "lucide-react";
@@ -35,7 +34,7 @@ export const ProfilePage = () => {
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
-// 
+    //
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -51,7 +50,7 @@ export const ProfilePage = () => {
         <HeaderTitle>Profil Saya</HeaderTitle>
       </ContainerHeaderPage>
 
-      <div className="max-w-6xl flex gap-3 w-full">
+      <div className="max-w-6xl flex flex-col lg:flex-row gap-3 w-full">
         <Card className="flex rounded-2xl shadow-none flex-col items-center space-y-2 w-full lg:w-62.5 overflow-hidden">
           <div className="max-w-xl flex justify-center flex-col items-center pt-10">
             <div className="relative">
@@ -80,7 +79,9 @@ export const ProfilePage = () => {
             <h2 className="mt-4 font-semibold text-lg">{user.username}</h2>
             <p className="text-xs text-muted-foreground">{user.email}</p>
 
-            <Card className={`mt-3 px-4 py-2 text-md font-bold rounded-lg w-full ${user?.role == "admin" ? "bg-indigo-50 text-indigo-500" : "bg-orange-50 text-orange-500"} text-center shadow-none`}>
+            <Card
+              className={`mt-3 px-4 py-2 text-md font-bold rounded-lg w-full ${user?.role == "admin" ? "bg-indigo-50 text-indigo-500" : "bg-orange-50 text-orange-500"} text-center shadow-none`}
+            >
               {user.role}
             </Card>
           </div>
@@ -183,7 +184,7 @@ export const ProfilePage = () => {
               label="Password"
               name="password"
               type="password"
-              value={''}
+              value={""}
               onChange={handleChange}
             />
 
@@ -192,7 +193,7 @@ export const ProfilePage = () => {
               label="Konfirmasi Password"
               name="confirmPassword"
               type="password"
-              value={''}
+              value={""}
               onChange={handleChange}
             />
           </div>

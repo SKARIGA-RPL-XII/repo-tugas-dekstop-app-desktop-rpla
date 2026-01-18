@@ -4,7 +4,7 @@ import LogoCollapsed from "../../assets/logo-collapse.svg";
 import { isElectron } from "../../utils/electron";
 import { useAuth } from "../../context/AuthContext";
 import { MenuGroup, SidebarProps } from "../../types/menuItems";
-import { menu } from "../../configs/menu"; 
+import { menu } from "../../configs/menu";
 
 const Sidebar = ({
   collapsed,
@@ -27,12 +27,12 @@ const Sidebar = ({
         return {
           ...group,
           items: group.items.filter(
-            (item) => !item.roles || item.roles.includes(userRole)
+            (item) => !item.roles || item.roles.includes(userRole),
           ),
         };
       })
       .filter(
-        (group): group is MenuGroup => group !== null && group.items.length > 0
+        (group): group is MenuGroup => group !== null && group.items.length > 0,
       );
   }
 
@@ -63,8 +63,12 @@ const Sidebar = ({
               >
                 {group.title}
               </p>
-              {group.items.map((item , _) => (
-                <NavLink key={_ + 1} to={`/${user.role}/${item.path}`} className={navClass}>
+              {group.items.map((item, _) => (
+                <NavLink
+                  key={_ + 1}
+                  to={`/${user.role}/${item.path}`}
+                  className={navClass}
+                >
                   {item.icon}
                   {!collapsed && <span>{item.label}</span>}
                 </NavLink>
@@ -93,7 +97,7 @@ const Sidebar = ({
                   {group.items.map((item) => (
                     <NavLink
                       key={item.path}
-                      to={item.path}
+                      to={`/${user.role}/${item.path}`}
                       className={navClass}
                       onClick={() => setMobileOpen(false)}
                     >
