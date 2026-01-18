@@ -13,7 +13,7 @@ export default function Kasir() {
           <div className="relative">
             <Search className="absolute w-[14px] h-[14px] top-[7px]  left-[15px]" />
             <input
-              type="text"
+              type="text" 
               className="border-[#D9D9D9] border-1 rounded-[7px] pl-8.5 p-2 text-[10px]"
               placeholder="Cari Produk"
             />
