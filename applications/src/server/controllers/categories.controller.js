@@ -6,45 +6,54 @@ import {
   deleteCategory,
   createCategory,
 } from "../model/categories.model.js";
+import { CategorySchema } from "../schemas/category.schema.js";
+import { formatFieldError } from "../utils/formatFieldError.js";
 
-export class categoryController {
-  static async filterCategories(req, res) {
-    try {
-      const { created_at, page = 1, limit = 10, search = "" } = req.query;
-      const params = {
-        created_at,
-        page: parseInt(page, 10),
-        limit: parseInt(limit, 10),
-        search
-      };
-      const result = await filterCategoriesModel(params);
-      return successResponse(res, result, "Filtered categories fetched successfully");
-    } catch (error) {
-      return errorResponse(res, "Failed to filter categories", 500, error.message);
-    }
-  }
+export class CategoryController {
+ static async getCategories(req, res) {
+  try {
+    const { created_at, page = 1, limit = 10, search = "" } = req.query;
 
-  static async getCategories(req, res) {
-    try {
-      const data = await getAllCategories();
-      return successResponse(res, data, "Categories retrieved successfully");
-    } catch (error) {
-      return errorResponse(
-        res,
-        "Failed to retrieve products",
-        500,
-        error.message
-      );
-    }
+    const params = {
+      created_at,
+      page: parseInt(page, 10),
+      limit: parseInt(limit, 10),
+      search,
+    };
+
+    const result = await getAllCategories(params);
+
+    return successResponse(
+      res,
+      result.data,
+      "Categories retrieved successfully",
+      200,
+      {
+        page: params.page,
+        limit: params.limit,
+        count: result.meta.count
+      }
+    );
+  } catch (error) {
+    return errorResponse(
+      res,
+      "Failed to retrieve categories",
+      500,
+      error.message
+    );
   }
+}
+
 
   static async getCategoryById(req, res) {
     const { id } = req.params;
     try {
       const category = await getCategoryById(id);
+
       if (!category) {
         return errorResponse(res, "Category not found", 404);
       }
+
       return successResponse(res, category, "Category retrieved successfully");
     } catch (error) {
       return errorResponse(
@@ -57,36 +66,44 @@ export class categoryController {
   }
 
   static async createCategory(req, res) {
-    const { category_name } = req.body;
-
-    if (!category_name) {
-      return errorResponse(res, "Category name is required", 400);
-    }
-
-    const newCategory = {
-      category_name: category_name,
-      created_at: new Date().toISOString(),
-      updated_at: null,
-    };
     try {
-      const createdCategory = await createCategory(newCategory);
-      if (!createdCategory) {
-        return errorResponse(res, "Failed to create category", 500);
-      }
+      const validatedData = CategorySchema.parse(req.body);
 
-      if (createdCategory.success === true) {
-        return successResponse(
+      const newCategory = {
+        category_name: validatedData.category_name,
+        created_at: new Date().toISOString(),
+        updated_at: null,
+      };
+
+      const createdCategory = await createCategory(newCategory);
+
+      if (!createdCategory || createdCategory.success !== true) {
+        return errorResponse(
           res,
-          createdCategory.data,
-          createdCategory.message,
+          "Failed to create category",
+          500,
+          createdCategory?.error?.message
         );
       }
+
+      return successResponse(
+        res,
+        createdCategory.data,
+        createdCategory.message
+      );
     } catch (error) {
+      if (error.name === "ZodError") {
+        return errorResponse(
+          res,
+          formatFieldError(error.message),
+          400
+        );
+      }
       return errorResponse(
         res,
         "Internal Server Error during creation",
         500,
-        error.message
+        formatFieldError(error.message)
       );
     }
   }
@@ -94,14 +111,10 @@ export class categoryController {
   static async updateCategory(req, res) {
     const { id } = req.params;
     try {
-      const { category_name } = req.body;
-
-      if (!category_name) {
-        return errorResponse(res, "Category name is required", 400);
-      }
+      const validatedData = CategorySchema.parse(req.body);
 
       const dataUpdate = {
-        category_name: category_name,
+        category_name: validatedData.category_name,
         updated_at: new Date().toISOString(),
       };
 
@@ -120,17 +133,20 @@ export class categoryController {
         return errorResponse(res, `Category with ID ${id} not found`, 404);
       }
 
-      return successResponse(
-        res,
-        result.data,
-        "Category updated successfully"
-      );
+      return successResponse(res, result.data, "Category updated successfully");
     } catch (error) {
-      return errorResponse(
+       if (error.name === "ZodError") {
+        return errorResponse(
+          res,
+          formatFieldError(error.message),
+          400
+        );
+      }
+     return errorResponse(
         res,
-        "Internal Server Error during update",
+        "Internal Server Error during creation",
         500,
-        error.message
+        formatFieldError(error.message)
       );
     }
   }
@@ -139,6 +155,7 @@ export class categoryController {
     const { id } = req.params;
     try {
       const result = await deleteCategory(id);
+
       if (result.error) {
         return errorResponse(
           res,
@@ -147,6 +164,7 @@ export class categoryController {
           result.error.message
         );
       }
+
       return successResponse(res, null, result.message);
     } catch (error) {
       return errorResponse(
