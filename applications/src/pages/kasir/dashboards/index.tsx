@@ -6,7 +6,7 @@ import { ApexOptions } from "apexcharts";
 import kasirLogo from "../../../assets/kasir-logo.svg";
 
 const DashboardKasir = () => {
-  const { user, logout, loading } = useAuth();
+  const { user } = useAuth();
   const displayName = user?.username || user?.email || "User";
   const [openDate, setOpenDate] = useState(false);
   const [startDate, setStartDate] = useState("2025-12-01");
@@ -189,7 +189,9 @@ const DashboardKasir = () => {
           onClick={() => setOpenDate(!openDate)}
         >
           {/* Kalender */}
-          <Calendar className="w-12 h-12 p-2 text-[#5565FF] bg-[#E6F0F7]" />
+          <div className="w-10 h-10 flex justify-center items-center bg-[#E6F0F7] rounded-sm">
+          <Calendar className="w-12 h-12 p-2 text-[#5565FF]" />
+          </div>
 
           {/* Filter Text */}
           <div>
