@@ -2,10 +2,10 @@ import { z } from "zod";
 
 export const createUserSchema = z.object({
   username: z.string().min(3, "username minimal 3 karakter"),
-  name: z.string().min(3, "name minimal 3 karakter"),
   email: z.string().email("email tidak valid"),
   password: z.string().min(6, "password minimal 6 karakter"),
   role: z.enum(["admin", "cashier"]),
+  is_blocked: z.enum([true , false]),
 });
 
 export const updateUserSchema = z.object({
@@ -13,4 +13,5 @@ export const updateUserSchema = z.object({
   email: z.string().email().optional(),
   password: z.string().min(6).optional(),
   role: z.enum(["admin", "cashier"]),
+  is_blocked: z.enum([true , false]),
 });
