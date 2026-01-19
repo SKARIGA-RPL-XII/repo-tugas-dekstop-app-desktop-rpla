@@ -1,14 +1,8 @@
-import { useRef, useState } from "react";
-import {
-  User,
-  Mail,
-  Shield,
-  Calendar,
-  Info,
-  Pencil,
-  Lock,
-} from "lucide-react";
+import { useRef } from "react";
+import { User, Mail, Shield, Calendar, Info, Pencil, Lock } from "lucide-react";
 
+import { useProfileDialog } from "../../hooks/users/useProfileDialog";
+import { UserServices } from "../../services/userService";
 import profileImage from "../../assets/unknown.gif";
 import {
   ContainerHeaderPage,
@@ -28,13 +22,25 @@ import { formatDate } from "../../utils/formatDate";
 
 export const ProfilePage = () => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const { user } = useAuth();
-  const [openModal, setOpenModal] = useState(false);
+  const { user, setUser } = useAuth();
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
-  ) => {
-    //
+  const profile = useProfileDialog(user);
+
+  const handleSaveProfile = async () => {
+    const success = await profile.submit(async (payload) => {
+      const updatedFromApi = await UserServices.updateUser(user.id, payload);
+
+      const updatedUser = {
+        ...user,
+        ...updatedFromApi,
+      } as ReturnType<typeof useAuth>["user"];
+
+      setUser(updatedUser);
+    });
+
+    if (success) {
+      console.log("Profile updated successfully");
+    }
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -117,22 +123,13 @@ export const ProfilePage = () => {
           </div>
 
           <div className="flex justify-end mt-6">
-            <Button
-              onClick={() => setOpenModal(true)}
-              className="px-6 py-2 text-sm bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
-            >
-              Ubah Informasi Saya
-            </Button>
+            <Button onClick={profile.openEdit}>Ubah Informasi Saya</Button>
           </div>
         </Card>
       </div>
 
-      <AlertDialog
-        className="w-full min-w-3xl"
-        open={openModal}
-        onOpenChange={close}
-      >
-        <AlertDialogHeader onClose={close}>
+      <AlertDialog open={profile.open} onOpenChange={profile.close} className="w-full min-w-3xl">
+        <AlertDialogHeader onClose={profile.close}>
           Ubah Informasi Saya
         </AlertDialogHeader>
 
@@ -141,72 +138,40 @@ export const ProfilePage = () => {
             <FormInput
               icon={<User size={14} />}
               label="Nama Lengkap"
-              name="name"
-              value={user.username}
-              onChange={handleChange}
+              value={profile.form.username}
+              onChange={(e) => profile.setField("username", e.target.value)}
             />
 
             <FormInput
               icon={<Mail size={14} />}
               label="Email"
-              name="email"
-              value={user.email}
-              onChange={handleChange}
-            />
-
-            <div className="flex flex-col gap-2">
-              <label className="text-xs text-gray-500">
-                Role <span className="text-red-500">*</span>
-              </label>
-              <select
-                name="role"
-                value={user.role}
-                onChange={handleChange}
-                className="w-full rounded-md border bg-white border-slate-200 focus:border-none focus:ring-primary text-black px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-offset-2 transition disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <option>Admin</option>
-                <option>User</option>
-                <option>Pelayan</option>
-                <option>Dapur</option>
-              </select>
-            </div>
-
-            <FormInput
-              icon={<Calendar size={14} />}
-              label="Bergabung Pada"
-              name="joined"
-              value={formatDate(user.created_at)}
-              onChange={handleChange}
+              value={profile.form.email}
+              onChange={(e) => profile.setField("email", e.target.value)}
             />
 
             <FormInput
               icon={<Lock size={14} />}
               label="Password"
-              name="password"
               type="password"
-              value={""}
-              onChange={handleChange}
+              value={profile.form.password}
+              onChange={(e) => profile.setField("password", e.target.value)}
             />
 
             <FormInput
               icon={<Lock size={14} />}
               label="Konfirmasi Password"
-              name="confirmPassword"
               type="password"
-              value={""}
-              onChange={handleChange}
+              value={profile.form.confirmPassword}
+              onChange={(e) =>
+                profile.setField("confirmPassword", e.target.value)
+              }
             />
           </div>
 
           <AlertDialogFooter>
+            <Button onClick={profile.close} className="px-5 py-2 text-sm rounded-md bg-muted-foreground hover:bg-muted/50 text-white">Batal</Button>
             <Button
-              onClick={() => setOpenModal(false)}
-              className="px-5 py-2 text-sm rounded-md bg-muted-foreground hover:bg-muted/50 text-white"
-            >
-              Batal
-            </Button>
-            <Button
-              onClick={() => setOpenModal(false)}
+              onClick={handleSaveProfile}
               className="px-5 py-2 text-sm bg-orange-400 text-white rounded-md hover:bg-orange-200"
             >
               Simpan
@@ -232,12 +197,18 @@ const InfoRow = ({ icon, label, value, noBorder }) => (
   </div>
 );
 
-const FormInput = ({ label }) => (
+const FormInput = ({ label, isDisabled = false, ...props }) => (
   <div className="flex flex-col gap-2">
     <label className="text-xs text-gray-500">
       {label}
       <span className="text-red-500">*</span>
     </label>
-    <Input placeholder="CMIW" />
+
+    <Input
+      {...props}
+      disabled={isDisabled}
+      className={`${isDisabled ? "bg-gray-100 cursor-not-allowed" : ""}`}
+      placeholder="CMIW"
+    />
   </div>
 );
