@@ -39,7 +39,7 @@ export class ProductServices {
   }
 
   static async deleteProduct(id: string): Promise<void> {
-    await ApiClient.delete(`/produk/${id}`);
+    await ApiClient.delete(`/delete/${id}`);
   }
 
     static async getCategories(params?: GetCategoriesParams): Promise<{

@@ -11,6 +11,8 @@ import ProtectedAuth from "../components/ProtectedAuth";
 import Forbidden from "../pages/errors/Forbidden";
 import { ProfilePage } from "../pages/auth/profile";
 import Pengguna from "../pages/admin/pengguna";
+import PenggunaDetail from "../pages/admin/pengguna/detail";
+
 import Produk from "../pages/admin/produk";
 import ProdukTambah from "../pages/admin/produk/tambah";
 import ProdukEdit from "../pages/admin/produk/edit";
@@ -33,6 +35,7 @@ const router = createBrowserRouter([
 
           { path: "kategori", element: <Category /> },
           { path: "pengguna", element: <Pengguna /> },
+          { path: "pengguna/:id/detail", element: <PenggunaDetail /> },
 
           // ================== PRODUK ==================
           { path: "produk", element: <Produk /> },

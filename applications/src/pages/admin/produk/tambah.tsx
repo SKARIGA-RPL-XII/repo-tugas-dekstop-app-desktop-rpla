@@ -14,9 +14,17 @@ const ProdukTambah = () => {
   });
   /* ====================================================================== */
 
+  const generateProductCode = () => {
+    const lastNumber = Number(localStorage.getItem("lastProductCode") || "0") + 1;
+    localStorage.setItem("lastProductCode", String(lastNumber));
+
+    return `PROD${String(lastNumber).padStart(3, "0")}`;
+  };
+
+
   const [form, setForm] = useState({
     nama: "",
-    kode: "PR001",
+    kode: generateProductCode(), // 🔥 auto generate
     kategori: "",
     status: "",
     harga: "",
@@ -24,6 +32,7 @@ const ProdukTambah = () => {
     deskripsi: "",
     gambar: null as File | null,
   });
+
 
   const handleChange = (
     e: React.ChangeEvent<
