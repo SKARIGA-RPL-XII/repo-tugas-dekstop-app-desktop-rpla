@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { UserServices } from "../../services/userService";
 import type { User, GetUsersParams } from "../../types/user";
@@ -6,6 +6,7 @@ import type { User, GetUsersParams } from "../../types/user";
 export const useUsers = (initialFilters?: GetUsersParams) => {
   const queryClient = useQueryClient();
 
+  /* ================== FILTER ================== */
   const [filters, setFilters] = useState<GetUsersParams>({
     page: 1,
     limit: 10,
@@ -13,6 +14,7 @@ export const useUsers = (initialFilters?: GetUsersParams) => {
     ...initialFilters,
   });
 
+  /* ================== SORT ================== */
   const [sortBy, setSortBy] = useState<keyof User>("created_at");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
@@ -25,30 +27,20 @@ export const useUsers = (initialFilters?: GetUsersParams) => {
     }
   };
 
-  // 🔥 TOKEN REACTIVE
-  const [token, setToken] = useState<string | null>(null);
-
-  useEffect(() => {
-    const t =
-      localStorage.getItem("token") ||
-      localStorage.getItem("access_token");
-    setToken(t);
-  }, []);
-
+  /* ================== QUERY ================== */
   const usersQuery = useQuery({
-    queryKey: ["users", filters, sortBy, sortOrder, token],
+    queryKey: ["users", filters, sortBy, sortOrder],
     queryFn: () =>
       UserServices.getUsers({
         ...filters,
         sortBy,
         sortOrder,
       }),
-    enabled: !!token,              // 🔥 AUTO RUN
     keepPreviousData: true,
     staleTime: 1000 * 60 * 5,
-    refetchOnWindowFocus: false,
   });
 
+  /* ================== MUTATION ================== */
   const createUser = useMutation({
     mutationFn: (payload: Partial<User>) =>
       UserServices.createUser(payload),
@@ -57,8 +49,13 @@ export const useUsers = (initialFilters?: GetUsersParams) => {
   });
 
   const updateUser = useMutation({
-    mutationFn: ({ id, payload }: { id: string; payload: Partial<User> }) =>
-      UserServices.updateUser(id, payload),
+    mutationFn: ({
+      id,
+      payload,
+    }: {
+      id: string;
+      payload: Partial<User>;
+    }) => UserServices.updateUser(id, payload),
     onSuccess: () =>
       queryClient.invalidateQueries({ queryKey: ["users"] }),
   });
@@ -69,6 +66,7 @@ export const useUsers = (initialFilters?: GetUsersParams) => {
       queryClient.invalidateQueries({ queryKey: ["users"] }),
   });
 
+  /* ================== STATE ================== */
   const loading =
     usersQuery.isLoading ||
     createUser.isLoading ||
@@ -76,30 +74,37 @@ export const useUsers = (initialFilters?: GetUsersParams) => {
     deleteUser.isLoading;
 
   const data = usersQuery.data?.data ?? [];
-  const meta = usersQuery.data?.meta ?? { page: 1, limit: 10, count: 0 };
+  const meta =
+    usersQuery.data?.meta ?? { page: 1, limit: 10, count: 0 };
 
   const pages = useMemo(
     () => Math.max(1, Math.ceil(meta.count / meta.limit)),
     [meta.count, meta.limit]
   );
 
+  /* ================== RETURN ================== */
   return {
     data,
     meta,
     pages,
+
     filters,
     setFilters,
+
     sortBy,
     sortOrder,
     handleSort,
+
     loading,
     error: usersQuery.error ?? null,
     refetch: usersQuery.refetch,
 
     createUser: createUser.mutateAsync,
     createLoading: createUser.isLoading,
+
     updateUser: updateUser.mutateAsync,
     updateLoading: updateUser.isLoading,
+
     deleteUser: deleteUser.mutateAsync,
     deleteLoading: deleteUser.isLoading,
   };

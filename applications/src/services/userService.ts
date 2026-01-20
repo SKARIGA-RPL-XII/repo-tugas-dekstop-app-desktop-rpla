@@ -19,10 +19,11 @@ export class UserServices {
     };
   }
 
-  static async getUserById(id: string): Promise<User> {
-    const response = await ApiClient.get(`/users/${id}`);
-    return response.data.data;
+  static async getUserById(id: string) {
+    const res = await ApiClient.get(`/user/${id}`);
+    return res.data.data;
   }
+
 
   static async createUser(payload: Partial<User>): Promise<User> {
     const response = await ApiClient.post("/users", payload);

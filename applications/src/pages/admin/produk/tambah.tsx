@@ -24,7 +24,7 @@ const ProdukTambah = () => {
 
   const [form, setForm] = useState({
     nama: "",
-    kode: generateProductCode(), // 🔥 auto generate
+    kode: generateProductCode(),
     kategori: "",
     status: "",
     harga: "",
