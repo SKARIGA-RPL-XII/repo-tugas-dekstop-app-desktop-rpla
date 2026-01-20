@@ -12,6 +12,10 @@ import Forbidden from "../pages/errors/Forbidden";
 import { ProfilePage } from "../pages/auth/profile";
 import Pengguna from "../pages/admin/pengguna";
 import Produk from "../pages/admin/produk";
+import ProdukTambah from "../pages/admin/produk/tambah";
+import ProdukEdit from "../pages/admin/produk/edit";
+import ProdukDetail from "../pages/admin/produk/detail";
+
 const router = createBrowserRouter([
   {
     element: <App />,
@@ -26,12 +30,21 @@ const router = createBrowserRouter([
         children: [
           { index: true, element: <Dashboard /> },
           { path: "dashboard", element: <Dashboard /> },
+
           { path: "kategori", element: <Category /> },
           { path: "pengguna", element: <Pengguna /> },
-          { path: "Produk", element: <Produk /> },
+
+          // ================== PRODUK ==================
+          { path: "produk", element: <Produk /> },
+          { path: "produk/tambah", element: <ProdukTambah /> },
+          { path: "produk/:id/detail", element: <ProdukDetail /> },
+          { path: "produk/:id/edit", element: <ProdukEdit /> },
+
+
           { path: "profil-saya", element: <ProfilePage /> },
         ],
       },
+
       {
         path: "/cashier",
         element: (
@@ -45,6 +58,7 @@ const router = createBrowserRouter([
           { path: "profil-saya", element: <ProfilePage /> },
         ],
       },
+
       {
         path: "/login",
         element: (
@@ -61,8 +75,9 @@ const router = createBrowserRouter([
           </ProtectedAuth>
         ),
       },
-      { path: "*", element: <NotFound /> },
+
       { path: "403", element: <Forbidden /> },
+      { path: "*", element: <NotFound /> },
     ],
   },
 ]);

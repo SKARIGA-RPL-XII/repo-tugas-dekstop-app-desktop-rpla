@@ -1,8 +1,18 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { ProductServices } from "../../../services/productService";
+import { useCategories } from "../../../hooks/categories/useCategories";
 
 const ProdukTambah = () => {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+
+  /* ================== KATEGORI (PERUBAHAN SATU-SATUNYA) ================== */
+  const { data: categories, loading: categoryLoading } = useCategories({
+    page: 1,
+    limit: 100,
+  });
+  /* ====================================================================== */
 
   const [form, setForm] = useState({
     nama: "",
@@ -12,38 +22,58 @@ const ProdukTambah = () => {
     harga: "",
     stok: "",
     deskripsi: "",
-    gambar: null,
+    gambar: null as File | null,
   });
 
-  const handleChange = (e) => {
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
+  ) => {
     const { name, value } = e.target;
-    setForm((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setForm((p) => ({ ...p, [name]: value }));
   };
 
-  const handleImageChange = (e) => {
-    setForm((prev) => ({
-      ...prev,
-      gambar: e.target.files[0],
-    }));
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files?.[0]) {
+      setForm((p) => ({ ...p, gambar: e.target.files![0] }));
+    }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("DATA PRODUK:", form);
 
-    // nanti di sini tinggal fetch ke API createProduct
+    try {
+      setLoading(true);
+
+      const payload = new FormData();
+      payload.append("product_name", form.nama);
+      payload.append("product_code", form.kode);
+      payload.append("price", form.harga);
+      payload.append("stock", form.stok);
+      payload.append("category_id", form.kategori);
+      payload.append("description", form.deskripsi);
+      payload.append(
+        "is_active",
+        form.status === "Aktif" ? "true" : "false"
+      );
+
+      if (form.gambar) payload.append("image", form.gambar);
+
+      await ProductServices.createProduct(payload as any);
+      navigate("/admin/produk");
+    } catch (err: any) {
+      alert(err.response?.data?.message || "Gagal menambahkan produk");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-6 font-montserrat">
+    <div className="max-w-7xl mx-auto px-6 py-6">
       {/* HEADER */}
       <div className="mb-6">
-        <h1 className="text-2xl font-semibold text-gray-800">
-          Tambah Produk
-        </h1>
+        <h1 className="text-xl font-semibold text-gray-800">Tambah Produk</h1>
         <p className="text-sm text-gray-400 mt-1">
           Beranda / Daftar Produk /{" "}
           <span className="text-indigo-600">Tambah Produk</span>
@@ -52,165 +82,207 @@ const ProdukTambah = () => {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* INFORMASI PRODUK */}
-        <div className="bg-white rounded-2xl shadow-sm p-6">
-          <h2 className="font-semibold text-gray-800 mb-1">
+        <div className="bg-white rounded-xl border border-gray-100 p-6">
+          <h2 className="text-sm font-semibold text-gray-800 mb-1">
             Informasi Produk
           </h2>
-          <p className="text-sm text-gray-400 mb-6">
+          <p className="text-xs text-gray-400 mb-6">
             Tambahkan informasi mengenai produk yang ingin Anda buat.
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Nama Produk */}
-            <div>
-              <label className="text-sm font-medium text-gray-700">
-                Nama Produk<span className="text-red-500">*</span>
-              </label>
-              <input
-                name="nama"
-                value={form.nama}
-                onChange={handleChange}
-                placeholder="Masukkan nama produk"
-                className="mt-2 w-full h-10 px-4 border border-gray-200 rounded-md text-sm outline-none focus:ring-1 focus:ring-indigo-500"
-              />
-            </div>
+            <Input
+              label="Nama Produk"
+              name="nama"
+              value={form.nama}
+              onChange={handleChange}
+              placeholder="Masukkan nama produk"
+              required
+            />
 
-            {/* Kode Produk */}
-            <div>
-              <label className="text-sm font-medium text-gray-700">
-                Kode Produk<span className="text-red-500">*</span>
-              </label>
-              <input
-                name="kode"
-                value={form.kode}
-                disabled
-                className="mt-2 w-full h-10 px-4 border border-gray-200 rounded-md text-sm bg-gray-100"
-              />
-            </div>
+            <Input
+              label="Kode Produk"
+              name="kode"
+              value={form.kode}
+              disabled
+              required
+            />
 
-            {/* Kategori */}
+            {/* ================== KATEGORI (DINAMIS) ================== */}
             <div>
-              <label className="text-sm font-medium text-gray-700">
+              <Label>
                 Kategori<span className="text-red-500">*</span>
-              </label>
+              </Label>
               <select
                 name="kategori"
                 value={form.kategori}
                 onChange={handleChange}
+                disabled={categoryLoading}
                 className="mt-2 w-full h-10 px-4 border border-gray-200 rounded-md text-sm outline-none focus:ring-1 focus:ring-indigo-500"
+                required
               >
                 <option value="">Pilih kategori produk</option>
-                <option value="Snack">Snack</option>
-                <option value="Minuman">Minuman</option>
+                {categories.map((cat) => (
+                  <option key={cat.id} value={cat.id}>
+                    {cat.category_name}
+                  </option>
+                ))}
               </select>
             </div>
+            {/* ========================================================= */}
 
-            {/* Status */}
-            <div>
-              <label className="text-sm font-medium text-gray-700">
-                Status<span className="text-red-500">*</span>
-              </label>
-              <select
-                name="status"
-                value={form.status}
-                onChange={handleChange}
-                className="mt-2 w-full h-10 px-4 border border-gray-200 rounded-md text-sm outline-none focus:ring-1 focus:ring-indigo-500"
-              >
-                <option value="">Pilih status produk</option>
-                <option value="Aktif">Aktif</option>
-                <option value="Tidak Aktif">Tidak Aktif</option>
-              </select>
-            </div>
-
-            {/* Harga */}
-            <div>
-              <label className="text-sm font-medium text-gray-700">
-                Harga<span className="text-red-500">*</span>
-              </label>
-              <div className="mt-2 flex items-center border border-gray-200 rounded-md">
-                <span className="px-4 text-sm text-gray-500">Rp</span>
-                <input
-                  name="harga"
-                  value={form.harga}
-                  onChange={handleChange}
-                  type="number"
-                  placeholder="0"
-                  className="flex-1 h-10 pr-4 text-sm outline-none"
-                />
-              </div>
-            </div>
-
-            {/* Stok */}
-            <div>
-              <label className="text-sm font-medium text-gray-700">
-                Stok<span className="text-red-500">*</span>
-              </label>
-              <input
-                name="stok"
-                value={form.stok}
-                onChange={handleChange}
-                type="number"
-                placeholder="Masukkan stok produk"
-                className="mt-2 w-full h-10 px-4 border border-gray-200 rounded-md text-sm outline-none focus:ring-1 focus:ring-indigo-500"
-              />
-            </div>
-          </div>
-
-          {/* Deskripsi */}
-          <div className="mt-6">
-            <label className="text-sm font-medium text-gray-700">
-              Masukkan Deskripsi<span className="text-red-500">*</span>
-            </label>
-            <textarea
-              name="deskripsi"
-              value={form.deskripsi}
+            <Select
+              label="Status"
+              name="status"
+              value={form.status}
               onChange={handleChange}
-              placeholder="Masukkan deskripsi produk yang Anda buat"
-              rows={4}
-              className="mt-2 w-full px-4 py-3 border border-gray-200 rounded-md text-sm outline-none focus:ring-1 focus:ring-indigo-500"
+              required
+              options={[
+                { value: "", label: "Pilih status produk" },
+                { value: "Aktif", label: "Aktif" },
+                { value: "Tidak Aktif", label: "Tidak Aktif" },
+              ]}
+            />
+
+            <PriceInput
+              label="Harga"
+              name="harga"
+              value={form.harga}
+              onChange={handleChange}
+              required
+            />
+
+            <Input
+              label="Stok"
+              name="stok"
+              value={form.stok}
+              onChange={handleChange}
+              placeholder="Masukkan stok produk"
+              required
             />
           </div>
+
+          <Textarea
+            label="Masukkan Deskripsi"
+            name="deskripsi"
+            value={form.deskripsi}
+            onChange={handleChange}
+            placeholder="Masukkan deskripsi produk yang Anda buat"
+            required
+          />
         </div>
 
-        {/* GAMBAR PRODUK */}
-        <div className="bg-white rounded-2xl shadow-sm p-6">
-          <h2 className="font-semibold text-gray-800 mb-1">
+        {/* GAMBAR */}
+        <div className="bg-white rounded-xl border border-gray-100 p-6">
+          <h2 className="text-sm font-semibold text-gray-800 mb-1">
             Gambar Produk
           </h2>
-          <p className="text-sm text-gray-400 mb-6">
+          <p className="text-xs text-gray-400 mb-6">
             Tambahkan gambar produk Anda.
           </p>
 
-          <label className="w-32 h-32 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center cursor-pointer text-gray-400 hover:border-indigo-400 hover:text-indigo-500 transition">
+          <label className="w-32 h-32 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center cursor-pointer text-gray-400 hover:border-indigo-400 hover:text-indigo-500 transition">
             <input
               type="file"
+              hidden
               accept="image/*"
               onChange={handleImageChange}
-              className="hidden"
             />
-            <span className="text-sm">Unggah Gambar</span>
+            <span className="text-xs">Unggah Gambar</span>
           </label>
         </div>
 
-        {/* ACTION BUTTON */}
+        {/* ACTION */}
         <div className="flex justify-end gap-3">
           <button
             type="button"
             onClick={() => navigate(-1)}
-            className="px-6 py-2 rounded-md bg-gray-400 text-white text-sm hover:bg-gray-500"
+            className="px-5 py-2 rounded-md bg-gray-400 text-white text-sm"
           >
             Kembali
           </button>
           <button
             type="submit"
-            className="px-6 py-2 rounded-md bg-indigo-600 text-white text-sm hover:bg-indigo-700"
+            disabled={loading}
+            className="px-5 py-2 rounded-md bg-indigo-600 text-white text-sm"
           >
-            Tambah
+            {loading ? "Menyimpan..." : "Tambah"}
           </button>
         </div>
       </form>
     </div>
   );
 };
+
+/* ================= SMALL COMPONENTS ================= */
+
+const Label = ({ children }: any) => (
+  <label className="text-xs font-medium text-gray-700">
+    {children}
+  </label>
+);
+
+const Input = ({ label, required, ...props }: any) => (
+  <div>
+    <Label>
+      {label}
+      {required && <span className="text-red-500">*</span>}
+    </Label>
+    <input
+      {...props}
+      className="mt-2 w-full h-10 px-4 border border-gray-200 rounded-md text-sm outline-none focus:ring-1 focus:ring-indigo-500"
+    />
+  </div>
+);
+
+const Select = ({ label, options, required, ...props }: any) => (
+  <div>
+    <Label>
+      {label}
+      {required && <span className="text-red-500">*</span>}
+    </Label>
+    <select
+      {...props}
+      className="mt-2 w-full h-10 px-4 border border-gray-200 rounded-md text-sm outline-none focus:ring-1 focus:ring-indigo-500"
+    >
+      {options.map((o: any) => (
+        <option key={o.value} value={o.value}>
+          {o.label}
+        </option>
+      ))}
+    </select>
+  </div>
+);
+
+const PriceInput = ({ label, required, ...props }: any) => (
+  <div>
+    <Label>
+      {label}
+      {required && <span className="text-red-500">*</span>}
+    </Label>
+    <div className="mt-2 flex items-center border border-gray-200 rounded-md">
+      <span className="px-4 text-sm text-gray-500">Rp</span>
+      <input
+        {...props}
+        type="number"
+        className="flex-1 h-10 pr-4 text-sm outline-none"
+      />
+    </div>
+  </div>
+);
+
+const Textarea = ({ label, required, ...props }: any) => (
+  <div className="mt-6">
+    <Label>
+      {label}
+      {required && <span className="text-red-500">*</span>}
+    </Label>
+    <textarea
+      {...props}
+      rows={4}
+      className="mt-2 w-full px-4 py-3 border border-gray-200 rounded-md text-sm outline-none focus:ring-1 focus:ring-indigo-500"
+    />
+  </div>
+);
 
 export default ProdukTambah;

@@ -1,281 +1,189 @@
-import { useState, useEffect } from "react";
-import { Trash2, Pencil, Search, Calendar, Eye } from "lucide-react";
-
-import DeleteAlert from "../../../components/Modals/DeleteAlert";
-import Pagination from "../../../components/Pagination";
+import { useEffect } from "react";
+import { Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
+
+import {
+  ContainerHeaderPage,
+  HeaderActions,
+  HeaderTitle,
+} from "../../../components/UI/component-header-page";
+import { Button } from "../../../components/UI/Button";
+import { Card } from "../../../components/UI/Card";
+import { DataTable } from "../../../components/UI/DataTable";
+import {
+  HeaderTableContainer,
+  HeaderTableSearch,
+} from "../../../components/UI/header-table";
+import DeleteAlert from "../../../components/Modals/DeleteAlert";
+import { EmptyNoData, EmptyNoResults } from "../../../components/UI/EmptyState";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogHeader,
+} from "../../../components/UI/AlertDialog";
+import { Input } from "../../../components/UI/Input";
+import { useToast } from "../../../components/UI/ToastContext";
+
+import { useProducts } from "../../../hooks/products/useProducts";
+import { useProductDialog } from "../../../hooks/products/useProductDialog";
+import { getUserColumns } from "../../../columns/userColumns";
+import { getProductColumns } from "../../../columns/productColumns";
+
 const Produk = () => {
-  const [openHapus, setOpenHapus] = useState(false);
-  const [selectedProduk, setSelectedProduk] = useState("");
+  const { addToast } = useToast();
 
-  // search & filter
-  const [search, setSearch] = useState("");
-  const [filterDate, setFilterDate] = useState("");
+  const {
+    openDelete,
+    openDeleteState,
+    closeDelete,
+    selected,
+    setSearch,
+    filters,
+  } = useProductDialog();
 
-  // pagination
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 3;
+
+  const {
+    data,
+    meta,
+    loading,
+    filters: productFilters,
+    setFilters: setProductFilters,
+    createProduct,
+    updateProduct,
+    deleteProduct,
+    refetch,
+  } = useProducts({
+    page: filters.page,
+    limit: filters.limit,
+    search: filters.search,
+  });
+
+  const isLoading = loading;
+
+  const columns = getProductColumns({
+    openDelete,
+    isLoading,
+  });
+
 
   const navigate = useNavigate();
 
 
-  // DATA
-  const dataProduk = [
-    {
-      id: 1,
-      nama: "Snack Piattos",
-      kode: "PR001",
-      kategori: "Snack",
-      harga: "Rp 10.000",
-      stok: 120,
-      status: "Aktif",
-      tanggal: "2026-12-12",
-    },
-    {
-      id: 2,
-      nama: "Snack Piattos",
-      kode: "PR001",
-      kategori: "Snack",
-      harga: "Rp 10.000",
-      stok: 3,
-      status: "Tidak Aktif",
-      tanggal: "2026-12-12",
-    },
-    {
-      id: 3,
-      nama: "Snack Piattos",
-      kode: "PR001",
-      kategori: "Snack",
-      harga: "Rp 10.000",
-      stok: 0,
-      status: "Aktif",
-      tanggal: "2026-12-12",
-    },
-    {
-      id: 4,
-      nama: "Snack Piattos",
-      kode: "PR001",
-      kategori: "Snack",
-      harga: "Rp 10.000",
-      stok: 120,
-      status: "Tidak Aktif",
-      tanggal: "2026-12-12",
-    },
-    {
-      id: 5,
-      nama: "Snack Piattos",
-      kode: "PR001",
-      kategori: "Snack",
-      harga: "Rp 10.000",
-      stok: 3,
-      status: "Aktif",
-      tanggal: "2026-12-12",
-    },
-    {
-      id: 6,
-      nama: "Snack Piattos",
-      kode: "PR001",
-      kategori: "Snack",
-      harga: "Rp 10.000",
-      stok: 0,
-      status: "Tidak Aktif",
-      tanggal: "2026-12-12",
-    },
-  ];
+  const handleSubmit = async () => {
+    try {
+      if (mode === "create") {
+        await createProduct(form);
+        addToast({
+          title: "Berhasil",
+          description: "Produk berhasil ditambahkan",
+          type: "success",
+        });
+      }
 
-  // FILTERING
-  const filteredData = dataProduk.filter((item) => {
-    const matchSearch = item.nama
-      .toLowerCase()
-      .includes(search.toLowerCase());
+      if (mode === "edit" && selected) {
+        await updateProduct({
+          id: selected.id,
+          payload: form,
+        });
 
-    const matchDate = filterDate
-      ? item.tanggal === filterDate
-      : true;
+        addToast({
+          title: "Berhasil",
+          description: "Produk berhasil diperbarui",
+          type: "success",
+        });
+      }
 
-    return matchSearch && matchDate;
-  });
+      refetch();
+      close();
+    } catch (err: any) {
+      addToast({
+        title: "Gagal",
+        description: err.response?.data?.message || "Terjadi kesalahan",
+        type: "error",
+      });
+    }
+  };
 
-  // PAGINATION LOGIC
-  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+  const handleDelete = async () => {
+    if (!selected?.id) return;
 
-  const paginatedData = filteredData.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+    await deleteProduct(selected.id);
 
-  // reset page saat search / filter berubah
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [search, filterDate]);
+    addToast({
+      title: "Berhasil",
+      description: "Produk berhasil dihapus",
+      type: "success",
+    });
+
+    refetch();
+    closeDelete();
+  };
+
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-6 font-montserrat relative">
+    <div className="max-w-7xl mx-auto px-6 py-6">
+      <ContainerHeaderPage className="mb-5">
+        <HeaderTitle>Daftar Produk</HeaderTitle>
+        <HeaderActions>
+          <Button
+            onClick={() => navigate("/admin/produk/tambah")}
+            className="flex gap-2"
+          >
+            <Plus size={18} /> Tambah Produk
+          </Button>
+        </HeaderActions>
+      </ContainerHeaderPage>
 
-      {/* HEADER */}
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h1 className="text-2xl font-semibold text-gray-800">
-            Daftar Produk
-          </h1>
-          <p className="text-sm text-gray-400 mt-1">
-            Beranda / <span className="text-indigo-600">Daftar Produk</span>
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={() => navigate("/admin/produk/tambah")}
-          className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium"
-        >
-          + Tambah Produk
-        </button>
-      </div>
+      <Card>
+        <HeaderTableContainer>
+          <HeaderTableSearch
+            placeholder="Telusuri produk..."
+            value={filters.search}
+            onChange={(val) => setSearch(val)}
+            onSearch={(val) =>
+              setProductFilters({ ...productFilters, page: 1, search: val })
+            }
+          />
+        </HeaderTableContainer>
 
-      {/* CARD */}
-      <div className="bg-white rounded-2xl shadow-sm p-6">
-
-        {/* SEARCH & FILTER */}
-        <div className="flex items-center gap-4 mb-6">
-
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Telusuri sesuatu..."
-              className="h-10 w-64 pl-9 pr-4 border border-gray-200 rounded-md text-sm focus:ring-1 focus:ring-indigo-500 outline-none"
-            />
-          </div>
-
-          <label className="h-10 flex items-center gap-2 px-4 border border-gray-200 rounded-md text-sm text-gray-500 cursor-pointer hover:bg-gray-50">
-            <Calendar className="w-4 h-4" />
-            Tanggal Dibuat
-            <input
-              type="date"
-              value={filterDate}
-              onChange={(e) => setFilterDate(e.target.value)}
-              className="absolute opacity-0 pointer-events-none"
-            />
-          </label>
-        </div>
-
-        {/* TABLE */}
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="bg-slate-100 text-gray-600">
-                <th className="py-3 px-4 text-left rounded-l-lg">Nama Produk</th>
-                <th className="py-3 px-4 text-left">Kategori</th>
-                <th className="py-3 px-4 text-left">Harga</th>
-                <th className="py-3 px-4 text-left">Stok</th>
-                <th className="py-3 px-4 text-left">Status</th>
-                <th className="py-3 px-4 text-left">Dibuat Tanggal</th>
-                <th className="py-3 px-4 text-center rounded-r-lg">Aksi</th>
-              </tr>
-            </thead>
-
-            <tbody className="divide-y divide-gray-100">
-              {paginatedData.map((item) => (
-                <tr key={item.id} className="hover:bg-gray-50">
-                  <td className="py-3 px-4">
-                    <div className="font-medium text-gray-800">
-                      {item.nama}
-                    </div>
-                    <div className="text-xs text-gray-400">
-                      Kode: {item.kode}
-                    </div>
-                  </td>
-
-                  <td className="py-3 px-4">{item.kategori}</td>
-                  <td className="py-3 px-4">{item.harga}</td>
-
-                  <td className="py-3 px-4 font-medium">
-                    <span
-                      className={
-                        item.stok === 0
-                          ? "text-red-500"
-                          : item.stok <= 5
-                          ? "text-orange-500"
-                          : "text-indigo-600"
-                      }
-                    >
-                      {item.stok}
-                    </span>
-                  </td>
-
-                  <td className="py-3 px-4">
-                    <span
-                      className={`px-3 py-1 rounded-md text-xs font-medium ${
-                        item.status === "Aktif"
-                          ? "bg-emerald-100 text-emerald-600"
-                          : "bg-gray-200 text-gray-500"
-                      }`}
-                    >
-                      {item.status}
-                    </span>
-                  </td>
-
-                  <td className="py-3 px-4">
-                    {new Date(item.tanggal).toLocaleDateString("id-ID", {
-                      day: "2-digit",
-                      month: "long",
-                      year: "numeric",
-                    })}
-                  </td>
-
-                  <td className="py-3 px-4">
-                    <div className="flex justify-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => navigate(`/admin/produk/detail/${item.id}`)}
-                        className="w-8 h-8 rounded-full border border-indigo-400 text-indigo-500 hover:bg-indigo-50"
-                      >
-                        <Eye className="w-4 h-4 mx-auto" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => navigate(`/admin/produk/edit/${item.id}`)}
-                        className="w-8 h-8 rounded-full border border-orange-400 text-orange-500 hover:bg-orange-50"
-                      >
-                        <Pencil className="w-4 h-4 mx-auto" />
-                      </button>
-                      <button
-                        onClick={() => {
-                          setSelectedProduk(item.nama);
-                          setOpenHapus(true);
-                        }}
-                        className="w-8 h-8 rounded-full border border-red-400 text-red-500 hover:bg-red-50"
-                      >
-                        <Trash2 className="w-4 h-4 mx-auto" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* PAGINATION */}
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={setCurrentPage}
+        <DataTable
+          columns={columns}
+          data={data}
+          isLoading={isLoading}
+          loadingSkeletonRows={6}
+          noDataComponent={<EmptyNoData onRefresh={refetch} />}
+          noResultsComponent={<EmptyNoResults onRefresh={refetch} />}
+          page={productFilters.page}
+          pageSize={meta.limit}
+          total={meta.count}
+          onPageChange={(page) =>
+            setProductFilters({ ...productFilters, page })
+          }
         />
-      </div>
-
-      {/* DELETE ALERT */}
+      </Card>
       <DeleteAlert
-        open={openHapus}
-        onCancel={() => setOpenHapus(false)}
-        onConfirm={() => {
-          console.log("Hapus produk:", selectedProduk);
-          setOpenHapus(false);
-        }}
+        open={openDeleteState}
+        onCancel={closeDelete}
+        onConfirm={handleDelete}
       />
     </div>
   );
 };
+
+const InputBlock = ({ label, value, onChange, type = "text" }: any) => (
+  <div>
+    <label className="text-sm font-medium text-gray-700 mb-2 block">
+      {label}
+    </label>
+    <Input
+      className="h-11"
+      type={type}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+    />
+  </div>
+);
 
 export default Produk;

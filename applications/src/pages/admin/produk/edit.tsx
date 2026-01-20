@@ -1,11 +1,17 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { ProductServices } from "../../../services/productService";
+import { useCategories } from "../../../hooks/categories/useCategories";
 
 const ProdukEdit = () => {
   const navigate = useNavigate();
   const { id } = useParams();
+  const [loading, setLoading] = useState(false);
 
-  const [loading, setLoading] = useState(true);
+  const { data: categories, loading: categoryLoading } = useCategories({
+    page: 1,
+    limit: 100,
+  });
 
   const [form, setForm] = useState({
     nama: "",
@@ -15,73 +21,88 @@ const ProdukEdit = () => {
     harga: "",
     stok: "",
     deskripsi: "",
-    gambar: null,
+    gambar: null as File | null,
   });
 
-  const [preview, setPreview] = useState(null);
+  /* ================== FETCH DETAIL ================== */
+useEffect(() => {
+  const fetchProduct = async () => {
+    try {
+      setLoading(true);
 
-  // ================== DUMMY LOAD DATA ==================
-  useEffect(() => {
-    // simulasi ambil data produk
-    setTimeout(() => {
+      const product = await ProductServices.getProductById(id!);
+
       setForm({
-        nama: "Snack Piattos",
-        kode: "PR001",
-        kategori: "Snack",
-        status: "Aktif",
-        harga: 10000,
-        stok: 120,
-        deskripsi: "Snack ringan dengan rasa keju",
+        nama: product.product_name ?? "",
+        kode: product.product_code ?? "",
+        kategori: product.category_id ?? "",
+        status: product.is_active ? "Aktif" : "Tidak Aktif",
+        harga: product.price?.toString() ?? "",
+        stok: product.stock?.toString() ?? "",
+        deskripsi: product.description ?? "",
         gambar: null,
       });
-
-      // gambar lama (dummy)
-      setPreview("https://via.placeholder.com/300x300.png?text=Produk");
-
+    } catch (error) {
+      console.error(error);
+      alert("Gagal memuat data produk");
+    } finally {
       setLoading(false);
-    }, 500);
-  }, [id]);
+    }
+  };
 
-  // ================== HANDLE INPUT ==================
-  const handleChange = (e) => {
+  fetchProduct();
+}, [id]);
+
+  /* ================================================= */
+
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
+  ) => {
     const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    setForm((p) => ({ ...p, [name]: value }));
   };
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    setForm((prev) => ({
-      ...prev,
-      gambar: file,
-    }));
-
-    setPreview(URL.createObjectURL(file));
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files?.[0]) {
+      setForm((p) => ({ ...p, gambar: e.target.files![0] }));
+    }
   };
 
-  // ================== SUBMIT ==================
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("DATA EDIT PRODUK:", form);
-    navigate("/admin/produk");
-  };
 
-  if (loading) {
-    return (
-      <div className="p-10 text-center text-gray-400">
-        Memuat data produk...
-      </div>
-    );
-  }
+    try {
+      setLoading(true);
+
+      const payload = new FormData();
+      payload.append("product_name", form.nama);
+      payload.append("price", form.harga);
+      payload.append("stock", form.stok);
+      payload.append("category_id", form.kategori);
+      payload.append("description", form.deskripsi);
+      payload.append(
+        "is_active",
+        form.status === "Aktif" ? "true" : "false"
+      );
+
+      if (form.gambar) payload.append("image", form.gambar);
+
+      await ProductServices.updateProduct(id!, payload as any);
+      navigate("/admin/produk");
+    } catch (err: any) {
+      alert(err.response?.data?.message || "Gagal mengubah produk");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-6 font-montserrat">
+    <div className="max-w-7xl mx-auto px-6 py-6">
       {/* HEADER */}
       <div className="mb-6">
-        <h1 className="text-2xl font-semibold text-gray-800">
-          Edit Produk
-        </h1>
+        <h1 className="text-xl font-semibold text-gray-800">Edit Produk</h1>
         <p className="text-sm text-gray-400 mt-1">
           Beranda / Daftar Produk /{" "}
           <span className="text-indigo-600">Edit Produk</span>
@@ -90,151 +111,107 @@ const ProdukEdit = () => {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* INFORMASI PRODUK */}
-        <div className="bg-white rounded-2xl shadow-sm p-6">
-          <h2 className="font-semibold text-gray-800 mb-1">
+        <div className="bg-white rounded-xl border border-gray-100 p-6">
+          <h2 className="text-sm font-semibold text-gray-800 mb-1">
             Informasi Produk
           </h2>
-          <p className="text-sm text-gray-400 mb-6">
-            Ubah informasi produk yang dipilih.
+          <p className="text-xs text-gray-400 mb-6">
+            Ubah informasi produk sesuai kebutuhan.
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Nama */}
-            <div>
-              <label className="text-sm font-medium text-gray-700">
-                Nama Produk
-              </label>
-              <input
-                name="nama"
-                value={form.nama}
-                onChange={handleChange}
-                className="mt-2 w-full h-10 px-4 border border-gray-200 rounded-md text-sm"
-              />
-            </div>
+            <Input
+              label="Nama Produk"
+              name="nama"
+              value={form.nama}
+              onChange={handleChange}
+              required
+            />
 
-            {/* Kode */}
-            <div>
-              <label className="text-sm font-medium text-gray-700">
-                Kode Produk
-              </label>
-              <input
-                value={form.kode}
-                disabled
-                className="mt-2 w-full h-10 px-4 border border-gray-200 rounded-md text-sm bg-gray-100"
-              />
-            </div>
+            <Input
+              label="Kode Produk"
+              name="kode"
+              value={form.kode}
+              disabled
+            />
 
-            {/* Kategori */}
             <div>
-              <label className="text-sm font-medium text-gray-700">
-                Kategori
-              </label>
+              <Label>
+                Kategori<span className="text-red-500">*</span>
+              </Label>
               <select
                 name="kategori"
                 value={form.kategori}
                 onChange={handleChange}
-                className="mt-2 w-full h-10 px-4 border border-gray-200 rounded-md text-sm"
+                disabled={categoryLoading}
+                className="mt-2 w-full h-10 px-4 border border-gray-200 rounded-md text-sm outline-none focus:ring-1 focus:ring-indigo-500"
+                required
               >
                 <option value="">Pilih kategori</option>
-                <option value="Snack">Snack</option>
-                <option value="Minuman">Minuman</option>
+                {categories.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.category_name}
+                  </option>
+                ))}
               </select>
             </div>
 
-            {/* Status */}
-            <div>
-              <label className="text-sm font-medium text-gray-700">
-                Status
-              </label>
-              <select
-                name="status"
-                value={form.status}
-                onChange={handleChange}
-                className="mt-2 w-full h-10 px-4 border border-gray-200 rounded-md text-sm"
-              >
-                <option value="Aktif">Aktif</option>
-                <option value="Tidak Aktif">Tidak Aktif</option>
-              </select>
-            </div>
-
-            {/* Harga */}
-            <div>
-              <label className="text-sm font-medium text-gray-700">
-                Harga
-              </label>
-              <input
-                type="number"
-                name="harga"
-                value={form.harga}
-                onChange={handleChange}
-                className="mt-2 w-full h-10 px-4 border border-gray-200 rounded-md text-sm"
-              />
-            </div>
-
-            {/* Stok */}
-            <div>
-              <label className="text-sm font-medium text-gray-700">
-                Stok
-              </label>
-              <input
-                type="number"
-                name="stok"
-                value={form.stok}
-                onChange={handleChange}
-                className="mt-2 w-full h-10 px-4 border border-gray-200 rounded-md text-sm"
-              />
-            </div>
-          </div>
-
-          {/* Deskripsi */}
-          <div className="mt-6">
-            <label className="text-sm font-medium text-gray-700">
-              Deskripsi
-            </label>
-            <textarea
-              name="deskripsi"
-              value={form.deskripsi}
+            <Select
+              label="Status"
+              name="status"
+              value={form.status}
               onChange={handleChange}
-              rows={4}
-              className="mt-2 w-full px-4 py-3 border border-gray-200 rounded-md text-sm"
+              required
+              options={[
+                { value: "Aktif", label: "Aktif" },
+                { value: "Tidak Aktif", label: "Tidak Aktif" },
+              ]}
+            />
+
+            <PriceInput
+              label="Harga"
+              name="harga"
+              value={form.harga}
+              onChange={handleChange}
+              required
+            />
+
+            <Input
+              label="Stok"
+              name="stok"
+              value={form.stok}
+              onChange={handleChange}
+              required
             />
           </div>
+
+          <Textarea
+            label="Deskripsi"
+            name="deskripsi"
+            value={form.deskripsi}
+            onChange={handleChange}
+            required
+          />
         </div>
 
-        {/* GAMBAR PRODUK */}
-        <div className="bg-white rounded-2xl shadow-sm p-6">
-          <h2 className="font-semibold text-gray-800 mb-1">
+        {/* GAMBAR */}
+        <div className="bg-white rounded-xl border border-gray-100 p-6">
+          <h2 className="text-sm font-semibold text-gray-800 mb-1">
             Gambar Produk
           </h2>
-          <p className="text-sm text-gray-400 mb-6">
-            Ubah gambar produk jika diperlukan.
+          <p className="text-xs text-gray-400 mb-6">
+            Unggah gambar baru jika ingin mengganti.
           </p>
 
-          <div className="flex items-center gap-6">
-            {/* PREVIEW */}
-            <div className="w-32 h-32 border rounded-xl overflow-hidden bg-gray-50 flex items-center justify-center">
-              {preview ? (
-                <img
-                  src={preview}
-                  alt="Preview"
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <span className="text-xs text-gray-400">No Image</span>
-              )}
-            </div>
-
-            {/* UPLOAD */}
-            <label className="px-4 py-2 border border-dashed border-gray-300 rounded-md cursor-pointer text-sm text-gray-600 hover:border-indigo-500 hover:text-indigo-600 transition">
-              Ganti Gambar
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleImageChange}
-                className="hidden"
-              />
-            </label>
-          </div>
+          <label className="w-32 h-32 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center cursor-pointer text-gray-400 hover:border-indigo-400 hover:text-indigo-500 transition">
+            <input
+              type="file"
+              hidden
+              accept="image/*"
+              onChange={handleImageChange}
+            />
+            <span className="text-xs">Ganti Gambar</span>
+          </label>
         </div>
 
         {/* ACTION */}
@@ -242,20 +219,89 @@ const ProdukEdit = () => {
           <button
             type="button"
             onClick={() => navigate(-1)}
-            className="px-6 py-2 rounded-md bg-gray-400 text-white text-sm"
+            className="px-5 py-2 rounded-md bg-gray-400 text-white text-sm"
           >
-            Batal
+            Kembali
           </button>
           <button
             type="submit"
-            className="px-6 py-2 rounded-md bg-indigo-600 text-white text-sm"
+            disabled={loading}
+            className="px-5 py-2 rounded-md bg-indigo-600 text-white text-sm"
           >
-            Simpan Perubahan
+            {loading ? "Menyimpan..." : "Simpan Perubahan"}
           </button>
         </div>
       </form>
     </div>
   );
 };
+
+/* ==== SMALL COMPONENTS (SAMA DENGAN TAMBAH) ==== */
+const Label = ({ children }: any) => (
+  <label className="text-xs font-medium text-gray-700">{children}</label>
+);
+
+const Input = ({ label, required, ...props }: any) => (
+  <div>
+    <Label>
+      {label}
+      {required && <span className="text-red-500">*</span>}
+    </Label>
+    <input
+      {...props}
+      className="mt-2 w-full h-10 px-4 border border-gray-200 rounded-md text-sm outline-none focus:ring-1 focus:ring-indigo-500"
+    />
+  </div>
+);
+
+const Select = ({ label, options, required, ...props }: any) => (
+  <div>
+    <Label>
+      {label}
+      {required && <span className="text-red-500">*</span>}
+    </Label>
+    <select
+      {...props}
+      className="mt-2 w-full h-10 px-4 border border-gray-200 rounded-md text-sm outline-none focus:ring-1 focus:ring-indigo-500"
+    >
+      {options.map((o: any) => (
+        <option key={o.value} value={o.value}>
+          {o.label}
+        </option>
+      ))}
+    </select>
+  </div>
+);
+
+const PriceInput = ({ label, required, ...props }: any) => (
+  <div>
+    <Label>
+      {label}
+      {required && <span className="text-red-500">*</span>}
+    </Label>
+    <div className="mt-2 flex items-center border border-gray-200 rounded-md">
+      <span className="px-4 text-sm text-gray-500">Rp</span>
+      <input
+        {...props}
+        type="number"
+        className="flex-1 h-10 pr-4 text-sm outline-none"
+      />
+    </div>
+  </div>
+);
+
+const Textarea = ({ label, required, ...props }: any) => (
+  <div className="mt-6">
+    <Label>
+      {label}
+      {required && <span className="text-red-500">*</span>}
+    </Label>
+    <textarea
+      {...props}
+      rows={4}
+      className="mt-2 w-full px-4 py-3 border border-gray-200 rounded-md text-sm outline-none focus:ring-1 focus:ring-indigo-500"
+    />
+  </div>
+);
 
 export default ProdukEdit;
