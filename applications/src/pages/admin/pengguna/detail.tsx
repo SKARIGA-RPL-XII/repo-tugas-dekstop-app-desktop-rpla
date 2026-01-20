@@ -68,7 +68,7 @@ const DetailPengguna = () => {
       <div className="max-w-6xl flex flex-col lg:flex-row gap-6 mt-4">
 
         {/* ================= LEFT CARD ================= */}
-        <Card className="w-full lg:w-[260px] rounded-3xl shadow-sm p-6 flex flex-col items-center text-center">
+        <Card className="w-full lg:w-[260px] shadow-none rounded-3xl p-6 flex flex-col items-center text-center">
           <img
             src={`https://ui-avatars.com/api/?name=${user.username}&background=6366f1&color=fff`}
             alt={user.username}
@@ -96,7 +96,7 @@ const DetailPengguna = () => {
         </Card>
 
         {/* ================= RIGHT CARD ================= */}
-        <Card className="flex-1 rounded-3xl shadow-sm p-8">
+        <Card className="flex-1 shadow-none rounded-3xl p-8">
           <div className="flex items-center gap-2 mb-6">
             <Info size={16} className="text-indigo-600" />
             <h3 className="text-sm font-semibold text-gray-800">

@@ -50,6 +50,8 @@ const Pengguna = () => {
     closeDelete,
     openDeleteState,
     open,
+    filters,      // ✅ TAMBAH
+    setSearch,
   } = useUserDialog();
 
 
@@ -66,7 +68,11 @@ const Pengguna = () => {
     updateLoading,
     deleteUser,
     deleteLoading,
-  } = useUsers();
+  } = useUsers({
+  page: filters.page,
+  limit: filters.limit,
+  search: filters.search,
+});
 
   useEffect(() => {
     refetch();
@@ -221,6 +227,7 @@ const Pengguna = () => {
           payload.password_confirmation = form.password_confirmation;
         }
 
+        
         await updateUser({
           id: selected.id,
           payload,
@@ -275,6 +282,7 @@ const Pengguna = () => {
       });
     }
   };
+  
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-6">
@@ -294,14 +302,18 @@ const Pengguna = () => {
       <Card>
         <HeaderTableContainer>
           <HeaderTableSearch
-            value={userFilters.search}
-            onChange={(val) =>
-              setUserFilters({ ...userFilters, search: val, page: 1 })
+            value={filters.search}
+            onChange={(val) => setSearch(val)}
+            onSearch={(val) =>
+              setUserFilters({
+                ...userFilters,
+                page: 1,
+                search: val,
+              })
             }
-
-
             placeholder="Cari pengguna..."
           />
+
         </HeaderTableContainer>
 
         <DataTable
@@ -314,8 +326,12 @@ const Pengguna = () => {
           pageSize={meta.limit}
           total={meta.count}
           onPageChange={(newPage) =>
-            setUserFilters({ ...userFilters, page: newPage })
+            setUserFilters((prev) => ({
+              ...prev,
+              page: newPage,
+            }))
           }
+
         />
 
 
