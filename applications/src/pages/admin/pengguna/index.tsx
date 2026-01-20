@@ -1,5 +1,7 @@
 import { Eye, EyeOff, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
 
 import {
   ContainerHeaderPage,
@@ -46,11 +48,10 @@ const Pengguna = () => {
     close,
     openDelete,
     closeDelete,
-    filters,
-    setSearch,
     openDeleteState,
     open,
   } = useUserDialog();
+
 
   const {
     data,
@@ -65,30 +66,44 @@ const Pengguna = () => {
     updateLoading,
     deleteUser,
     deleteLoading,
-  } = useUsers({
-  page: filters.page ?? 1,
-  limit: filters.limit ?? 10,
-  search: filters.search ?? "",
-});
+  } = useUsers();
+
+  useEffect(() => {
+    refetch();
+  }, []);
+
 
 
   const { addToast } = useToast();
 
   const isLoading = loading || createLoading || updateLoading || deleteLoading;
+  const navigate = useNavigate();
+
+  const openDetail = (user: any) => {
+    navigate(`/admin/pengguna/${user.id}/detail`);
+  };
+
+
 
   const columns = getUserColumns({
     openEdit,
     openDelete,
+    openDetail,
     isLoading,
-    openDetail: openEdit,
   });
+
 
   useEffect(() => {
     if (mode === "edit" && selected) {
       setFormField("username", selected.username ?? "");
       setFormField("email", selected.email ?? "");
       setFormField("role", selected.role || "cashier");
-      setFormField("is_blocked", !!selected.is_blocked);
+      setFormField(
+        "is_blocked",
+        selected.is_blocked === true ||
+        selected.is_blocked === 1 ||
+        selected.is_blocked === "1"
+      );
 
       setFormField("password", "");
       setFormField("password_confirmation", "");
@@ -142,7 +157,7 @@ const Pengguna = () => {
           password: form.password,
           password_confirmation: form.password_confirmation,
           role: form.role,
-          is_blocked: form.is_blocked,
+          is_blocked: Boolean(form.is_blocked),
         });
 
         addToast({
@@ -164,7 +179,7 @@ const Pengguna = () => {
           return addToast({
             title: "Tidak ada perubahan",
             description: "Ubah minimal satu data sebelum menyimpan",
-            type: "warning",
+            type: "error",
           });
         }
 
@@ -198,8 +213,8 @@ const Pengguna = () => {
           username: form.username,
           email: form.email,
           role: form.role,
-          is_blocked: form.is_blocked,
-        };
+          is_blocked: Boolean(form.is_blocked),        
+};
 
         if (form.password) {
           payload.password = form.password;
@@ -261,10 +276,6 @@ const Pengguna = () => {
     }
   };
 
-  // useEffect(() => {
-  //   refetch();
-  // }, []);
-
   return (
     <div className="max-w-7xl mx-auto px-6 py-6">
       <ContainerHeaderPage className="mb-5">
@@ -283,29 +294,31 @@ const Pengguna = () => {
       <Card>
         <HeaderTableContainer>
           <HeaderTableSearch
-            value={filters.search}
-            onChange={(val) => setSearch(val)}
-            onSearch={(val) =>
-              setUserFilters({ ...userFilters, page: 1, search: val })
+            value={userFilters.search}
+            onChange={(val) =>
+              setUserFilters({ ...userFilters, search: val, page: 1 })
             }
+
+
             placeholder="Cari pengguna..."
           />
         </HeaderTableContainer>
 
         <DataTable
           columns={columns}
-          data={data ?? []}
+          data={data}
           isLoading={isLoading}
-          loadingSkeletonRows={5}
           noDataComponent={<EmptyNoData onRefresh={refetch} />}
           noResultsComponent={<EmptyNoResults onRefresh={refetch} />}
-          page={userFilters?.page ?? 1}
-          pageSize={meta?.limit ?? 10}
-          total={meta?.count ?? 0}
+          page={userFilters.page}
+          pageSize={meta.limit}
+          total={meta.count}
           onPageChange={(newPage) =>
             setUserFilters({ ...userFilters, page: newPage })
           }
         />
+
+
       </Card>
 
       <AlertDialog

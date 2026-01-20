@@ -2,7 +2,6 @@ import { useState, useMemo, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { UserServices } from "../../services/userService";
 import type { User, GetUsersParams } from "../../types/user";
-
 export const useUsers = (initialFilters?: GetUsersParams) => {
   const queryClient = useQueryClient();
 
@@ -16,16 +15,6 @@ export const useUsers = (initialFilters?: GetUsersParams) => {
   const [sortBy, setSortBy] = useState<keyof User>("created_at");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
-  const handleSort = (column: keyof User) => {
-    if (sortBy === column) {
-      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
-    } else {
-      setSortBy(column);
-      setSortOrder("asc");
-    }
-  };
-
-  // 🔥 TOKEN REACTIVE
   const [token, setToken] = useState<string | null>(null);
 
   useEffect(() => {
@@ -43,7 +32,7 @@ export const useUsers = (initialFilters?: GetUsersParams) => {
         sortBy,
         sortOrder,
       }),
-    enabled: !!token,              // 🔥 AUTO RUN
+    enabled: !!token,
     keepPreviousData: true,
     staleTime: 1000 * 60 * 5,
     refetchOnWindowFocus: false,
@@ -69,31 +58,12 @@ export const useUsers = (initialFilters?: GetUsersParams) => {
       queryClient.invalidateQueries({ queryKey: ["users"] }),
   });
 
-  const loading =
-    usersQuery.isLoading ||
-    createUser.isLoading ||
-    updateUser.isLoading ||
-    deleteUser.isLoading;
-
-  const data = usersQuery.data?.data ?? [];
-  const meta = usersQuery.data?.meta ?? { page: 1, limit: 10, count: 0 };
-
-  const pages = useMemo(
-    () => Math.max(1, Math.ceil(meta.count / meta.limit)),
-    [meta.count, meta.limit]
-  );
-
   return {
-    data,
-    meta,
-    pages,
+    data: usersQuery.data?.data ?? [],
+    meta: usersQuery.data?.meta ?? { page: 1, limit: 10, count: 0 },
     filters,
     setFilters,
-    sortBy,
-    sortOrder,
-    handleSort,
-    loading,
-    error: usersQuery.error ?? null,
+    loading: usersQuery.isLoading,
     refetch: usersQuery.refetch,
 
     createUser: createUser.mutateAsync,

@@ -1,125 +1,169 @@
-import { useNavigate, useParams } from "react-router-dom"
-import { User, Mail, Shield, CalendarDays } from "lucide-react"
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import {
+  User as UserIcon,
+  Mail,
+  Shield,
+  Calendar,
+  Info,
+} from "lucide-react";
+
+import { UserServices } from "../../../services/userService";
+import { formatDate } from "../../../utils/formatDate";
+import {
+  ContainerHeaderPage,
+  HeaderTitle,
+} from "../../../components/UI/component-header-page";
+import { Card } from "../../../components/UI/Card";
+import { Button } from "../../../components/UI/Button";
 
 const DetailPengguna = () => {
-  const navigate = useNavigate()
-  const { id } = useParams()
+  const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
 
-  // dummy data (nanti ganti API)
-  const user = {
-    id,
-    nama: "Albus Dumbledore",
-    email: "albusdumbledore@gmail.com",
-    role: "Admin",
-    tanggal: "1945-01-01",
-    foto: "https://i.pravatar.cc/150?img=12",
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!id) return;
+
+    const fetchUser = async () => {
+      try {
+        const res = await UserServices.getUserById(id);
+        setUser(res?.data ?? res);
+      } catch (err) {
+        console.error(err);
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUser();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64 text-gray-500">
+        Memuat data pengguna...
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="flex justify-center items-center h-64 text-red-500">
+        Data pengguna tidak ditemukan
+      </div>
+    );
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-6 font-montserrat">
-
+    <div className="w-full px-4">
       {/* HEADER */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold text-gray-800">
-          Detail Pengguna
-        </h1>
-        <p className="text-sm text-gray-400 mt-1">
-          Beranda / Daftar Pengguna /{" "}
-          <span className="text-indigo-600">Detail Pengguna</span>
-        </p>
-      </div>
+      <ContainerHeaderPage>
+        <HeaderTitle>Detail Pengguna</HeaderTitle>
+      </ContainerHeaderPage>
 
-      <div className="grid grid-cols-12 gap-6">
+      <div className="max-w-6xl flex flex-col lg:flex-row gap-6 mt-4">
 
-        {/* KIRI */}
-        <div className="col-span-4">
-          <div className="bg-white rounded-xl shadow-sm p-6 text-center">
+        {/* ================= LEFT CARD ================= */}
+        <Card className="w-full lg:w-[260px] rounded-3xl shadow-sm p-6 flex flex-col items-center text-center">
+          <img
+            src={`https://ui-avatars.com/api/?name=${user.username}&background=6366f1&color=fff`}
+            alt={user.username}
+            className="w-24 h-24 rounded-xl border-4 border-white shadow-sm object-cover"
+          />
 
-            <img
-              src={user.foto}
-              alt={user.nama}
-              className="w-24 h-24 rounded-full mx-auto mb-4"
-            />
+          <h2 className="mt-4 text-sm font-semibold text-gray-800">
+            {user.username}
+          </h2>
 
-            <h2 className="text-lg font-semibold text-gray-800">
-              {user.nama}
-            </h2>
-            <p className="text-sm text-gray-500">{user.email}</p>
+          <p className="text-xs text-gray-400 mb-3">
+            {user.email}
+          </p>
 
-            <span className="inline-block mt-3 px-4 py-1 rounded-full bg-indigo-100 text-indigo-600 text-xs font-medium">
-              {user.role}
-            </span>
+          <span className="px-3 py-1 rounded-full bg-indigo-100 text-indigo-600 text-xs font-medium">
+            {user.role}
+          </span>
 
-            <button
-              onClick={() => navigate(-1)}
-              className="mt-6 w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-md text-sm"
-            >
-              ← Kembali
-            </button>
-          </div>
-        </div>
+          <Button
+            onClick={() => navigate(-1)}
+            className="mt-35 w-full h-9 text-sm bg-indigo-600 hover:bg-indigo-700 text-white"
+          >
+            ← Kembali
+          </Button>
+        </Card>
 
-        {/* KANAN */}
-        <div className="col-span-8">
-          <div className="bg-white rounded-xl shadow-sm p-6">
-
-            <h3 className="flex items-center gap-2 text-base font-semibold text-gray-800 mb-6">
-              <span className="text-indigo-600">ⓘ</span> Informasi Dasar
+        {/* ================= RIGHT CARD ================= */}
+        <Card className="flex-1 rounded-3xl shadow-sm p-8">
+          <div className="flex items-center gap-2 mb-6">
+            <Info size={16} className="text-indigo-600" />
+            <h3 className="text-sm font-semibold text-gray-800">
+              Informasi Dasar
             </h3>
-
-            <div className="space-y-5">
-
-              <div className="flex gap-4 items-start">
-                <User className="w-5 h-5 text-indigo-500 mt-1" />
-                <div>
-                  <p className="text-sm text-gray-500">Nama Lengkap</p>
-                  <p className="text-sm font-medium text-gray-800">
-                    {user.nama}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex gap-4 items-start">
-                <Mail className="w-5 h-5 text-indigo-500 mt-1" />
-                <div>
-                  <p className="text-sm text-gray-500">Email</p>
-                  <p className="text-sm font-medium text-gray-800">
-                    {user.email}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex gap-4 items-start">
-                <Shield className="w-5 h-5 text-indigo-500 mt-1" />
-                <div>
-                  <p className="text-sm text-gray-500">Role</p>
-                  <p className="text-sm font-medium text-gray-800">
-                    {user.role}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex gap-4 items-start">
-                <CalendarDays className="w-5 h-5 text-indigo-500 mt-1" />
-                <div>
-                  <p className="text-sm text-gray-500">Bergabung Pada</p>
-                  <p className="text-sm font-medium text-gray-800">
-                    {new Date(user.tanggal).toLocaleDateString("id-ID", {
-                      day: "2-digit",
-                      month: "long",
-                      year: "numeric",
-                    })}
-                  </p>
-                </div>
-              </div>
-
-            </div>
           </div>
-        </div>
 
+          <InfoRow
+            icon={<UserIcon size={14} />}
+            label="Nama Lengkap"
+            value={user.username}
+          />
+
+          <InfoRow
+            icon={<Mail size={14} />}
+            label="Email"
+            value={user.email}
+          />
+
+          <InfoRow
+            icon={<Shield size={14} />}
+            label="Role"
+            value={user.role}
+          />
+
+          <InfoRow
+            icon={<Calendar size={14} />}
+            label="Bergabung Pada"
+            value={formatDate(user.created_at)}
+            noBorder
+          />
+        </Card>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default DetailPengguna
+export default DetailPengguna;
+
+/* ================= HELPER ================= */
+
+const InfoRow = ({
+  icon,
+  label,
+  value,
+  noBorder = false,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  noBorder?: boolean;
+}) => (
+  <div
+    className={`flex items-start gap-4 py-4 ${
+      !noBorder ? "border-b border-gray-100" : ""
+    }`}
+  >
+    <div className="text-indigo-600 mt-1">
+      {icon}
+    </div>
+    <div>
+      <p className="text-xs text-gray-400 mb-1">
+        {label}
+      </p>
+      <p className="text-sm text-gray-600">
+        {value}
+      </p>
+    </div>
+  </div>
+);

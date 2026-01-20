@@ -14,8 +14,10 @@ interface UserColumnsProps {
 export const getUserColumns = ({
   openEdit,
   openDelete,
+  openDetail,
   isLoading,
 }: UserColumnsProps): ColumnDef<User>[] => [
+
   {
     id: "no",
     header: "#",
