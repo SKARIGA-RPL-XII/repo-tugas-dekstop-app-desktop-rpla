@@ -4,6 +4,7 @@ import { Product } from "../types/product";
 import { formatDate } from "../utils/formatDate";
 import { Button } from "../components/UI/Button";
 import { useNavigate } from "react-router-dom";
+import imagesDumy from "../assets/images.png"
 
 export const getProductColumns = ({
   openDelete,
@@ -32,7 +33,7 @@ export const getProductColumns = ({
         return (
           <div className="flex items-center gap-3">
             <img
-              src={product.url_image}
+              src={product.url_image ?? imagesDumy}
               alt={product.product_name}
               className="w-10 h-10 rounded-md object-cover border"
               onError={(e) => {

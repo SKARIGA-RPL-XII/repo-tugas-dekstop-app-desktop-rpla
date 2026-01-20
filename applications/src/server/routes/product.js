@@ -5,8 +5,8 @@ import { upload } from "../middlewares/upload.js";
 
 const router = Router();
 
-router.get("/product/filter", authMiddleware, adminMiddleware, ProductsController.filterProducts);
-router.get("/product", authMiddleware, adminMiddleware, ProductsController.getProducts);
+router.get("/products", authMiddleware, adminMiddleware, ProductsController.filterProducts);
+// router.get("/product", authMiddleware, adminMiddleware, ProductsController.getProducts);
 router.get("/product/:id", authMiddleware, adminMiddleware, ProductsController.getProducts);
 router.post("/product",authMiddleware,adminMiddleware,upload.single("image"), ProductsController.createProduct);
 router.put("/product/:id", authMiddleware, adminMiddleware, ProductsController.updateProduct);
