@@ -1,4 +1,4 @@
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import {
@@ -7,7 +7,6 @@ import {
   HeaderTitle,
 } from "../../../components/UI/component-header-page";
 import { Button } from "../../../components/UI/Button";
-import { Plus } from "lucide-react";
 import { Card } from "../../../components/UI/Card";
 import { DataTable } from "../../../components/UI/DataTable";
 import {
@@ -67,10 +66,11 @@ const Pengguna = () => {
     deleteUser,
     deleteLoading,
   } = useUsers({
-    page: filters.page,
-    limit: filters.limit,
-    search: filters.search,
-  });
+  page: filters.page ?? 1,
+  limit: filters.limit ?? 10,
+  search: filters.search ?? "",
+});
+
 
   const { addToast } = useToast();
 
@@ -294,14 +294,14 @@ const Pengguna = () => {
 
         <DataTable
           columns={columns}
-          data={data}
+          data={data ?? []}
           isLoading={isLoading}
           loadingSkeletonRows={5}
           noDataComponent={<EmptyNoData onRefresh={refetch} />}
           noResultsComponent={<EmptyNoResults onRefresh={refetch} />}
-          page={userFilters.page}
-          pageSize={meta.limit}
-          total={meta.count}
+          page={userFilters?.page ?? 1}
+          pageSize={meta?.limit ?? 10}
+          total={meta?.count ?? 0}
           onPageChange={(newPage) =>
             setUserFilters({ ...userFilters, page: newPage })
           }
@@ -310,9 +310,11 @@ const Pengguna = () => {
 
       <AlertDialog
         open={open}
-        onOpenChange={close}
+        onOpenChange={(v) => !v && close()}
         className="max-w-5xl w-full"
       >
+
+
         <AlertDialogHeader className="bg-gray-100 px-8 py-4 font-semibold">
           {mode === "edit" ? "Edit Pengguna" : "Tambah Pengguna Baru"}
         </AlertDialogHeader>
