@@ -35,7 +35,7 @@ export const getProductColumns = ({
             <img
               src={product.url_image ?? imagesDumy}
               alt={product.product_name}
-              className="w-10 h-10 rounded-md object-cover border"
+              className="w-10 h-10 rounded-md object-cover border border-muted-foreground"
               onError={(e) => {
                 (e.target as HTMLImageElement).src =
                   "https://via.placeholder.com/40";

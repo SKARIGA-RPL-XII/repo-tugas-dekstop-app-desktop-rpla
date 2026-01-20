@@ -68,7 +68,9 @@ export class Users {
 
     if (error) throw new Error(error.message);
 
-    return data;
+    const { password, ...safeData } = data;
+
+    return safeData;
   }
 
   static async findById(db, id) {
@@ -116,7 +118,9 @@ export class Users {
 
     if (error) throw new Error(error.message);
 
-    return data;
+    const { password, ...safeData } = data;
+
+    return safeData;
   }
 
   static async block(db, id) {

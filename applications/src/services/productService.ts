@@ -15,7 +15,7 @@ export class ProductServices {
     const response = await ApiClient.get("/products", { params });
 
     return {
-      data: response.data.data,
+      data: response.data.data.data,
       meta: response.data.meta,
     };
   }
