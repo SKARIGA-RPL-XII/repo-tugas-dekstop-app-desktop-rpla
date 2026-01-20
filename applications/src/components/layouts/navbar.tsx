@@ -47,7 +47,7 @@ const Navbar = () => {
   };
 
   const handleGoToProfile = () => {
-    navigate(" profil-saya");
+    navigate("profil-saya");
     setDropdownOpen(false);
   };
 
