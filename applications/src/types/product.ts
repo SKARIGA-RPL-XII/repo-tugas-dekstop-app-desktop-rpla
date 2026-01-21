@@ -42,5 +42,11 @@ export interface GetProductsParams {
   limit?: number;
 
   category_id?: string;
-  is_active?: boolean;
+  is_active?: string;
+  min_price?: string;
+  max_price?: string;
+  min_stock?: string;
+  max_stock?: string;
+  start_date?: string;
+  end_date?: string;
 }

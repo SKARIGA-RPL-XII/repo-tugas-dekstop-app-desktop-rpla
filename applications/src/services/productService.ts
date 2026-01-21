@@ -3,21 +3,18 @@ import { Category, GetCategoriesParams } from "../types/category";
 import ApiClient from "../utils/apiClient";
 
 export class ProductServices {
-  static async getProducts(
-    params?: GetProductsParams & {
-      sortBy?: string;
-      sortOrder?: "asc" | "desc";
-    }
-  ): Promise<{
-    data: Product[];
-    meta: { page: number; limit: number; count: number };
-  }> {
+  static async getProducts(params?: GetProductsParams) {
     const response = await ApiClient.get("/products", { params });
-      return {
-        data: response.data.data,
-        meta: response.data.meta,
-      };
-  }
+
+    return {
+      data: response.data.data ?? [],
+      meta: response.data.meta ?? {
+        page: params?.page ?? 1,
+        limit: params?.limit ?? 10,
+        count: 0,
+      },
+    };
+  }  
 
   static async getProductById(id: string): Promise<Product> {
     const response = await ApiClient.get(`/product/${id}`);

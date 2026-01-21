@@ -1,6 +1,16 @@
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Plus } from "lucide-react";
+import {
+  Search,
+  Layers,
+  DollarSign,
+  Boxes,
+  CheckCircle,
+  Calendar,
+} from "lucide-react";
+
 import { useNavigate } from "react-router-dom";
+import { useCategories } from "../../../hooks/categories/useCategories";
 
 
 import {
@@ -31,35 +41,44 @@ import { useProductDialog } from "../../../hooks/products/useProductDialog";
 import { getUserColumns } from "../../../columns/userColumns";
 import { getProductColumns } from "../../../columns/productColumns";
 
+
 const Produk = () => {
+  
   const { addToast } = useToast();
 
-  const {
-    openDelete,
-    openDeleteState,
-    closeDelete,
-    selected,
-    setSearch,
-    filters,
-  } = useProductDialog();
+  const [openPrice, setOpenPrice] = useState(false);
+  const [openStock, setOpenStock] = useState(false);
 
-
-  const {
-    data,
-    meta,
-    loading,
-    filters: productFilters,
-    setFilters: setProductFilters,
-    createProduct,
-    updateProduct,
-    deleteProduct,
-    refetch,
-  } = useProducts({
+  /* ================= KATEGORI ================= */
+const {
+  data: categories = [],
+  loading: categoryLoading,
+} = useCategories({
   page: 1,
-  limit: 10,
-  search: "",
-    // search: filters.search,
-  });
+  limit: 100,
+});
+
+
+
+const {
+  openDelete,
+  openDeleteState,
+  closeDelete,
+  selected,
+} = useProductDialog();
+
+const {
+  data,
+  meta,
+  loading,
+  filters,
+  setFilterField,
+  setSearch,
+  setFilters,
+  deleteProduct,
+  refetch,
+} = useProducts();
+
 
   const isLoading = loading;
 
@@ -107,6 +126,17 @@ const Produk = () => {
     }
   };
 
+  const isStockInvalid =
+  filters.min_stock !== "" &&
+  filters.max_stock !== "" &&
+  Number(filters.max_stock) < Number(filters.min_stock);
+
+  const isPriceInvalid =
+  filters.min_price !== "" &&
+  filters.max_price !== "" &&
+  Number(filters.max_price) < Number(filters.min_price);
+
+
   const handleDelete = async () => {
     if (!selected?.id) return;
 
@@ -138,43 +168,217 @@ const Produk = () => {
       </ContainerHeaderPage>
 
       <Card>
-        <HeaderTableContainer>
-          <HeaderTableSearch
-            placeholder="Telusuri produk..."
-            value={productFilters.search}
-            onChange={(val) =>
-              setProductFilters({
-                ...productFilters,
-                search: val,
-              })
-            }
-            onSearch={(val) =>
-              setProductFilters({
-                ...productFilters,
-                page: 1,      // 🔥 reset page
-                search: val,
-              })
-            }
+      <HeaderTableContainer className="flex flex-wrap items-center gap-3 mb-4">
+
+=        <div className="relative">
+          <Search
+            size={16}
+            className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
           />
-        </HeaderTableContainer>
+          <HeaderTableSearch
+            value={filters.search}
+            onChange={setSearch}
+            onSearch={setSearch}
+            placeholder="Telusuri sesuatu..."
+            className="w-72 pl-10 h-10 rounded-full border border-gray-200 text-sm"
+          />
+        </div>
+
+        <div className="flex items-center gap-2 h-10 px-4 border border-gray-200 rounded-full bg-white text-sm text-gray-600">
+          <Layers size={16} className="text-gray-400" />
+          <select
+            disabled={categoryLoading}
+            className="bg-transparent outline-none cursor-pointer"
+            value={filters.category_id}
+            onChange={(e) => setFilterField("category_id", e.target.value)}
+          >
+            <option value="">
+              {categoryLoading ? "Memuat kategori..." : "Kategori"}
+            </option>
+            {categories.map((cat) => (
+              <option key={cat.id} value={cat.id}>
+                {cat.category_name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <button
+          onClick={() => setOpenPrice(true)}
+          className="flex items-center gap-2 h-10 px-4 border border-gray-200 rounded-full text-sm text-gray-600 bg-white hover:bg-gray-50 transition"
+        >
+          <DollarSign size={16} className="text-gray-400" />
+          Range Harga
+        </button>
+
+        <button
+          onClick={() => setOpenStock(true)}
+          className="flex items-center gap-2 h-10 px-4 border border-gray-200 rounded-full text-sm text-gray-600 bg-white hover:bg-gray-50 transition"
+        >
+          <Boxes size={16} className="text-gray-400" />
+          Range Stok
+        </button>
+
+        <div className="flex items-center gap-2 h-10 px-4 border border-gray-200 rounded-full bg-white text-sm text-gray-600">
+          <CheckCircle size={16} className="text-gray-400" />
+          <select
+            className="bg-transparent outline-none cursor-pointer"
+            value={filters.is_active}
+            onChange={(e) => setFilterField("is_active", e.target.value)}
+          >
+            <option value="">Status</option>
+            <option value="true">Aktif</option>
+            <option value="false">Non-Aktif</option>
+          </select>
+        </div>
+
+        <div className="flex items-center gap-2 h-10 px-4 border border-gray-200 rounded-full bg-white text-sm text-gray-600">
+          <Calendar size={16} className="text-gray-400" />
+          <input
+            type="date"
+            className="bg-transparent outline-none cursor-pointer"
+            value={filters.start_date}
+            onChange={(e) => {
+              const date = e.target.value;
+              setFilterField("start_date", date);
+              setFilterField("end_date", date);
+            }}
+          />
+        </div>
+
+      </HeaderTableContainer>
 
         <DataTable
           columns={columns}
           data={data}
-          isLoading={isLoading}
-          loadingSkeletonRows={6}
-          noDataComponent={<EmptyNoData onRefresh={refetch} />}
-          noResultsComponent={<EmptyNoResults onRefresh={refetch} />}
-          page={productFilters.page}       // ✅ current page
-          pageSize={meta.limit}            // ✅ limit per page
-          total={meta.count}               // ✅ total data
+          isLoading={loading}
+          page={filters.page}
+          pageSize={meta.limit}
+          total={meta.count}
           onPageChange={(page) =>
-            setProductFilters({
-              ...productFilters,
-              page,                         // ✅ update page
-            })
+            setFilters((f) => ({ ...f, page }))
           }
         />
+
+        {/* ================= MODAL RANGE HARGA ================= */}
+      <AlertDialog open={openPrice} onOpenChange={setOpenPrice}>
+        <AlertDialogContent className="rounded-xl">
+          <AlertDialogHeader>
+            <h2 className="text-base font-semibold text-gray-800">
+              Range Harga
+            </h2>
+            <p className="text-sm text-gray-500">
+              Tentukan batas harga minimum dan maksimum
+            </p>
+          </AlertDialogHeader>
+
+          <div className="grid grid-cols-2 gap-4 mt-5">
+            <InputBlock
+              label="Minimum"
+              type="number"
+              value={filters.min_price}
+              onChange={(v: string) => setFilterField("min_price", v)}
+            />
+            <InputBlock
+              label="Maksimum"
+              type="number"
+              value={filters.max_price}
+              onChange={(v: string) => setFilterField("max_price", v)}
+            />
+          </div>
+
+          {isPriceInvalid && (
+            <p className="text-sm text-red-500 mt-3">
+              Harga maksimum tidak boleh lebih kecil dari minimum
+            </p>
+          )}
+
+          <AlertDialogFooter className="mt-6 flex justify-end gap-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setFilterField("min_price", "");
+                setFilterField("max_price", "");
+                setOpenPrice(false);
+                refetch();
+              }}
+            >
+              Batal
+            </Button>
+
+            <Button
+              disabled={isPriceInvalid}
+              className={isPriceInvalid ? "opacity-50 cursor-not-allowed" : ""}
+              onClick={() => {
+                setOpenPrice(false);
+                refetch();
+              }}
+            >
+              Terapkan
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* ================= MODAL RANGE STOK ================= */}
+      <AlertDialog open={openStock} onOpenChange={setOpenStock}>
+        <AlertDialogContent className="rounded-xl">
+          <AlertDialogHeader>
+            <h2 className="text-base font-semibold text-gray-800">
+              Range Stok
+            </h2>
+            <p className="text-sm text-gray-500">
+              Tentukan batas minimum dan maksimum stok
+            </p>
+          </AlertDialogHeader>
+
+          <div className="grid grid-cols-2 gap-4 mt-5">
+            <InputBlock
+              label="Minimum"
+              type="number"
+              value={filters.min_stock}
+              onChange={(v: string) => setFilterField("min_stock", v)}
+            />
+            <InputBlock
+              label="Maksimum"
+              type="number"
+              value={filters.max_stock}
+              onChange={(v: string) => setFilterField("max_stock", v)}
+            />
+          </div>
+
+          {isStockInvalid && (
+            <p className="text-sm text-red-500 mt-3">
+              Stok maksimum tidak boleh lebih kecil dari minimum
+            </p>
+          )}
+
+          <AlertDialogFooter className="mt-6 flex justify-end gap-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setFilterField("min_stock", "");
+                setFilterField("max_stock", "");
+                setOpenStock(false);
+                refetch();
+              }}
+            >
+              Batal
+            </Button>
+
+            <Button
+              disabled={isStockInvalid}
+              className={isStockInvalid ? "opacity-50 cursor-not-allowed" : ""}
+              onClick={() => {
+                setOpenStock(false);
+                refetch();
+              }}
+            >
+              Terapkan
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       </Card>
       <DeleteAlert

@@ -62,7 +62,6 @@ const ProdukDetail = () => {
   return (
     <div className="bg-gray-50 min-h-screen px-6 py-6">
       <div className="max-w-7xl mx-auto">
-        {/* HEADER */}
         <div className="mb-6">
           <h1 className="text-xl font-semibold text-gray-800">
             Detail Produk
@@ -73,10 +72,8 @@ const ProdukDetail = () => {
           </p>
         </div>
 
-        {/* CARD */}
         <div className="bg-white rounded-xl p-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* IMAGE */}
             <div className="flex justify-center">
               {produk.url_image ? (
                 <img
@@ -91,7 +88,6 @@ const ProdukDetail = () => {
               )}
             </div>
 
-            {/* INFO */}
             <div className="md:col-span-2">
               <h2 className="text-lg font-semibold text-gray-800">
                 {produk.product_name}
@@ -105,7 +101,6 @@ const ProdukDetail = () => {
 
               <hr className="my-4" />
 
-              {/* DESKRIPSI */}
               <div className="mb-4">
                 <p className="text-sm font-medium text-gray-700 mb-1">
                   Deskripsi Produk:
@@ -115,7 +110,6 @@ const ProdukDetail = () => {
                 </p>
               </div>
 
-              {/* TANGGAL */}
               <div className="mb-4">
                 <p className="text-sm font-medium text-gray-700 mb-1">
                   Tanggal Pembuatan:
@@ -131,7 +125,6 @@ const ProdukDetail = () => {
                 </p>
               </div>
 
-              {/* STATUS */}
               <div>
                 <p className="text-sm font-medium text-gray-700 mb-1">
                   Status Produk:
@@ -147,7 +140,6 @@ const ProdukDetail = () => {
             </div>
           </div>
 
-          {/* FOOTER BUTTON */}
           <div className="flex justify-end mt-6">
             <button
               onClick={() => navigate(-1)}

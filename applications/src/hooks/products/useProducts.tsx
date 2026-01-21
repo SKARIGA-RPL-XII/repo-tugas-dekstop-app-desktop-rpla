@@ -2,43 +2,48 @@ import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { ProductServices } from "../../services/productService";
 import type { Product, GetProductsParams } from "../../types/product";
+import { CategoryServices } from "../../services/categoryService";
 
-export const useProducts = (initialFilters?: GetProductsParams) => {
+
+
+export const useProducts = () => {
   const queryClient = useQueryClient();
+  
 
   const [filters, setFilters] = useState<GetProductsParams>({
     page: 1,
     limit: 10,
     search: "",
-    ...initialFilters,
+    category_id: "",
+    is_active: "",
+    min_price: "",
+    max_price: "",
+    min_stock: "",
+    max_stock: "",
+    start_date: "",
+    end_date: "",
   });
 
-  const [sortBy, setSortBy] = useState<keyof Product>("created_at");
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
-  const handleSort = (column: keyof Product) => {
-    if (sortBy === column) {
-      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
-    } else {
-      setSortBy(column);
-      setSortOrder("asc");
-    }
+  const setFilterField = (key: keyof GetProductsParams, value: any) => {
+    setFilters((prev) => ({
+      ...prev,
+      [key]: value,
+      page: 1, 
+    }));
   };
 
+  const setSearch = (search: string) =>
+    setFilters((prev) => ({ ...prev, search, page: 1 }));
+
   const productsQuery = useQuery({
-    queryKey: ["products", filters, sortBy, sortOrder],
-    queryFn: () =>
-      ProductServices.getProducts({
-        ...filters,
-        sortBy,
-        sortOrder,
-      }),
+    queryKey: ["products", filters],
+    queryFn: () => ProductServices.getProducts(filters),
     keepPreviousData: true,
-    staleTime: 1000 * 60 * 5,
   });
 
   const createProduct = useMutation({
-    mutationFn: (payload: Partial<Product>) =>
+    mutationFn: (payload: FormData) =>
       ProductServices.createProduct(payload),
     onSuccess: () =>
       queryClient.invalidateQueries({ queryKey: ["products"] }),
@@ -50,7 +55,7 @@ export const useProducts = (initialFilters?: GetProductsParams) => {
       payload,
     }: {
       id: string;
-      payload: Partial<Product>;
+      payload: FormData;
     }) => ProductServices.updateProduct(id, payload),
     onSuccess: () =>
       queryClient.invalidateQueries({ queryKey: ["products"] }),
@@ -70,8 +75,8 @@ export const useProducts = (initialFilters?: GetProductsParams) => {
 
   const data = productsQuery.data?.data ?? [];
   const meta = productsQuery.data?.meta ?? {
-    page: 1,
-    limit: 10,
+    page: filters.page ?? 1,
+    limit: filters.limit ?? 10,
     count: 0,
   };
 
@@ -84,20 +89,17 @@ export const useProducts = (initialFilters?: GetProductsParams) => {
     data,
     meta,
     pages,
-    filters,
-    setFilters,
-    sortBy,
-    sortOrder,
-    handleSort,
     loading,
     error: productsQuery.error ?? null,
     refetch: productsQuery.refetch,
 
+    filters,
+    setFilters,
+    setFilterField,
+    setSearch,
+
     createProduct: createProduct.mutateAsync,
-    createLoading: createProduct.isLoading,
     updateProduct: updateProduct.mutateAsync,
-    updateLoading: updateProduct.isLoading,
     deleteProduct: deleteProduct.mutateAsync,
-    deleteLoading: deleteProduct.isLoading,
   };
 };

@@ -107,7 +107,6 @@ export const getProductColumns = ({
 
         return (
           <div className="flex items-center gap-2">
-            {/* DETAIL */}
             <Button
               variant="outline"
               size="sm"
@@ -120,7 +119,6 @@ export const getProductColumns = ({
               <Eye size={15} />
             </Button>
 
-            {/* EDIT */}
             <Button
               variant="outline"
               size="sm"
@@ -133,7 +131,6 @@ export const getProductColumns = ({
               <Pencil size={15} />
             </Button>
 
-            {/* DELETE */}
             <Button
               variant="outline"
               size="sm"

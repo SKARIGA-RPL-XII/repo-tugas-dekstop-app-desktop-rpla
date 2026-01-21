@@ -66,7 +66,7 @@ const ProdukTambah = () => {
     }));
   };
 
-  const MAX_SIZE = 2 * 1024 * 1024; // 2MB
+  const MAX_SIZE = 2 * 1024 * 1024;
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -98,8 +98,8 @@ const ProdukTambah = () => {
 
       const payload = new FormData();
       payload.append("product_name", form.nama);
-      payload.append("price", unformatNumber(form.harga)); // ✅ FIX
-      payload.append("stock", unformatNumber(form.stok)); // ✅ FIX
+      payload.append("price", unformatNumber(form.harga));
+      payload.append("stock", unformatNumber(form.stok));
       payload.append("category_id", form.kategori);
       payload.append("description", form.deskripsi);
       payload.append("is_active", String(form.status));
@@ -273,8 +273,8 @@ const PriceInput = ({ label, required, ...props }: any) => (
       <span className="px-4 text-sm text-gray-500">Rp</span>
       <input
         {...props}
-        type="text"          // ✅ WAJIB
-        inputMode="numeric"  // ✅ mobile-friendly
+        type="text"          
+        inputMode="numeric" 
         className="flex-1 h-10 pr-4 text-sm outline-none"
       />
     </div>

@@ -26,7 +26,27 @@ export function useProductDialog() {
     search: "",
     page: 1,
     limit: 10,
+
+    category_id: "",
+    is_active: "",
+    min_price: "",
+    max_price: "",
+    min_stock: "",
+    max_stock: "",
+    start_date: "",
+    end_date: "",
   });
+
+  const setFilterField = (
+    field: keyof GetProductsParams,
+    value: any
+  ) => {
+    setFilters((prev) => ({
+      ...prev,
+      [field]: value,
+      page: 1,
+    }));
+  };
 
   const openCreate = () => {
     setSelected(null);
@@ -120,5 +140,6 @@ export function useProductDialog() {
     setFilters,
     setSearch,
     submit,
+    setFilterField,
   };
 }
