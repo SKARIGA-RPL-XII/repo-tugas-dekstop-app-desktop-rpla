@@ -1,11 +1,59 @@
 import { useState } from "react";
-import { ArrowUpFromLine } from "lucide-react";
+import { ArrowUpFromLine, Calendar } from "lucide-react";
+import { useAuth } from "../../../context/AuthContext";
 import Chart from "react-apexcharts";
 import { ApexOptions } from "apexcharts";
+import kasirLogo from "../../../assets/kasir-logo.svg";
 
 const DashboardKasir = () => {
+  const { user } = useAuth();
+  const displayName = user?.username || user?.email || "User";
+  const [openDate, setOpenDate] = useState(false);
+  const [startDate, setStartDate] = useState("2025-12-01");
+  const [endDate, setEndDate] = useState("2025-12-31");
+
   /* ================= CARD ATAS ================= */
   const cards = [
+    {
+      label: "Pendapatan Mingguan",
+      value: "Rp 1.500.000",
+      bg: "bg-white",
+      text: "text-green-600",
+      percent: "4%",
+      percentBg: "#E0F9F2",
+      percentText: "#009966",
+      description: "Meningkat dari minggu sebelumnya",
+      svg: (
+        <img src={kasirLogo} alt="Kasir Logo" className="w-[80px] h-[80px]" />
+      ),
+      fullWidth: true,
+    },
+    {
+      label: "Pelanggan",
+      value: "12k",
+      bg: "bg-[#FFFFFF]",
+      text: "text-[#F59200]",
+      percent: "6%",
+      percentBg: "#E0F9F2",
+      percentText: "#009966",
+      svg: (
+        <svg
+          width="50"
+          height="50"
+          viewBox="0 0 50 50"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <rect width="50" height="50" rx="10" fill="#FBF1E5" />
+          <path
+            d="M14.5 33.1667V32C14.5 30.7623 14.9917 29.5753 15.8668 28.7002C16.742 27.825 17.929 27.3333 19.1667 27.3333H23.8333C25.071 27.3333 26.258 27.825 27.1332 28.7002C28.0083 29.5753 28.5 30.7623 28.5 32V33.1667M35.5 33.1667V32C35.5 30.7623 35.0083 29.5753 34.1332 28.7002C33.258 27.825 32.071 27.3333 30.8333 27.3333M27.9167 17.0317C28.4445 16.8457 29.0092 16.789 29.5634 16.8663C30.1177 16.9437 30.6453 17.1528 31.102 17.4761C31.5588 17.7994 31.9314 18.2276 32.1885 18.7246C32.4456 19.2217 32.5798 19.7731 32.5798 20.3327C32.5798 20.8924 32.4456 21.4438 32.1885 21.9409C31.9314 22.4379 31.5588 22.8661 31.102 23.1894C30.6453 23.5127 30.1177 23.7218 29.5634 23.7992C29.0092 23.8765 28.4445 23.8198 27.9167 23.6338M25 20.3333C25 21.2616 24.6313 22.1518 23.9749 22.8082C23.3185 23.4646 22.4283 23.8333 21.5 23.8333C20.5717 23.8333 19.6815 23.4646 19.0251 22.8082C18.3687 22.1518 18 21.2616 18 20.3333C18 19.4051 18.3687 18.5148 19.0251 17.8585C19.6815 17.2021 20.5717 16.8333 21.5 16.8333C22.4283 16.8333 23.3185 17.2021 23.9749 17.8585C24.6313 18.5148 25 19.4051 25 20.3333Z"
+            stroke="#F59200"
+            strokeWidth="2"
+            strokeLinecap="round"
+          />
+        </svg>
+      ),
+    },
     {
       label: "Penjualan",
       value: "6,5k",
@@ -34,58 +82,41 @@ const DashboardKasir = () => {
         </svg>
       ),
     },
-    {
-      label: "Pelanggan",
-      value: "12k",
-      bg: "bg-[#FFFFFF]",
-      text: "text-[#F59200]",
-      percent: "6%",
-      percentBg: "#E0F9F2",
-      percentText: "#009966",
-      svg: (
-        <svg
-          width="50"
-          height="50"
-          viewBox="0 0 50 50"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <rect width="50" height="50" rx="10" fill="#FBF1E5" />
-          <path
-            d="M14.5 33.1667V32C14.5 30.7623 14.9917 29.5753 15.8668 28.7002C16.742 27.825 17.929 27.3333 19.1667 27.3333H23.8333C25.071 27.3333 26.258 27.825 27.1332 28.7002C28.0083 29.5753 28.5 30.7623 28.5 32V33.1667M35.5 33.1667V32C35.5 30.7623 35.0083 29.5753 34.1332 28.7002C33.258 27.825 32.071 27.3333 30.8333 27.3333M27.9167 17.0317C28.4445 16.8457 29.0092 16.789 29.5634 16.8663C30.1177 16.9437 30.6453 17.1528 31.102 17.4761C31.5588 17.7994 31.9314 18.2276 32.1885 18.7246C32.4456 19.2217 32.5798 19.7731 32.5798 20.3327C32.5798 20.8924 32.4456 21.4438 32.1885 21.9409C31.9314 22.4379 31.5588 22.8661 31.102 23.1894C30.6453 23.5127 30.1177 23.7218 29.5634 23.7992C29.0092 23.8765 28.4445 23.8198 27.9167 23.6338M25 20.3333C25 21.2616 24.6313 22.1518 23.9749 22.8082C23.3185 23.4646 22.4283 23.8333 21.5 23.8333C20.5717 23.8333 19.6815 23.4646 19.0251 22.8082C18.3687 22.1518 18 21.2616 18 20.3333C18 19.4051 18.3687 18.5148 19.0251 17.8585C19.6815 17.2021 20.5717 16.8333 21.5 16.8333C22.4283 16.8333 23.3185 17.2021 23.9749 17.8585C24.6313 18.5148 25 19.4051 25 20.3333Z"
-            stroke="#F59200"
-            strokeWidth="2"
-            strokeLinecap="round"
-          />
-        </svg>
-      ),
-    },
   ];
 
   /* ================= CHART ================= */
 
-const [chartOptions] = useState<ApexOptions>({
-  chart: {
-    type: "bar",
-    height: 248,
-  },
-  plotOptions: {
-    bar: {
-      horizontal: false,
-      columnWidth: "55%",
-      borderRadius: 5,
-      borderRadiusApplication: "end",
+  const [chartOptions] = useState<ApexOptions>({
+    chart: {
+      type: "bar",
+      height: 248,
     },
-  },
-  dataLabels: { enabled: false },
-  stroke: { show: true, width: 2, colors: ["transparent"] },
-  xaxis: {
-    categories: ["Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct"],
-  },
-  fill: { opacity: 1 },
-  colors: ["#5565FF", "#00E096"],
-});
-
+    plotOptions: {
+      bar: {
+        horizontal: false,
+        columnWidth: "55%",
+        borderRadius: 5,
+        borderRadiusApplication: "end",
+      },
+    },
+    dataLabels: { enabled: false },
+    stroke: { show: true, width: 2, colors: ["transparent"] },
+    xaxis: {
+      categories: [
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+      ],
+    },
+    fill: { opacity: 1 },
+    colors: ["#5565FF", "#00E096"],
+  });
 
   const [series] = useState([
     { name: "Tertinggi", data: [44, 55, 57, 56, 61, 58, 63, 60, 66] },
@@ -94,15 +125,145 @@ const [chartOptions] = useState<ApexOptions>({
 
   return (
     <div className="w-full h-full flex flex-col gap-5 ">
+      {/* ================= GREETING CARD ================= */}
+      <div className="bg-white rounded-[15px] p-5 flex items-center justify-between">
+        {/* KIRI */}
+        <div className="flex items-center gap-2">
+          {/* SVG Tangan Melambai */}
+          <svg
+            width="48"
+            height="48"
+            viewBox="0 0 48 48"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            {/* Hand */}
+            <path
+              d="M19 22V14C19 12.8954 19.8954 12 21 12C22.1046 12 23 12.8954 23 14V22"
+              stroke="#5565FF"
+              strokeWidth="2"
+              strokeLinecap="round"
+            />
+            <path
+              d="M23 22V13C23 11.8954 23.8954 11 25 11C26.1046 11 27 11.8954 27 13V22"
+              stroke="#5565FF"
+              strokeWidth="2"
+              strokeLinecap="round"
+            />
+            <path
+              d="M27 22V15C27 13.8954 27.8954 13 29 13C30.1046 13 31 13.8954 31 15V23"
+              stroke="#5565FF"
+              strokeWidth="2"
+              strokeLinecap="round"
+            />
+            <path
+              d="M19 22C18 22 17 22.8 17 24.5C17 29 20 32 25 32C30 32 32 29 32 26V24"
+              stroke="#5565FF"
+              strokeWidth="2"
+              strokeLinecap="round"
+            />
+
+            {/* Wave */}
+            <path
+              d="M34 14C35.5 15.5 35.5 18.5 34 20"
+              stroke="#5565FF"
+              strokeWidth="2"
+              strokeLinecap="round"
+            />
+          </svg>
+
+          {/* Text */}
+          <div className="flex items-center gap-1">
+            <p className="text-[13px] font-semibold text-[#314158]">
+              Hi {displayName},
+            </p>
+            <p className="text-[13px] text-[#314158]">
+              berikut data toko Anda pada hari ini
+            </p>
+          </div>
+        </div>
+
+        {/* KANAN */}
+        <div
+          className="relative flex items-center gap-3 cursor-pointer"
+          onClick={() => setOpenDate(!openDate)}
+        >
+          {/* Kalender */}
+          <div className="w-10 h-10 flex justify-center items-center bg-[#E6F0F7] rounded-sm">
+          <Calendar className="w-12 h-12 p-2 text-[#5565FF]" />
+          </div>
+
+          {/* Filter Text */}
+          <div>
+            <p className="text-[12px] font-semibold text-[#314158]">
+              Filter Periode
+            </p>
+            <p className="text-[12px] text-[#8B8B8B]">
+              {startDate} – {endDate}
+            </p>
+          </div>
+
+          {/* Dropdown */}
+          <div className="w-6 h-6 rounded-full bg-[#EEF2FF] flex items-center justify-center">
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M6 9L12 15L18 9"
+                stroke="#5565FF"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </div>
+          {openDate && (
+          <div className="absolute right-0 top-full mt-6 bg-white border border-[#EBF1F6] rounded-[12px] p-5 z-20">
+            <div className="flex gap-3">
+              <div className="flex flex-col gap-1">
+                <label className="text-[11px] text-[#314158] font-semibold">
+                  Tanggal Awal
+                </label>
+                <input
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  className="border rounded-md px-2 py-1 text-[12px]"
+                />
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="text-[11px] text-[#314158] font-semibold">
+                  Tanggal Akhir
+                </label>
+                <input
+                  type="date"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  className="border rounded-md px-2 py-1 text-[12px]"
+                />
+              </div>
+            </div>
+          </div>
+        )}
+        </div>
+      </div>
+
       {/* ================= CARD ATAS ================= */}
-      <div className="flex flex-col md:flex-row gap-4 md:gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         {cards.map((card) => (
           <div
             key={card.label}
-            className={`w-full md:w-1/4 rounded-[15px] p-5 flex items-center justify-between ${card.bg}`}
+            className={`rounded-[15px] p-5 flex items-center justify-between ${
+              card.bg
+            } ${card.fullWidth ? "md:col-span-2" : "md:col-span-1"}`}
           >
             {/* KIRI: Text */}
-            <div>
+            <div className="flex-1">
               <p className="text-[13px] font-semibold text-[#314158]">
                 {card.label}
               </p>
@@ -111,7 +272,6 @@ const [chartOptions] = useState<ApexOptions>({
                 {card.value}
               </p>
 
-              {/* Percent */}
               <div className="flex items-center gap-2 mt-1">
                 <div
                   className="w-[20px] h-[20px] rounded-full flex items-center justify-center"
@@ -119,17 +279,24 @@ const [chartOptions] = useState<ApexOptions>({
                 >
                   <ArrowUpFromLine className="w-3 h-3 text-[#009966]" />
                 </div>
-                <span
-                  className="text-[13px] font-medium"
-                  style={{ color: card.percentText }}
-                >
-                  {card.percent}
-                </span>
+                <div className="flex gap-2">
+                  <span
+                    className="text-[13px] font-medium"
+                    style={{ color: card.percentText }}
+                  >
+                    {card.percent}
+                  </span>
+                  {card.description && (
+                    <span className="text-[13px] text-gray-500">
+                      {card.description}
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
 
             {/* KANAN: Icon */}
-            <div className="ml-4">{card.svg}</div>
+            <div>{card.svg}</div>
           </div>
         ))}
       </div>

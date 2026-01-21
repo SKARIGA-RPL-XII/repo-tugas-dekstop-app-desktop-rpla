@@ -3,36 +3,45 @@ import { AuthContextType, LoginPayload, User } from "../types/Auth";
 import ApiClient from "../utils/apiClient";
 import { AuthService } from "../services/authService";
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+export type AuthContextFull = AuthContextType & { setUser: (user: User) => void };
+
+const AuthContext = createContext<AuthContextFull | undefined>(undefined);
 
 const TOKEN_KEY = "auth_token";
 const USER_KEY = "auth_user";
+
+export async function initAuth() {
+  const savedToken = localStorage.getItem(TOKEN_KEY);
+  const savedUser = localStorage.getItem(USER_KEY);
+
+  if (savedToken && savedUser) {
+    ApiClient.defaults.headers.common["Authorization"] = `Bearer ${savedToken}`;
+    return { token: savedToken, user: JSON.parse(savedUser) as User };
+  }
+
+  return null;
+}
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const savedToken = localStorage.getItem(TOKEN_KEY);
-    const savedUser = localStorage.getItem(USER_KEY);
-
-    if (savedToken && savedUser) {
-      setToken(savedToken);
-      setUser(JSON.parse(savedUser));
-
-      ApiClient.defaults.headers.common[
-        "Authorization"
-      ] = `Bearer ${savedToken}`;
-    }
+    initAuth().then((data) => {
+      if (data) {
+        setToken(data.token);
+        setUser(data.user);
+      }
+      setLoading(false);
+    });
   }, []);
 
   const login = async (payload: LoginPayload, remember: boolean) => {
     try {
       setLoading(true);
-
       const { token, user } = await AuthService.login(payload);
 
       setToken(token);
@@ -52,21 +61,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const logout = async () => {
     try {
       setLoading(true);
-
-      if (token) {
-        await AuthService.logout(token);
-      }
+      if (token) await AuthService.logout(token);
     } catch (err) {
-      console.log(err);
+      console.error("Logout failed", err);
     } finally {
       setUser(null);
       setToken(null);
 
       localStorage.removeItem(TOKEN_KEY);
       localStorage.removeItem(USER_KEY);
+      sessionStorage.removeItem("splashPlayed");
 
       delete ApiClient.defaults.headers.common["Authorization"];
-
       setLoading(false);
     }
   };
@@ -80,6 +86,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         loading,
         login,
         logout,
+        setUser,
       }}
     >
       {children}
@@ -88,7 +95,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 };
 
 export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) throw new Error("useAuth must be used inside AuthProvider");
-  return context;
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error("useAuth must be used inside AuthProvider");
+  return ctx;
 };

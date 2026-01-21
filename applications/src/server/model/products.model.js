@@ -3,6 +3,19 @@ import bcrypt from "bcryptjs";
 export class Products {
     static tableName = "products";
 
+    static async getLastProductCode(db) {
+        const { data, error } = await db
+            .from(this.tableName)
+            .select("product_code")
+            .order("created_at", { ascending: false })
+            .limit(1)
+            .single();
+
+        if (error) return null; 
+        return data.product_code;
+    }
+
+
     static async getAll(db) {
         const { data, error } = await db.from(this.tableName).select("*");
 
@@ -26,7 +39,7 @@ export class Products {
     static async findById(db, id) {
         const { data, error } = await db
             .from(this.tableName)
-            .select("id, product_name, price, description, url_image, created_at")
+            .select("id, product_name, price, description, url_image, created_at, stock, category_id, product_code")
             .eq("id", id)
             .single();
         if (error) throw new Error("Product not found");
@@ -37,19 +50,6 @@ export class Products {
         const { data, error } = await db
             .from(this.tableName)
             .update(payload)
-            .eq("id", id)
-            .select()
-            .single();
-
-        if (error) throw new Error(error.message);
-
-        return data;
-    }
-
-    static async block(db, id) {
-        const { data, error } = await db
-            .from(this.tableName)
-            .update({ is_blocked: true })
             .eq("id", id)
             .select()
             .single();
