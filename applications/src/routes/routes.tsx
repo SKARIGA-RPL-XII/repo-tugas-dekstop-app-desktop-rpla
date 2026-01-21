@@ -18,6 +18,8 @@ import Produk from "../pages/admin/produk";
 import ProdukTambah from "../pages/admin/produk/tambah";
 import ProdukEdit from "../pages/admin/produk/edit";
 import ProdukDetail from "../pages/admin/produk/detail";
+import Riwayat from "../pages/kasir/riwayat";
+import RiwayatDetail from "../pages/kasir/riwayat/detail";
 
 const router = createBrowserRouter([
   {
@@ -57,6 +59,8 @@ const router = createBrowserRouter([
           { index: true, element: <DashboardKasir /> },
           { path: "dashboard", element: <DashboardKasir /> },
           { path: "kasir", element: <Kasir /> },
+          { path: "riwayat-penjualan", element: <Riwayat /> },
+          { path: "riwayat-penjualan/detail", element: <RiwayatDetail /> },
           { path: "profil-saya", element: <ProfilePage /> },
         ],
       },

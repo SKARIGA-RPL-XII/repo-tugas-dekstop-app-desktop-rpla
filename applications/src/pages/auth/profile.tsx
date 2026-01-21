@@ -123,7 +123,7 @@ export const ProfilePage = () => {
           </div>
 
           <div className="flex justify-end mt-6">
-            <Button onClick={profile.openEdit}>Ubah Informasi Saya</Button>
+            <Button onClick={profile.openEdit} className="bg-primary">Ubah Informasi Saya</Button>
           </div>
         </Card>
       </div>
