@@ -17,11 +17,12 @@ const ProdukTambah = () => {
   const [form, setForm] = useState({
     nama: "",
     kategori: "",
-    status: "Aktif",
+    status: true, // ✅ BOOLEAN
     harga: "",
     stok: "",
     deskripsi: "",
     gambar: null as File | null,
+    imageUrl: "",
   });
 
   /* ================== HANDLERS ================== */
@@ -33,24 +34,33 @@ const ProdukTambah = () => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
+
+  const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setForm((prev) => ({
+      ...prev,
+      status: e.target.value === "true",
+    }));
+  };
+
   const MAX_SIZE = 2 * 1024 * 1024; // 2MB
-const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  const file = e.target.files?.[0];
-  if (!file) return;
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-  if (file.size > MAX_SIZE) {
-    alert("Ukuran gambar maksimal 2MB");
-    e.target.value = "";
-    return;
-  }
+    if (file.size > MAX_SIZE) {
+      alert("Ukuran gambar maksimal 2MB");
+      e.target.value = "";
+      return;
+    }
 
-  setForm((prev) => ({
-    ...prev,
-    gambar: file,
-    imageUrl: URL.createObjectURL(file),
-  }));
-};
+    setForm((prev) => ({
+      ...prev,
+      gambar: file,
+      imageUrl: URL.createObjectURL(file),
+    }));
+  };
 
+  /* ================== SUBMIT ================== */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -68,18 +78,8 @@ const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       payload.append("stock", String(Number(form.stok)));
       payload.append("category_id", form.kategori);
       payload.append("description", form.deskripsi);
-      payload.append(
-        "is_active",
-        form.status === "Aktif" ? "true" : "false"
-      );
-
-      // 🔥 FIELD IMAGE YANG BENAR
-      payload.append("image", form.gambar);
-
-      // DEBUG (boleh dihapus nanti)
-      for (const p of payload.entries()) {
-        console.log(p[0], p[1]);
-      }
+      payload.append("is_active", String(form.status)); // ✅ true / false
+      payload.append("image", form.gambar); // ✅ WAJIB
 
       await ProductServices.createProduct(payload);
       navigate("/admin/produk");
@@ -93,7 +93,6 @@ const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
   /* ================== RENDER ================== */
   return (
     <div className="max-w-7xl mx-auto px-6 py-6">
-      {/* HEADER */}
       <div className="mb-6">
         <h1 className="text-xl font-semibold text-gray-800">Tambah Produk</h1>
         <p className="text-sm text-gray-400 mt-1">
@@ -103,15 +102,8 @@ const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* INFORMASI PRODUK */}
+        {/* INFORMASI */}
         <div className="bg-white rounded-xl border border-gray-100 p-6">
-          <h2 className="text-sm font-semibold text-gray-800 mb-1">
-            Informasi Produk
-          </h2>
-          <p className="text-xs text-gray-400 mb-6">
-            Tambahkan informasi mengenai produk yang ingin Anda buat.
-          </p>
-
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Input
               label="Nama Produk"
@@ -123,39 +115,36 @@ const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 
             <Input label="Kode Produk" value="Otomatis dari sistem" disabled />
 
-            {/* KATEGORI */}
             <div>
-              <Label>
-                Kategori<span className="text-red-500">*</span>
-              </Label>
+              <Label>Kategori<span className="text-red-500">*</span></Label>
               <select
                 name="kategori"
                 value={form.kategori}
                 onChange={handleChange}
                 disabled={categoryLoading}
-                className="mt-2 w-full h-10 px-4 border border-gray-200 rounded-md text-sm outline-none focus:ring-1 focus:ring-indigo-500"
+                className="mt-2 w-full h-10 px-4 border border-gray-200 rounded-md text-sm"
                 required
               >
-                <option value="">Pilih kategori produk</option>
-                {categories.map((cat: any) => (
-                  <option key={cat.id} value={cat.id}>
-                    {cat.category_name}
+                <option value="">Pilih kategori</option>
+                {categories.map((c: any) => (
+                  <option key={c.id} value={c.id}>
+                    {c.category_name}
                   </option>
                 ))}
               </select>
             </div>
 
-            <Select
-              label="Status"
-              name="status"
-              value={form.status}
-              onChange={handleChange}
-              required
-              options={[
-                { value: "Aktif", label: "Aktif" },
-                { value: "Tidak Aktif", label: "Tidak Aktif" },
-              ]}
-            />
+            <div>
+              <Label>Status<span className="text-red-500">*</span></Label>
+              <select
+                value={String(form.status)}
+                onChange={handleStatusChange}
+                className="mt-2 w-full h-10 px-4 border border-gray-200 rounded-md text-sm"
+              >
+                <option value="true">Aktif</option>
+                <option value="false">Tidak Aktif</option>
+              </select>
+            </div>
 
             <PriceInput
               label="Harga"
@@ -185,29 +174,23 @@ const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 
         {/* GAMBAR */}
         <div className="bg-white rounded-xl border border-gray-100 p-6">
-          <h2 className="text-sm font-semibold text-gray-800 mb-1">
-            Gambar Produk
-          </h2>
-          <p className="text-xs text-gray-400 mb-6">
-            Tambahkan gambar produk Anda.
-            
-          </p>
+          {form.imageUrl && (
+            <img
+              src={form.imageUrl}
+              alt="Preview"
+              className="w-32 h-32 object-cover rounded-md mb-4"
+            />
+          )}
 
           <label
             htmlFor="upload-image"
             className="w-32 h-32 border-2 border-dashed border-gray-300 rounded-lg
-            flex flex-col items-center justify-center cursor-pointer text-gray-400
-            hover:border-indigo-400 hover:text-indigo-500 transition"
+            flex items-center justify-center cursor-pointer text-gray-400"
           >
             <span className="text-xs">
               {form.gambar ? "Gambar Dipilih" : "Unggah Gambar"}
             </span>
-            
           </label>
-          <p className="text-xs text-gray-400 mt-2">
-            Format: JPG / PNG • Maksimal 2MB
-          </p>
-
 
           <input
             id="upload-image"
@@ -218,7 +201,6 @@ const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
           />
         </div>
 
-        {/* ACTION */}
         <div className="flex justify-end gap-3">
           <button
             type="button"
@@ -254,27 +236,8 @@ const Input = ({ label, required, ...props }: any) => (
     </Label>
     <input
       {...props}
-      className="mt-2 w-full h-10 px-4 border border-gray-200 rounded-md text-sm outline-none focus:ring-1 focus:ring-indigo-500"
+      className="mt-2 w-full h-10 px-4 border border-gray-200 rounded-md text-sm"
     />
-  </div>
-);
-
-const Select = ({ label, options, required, ...props }: any) => (
-  <div>
-    <Label>
-      {label}
-      {required && <span className="text-red-500">*</span>}
-    </Label>
-    <select
-      {...props}
-      className="mt-2 w-full h-10 px-4 border border-gray-200 rounded-md text-sm outline-none focus:ring-1 focus:ring-indigo-500"
-    >
-      {options.map((o: any) => (
-        <option key={o.value} value={o.value}>
-          {o.label}
-        </option>
-      ))}
-    </select>
   </div>
 );
 
@@ -304,7 +267,7 @@ const Textarea = ({ label, required, ...props }: any) => (
     <textarea
       {...props}
       rows={4}
-      className="mt-2 w-full px-4 py-3 border border-gray-200 rounded-md text-sm outline-none focus:ring-1 focus:ring-indigo-500"
+      className="mt-2 w-full px-4 py-3 border border-gray-200 rounded-md text-sm"
     />
   </div>
 );

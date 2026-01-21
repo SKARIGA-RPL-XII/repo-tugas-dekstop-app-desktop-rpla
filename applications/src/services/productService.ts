@@ -29,13 +29,17 @@ export class ProductServices {
     return ApiClient.post("/product", payload);
   }
 
-  static async updateProduct(
-    id: string,
-    payload: Partial<Product>
-  ): Promise<Product> {
-    const response = await ApiClient.put(`/product/${id}`, payload);
-    return response.data.data;
-  }
+static async updateProduct(
+  id: string,
+  payload: FormData
+): Promise<Product> {
+  // update dulu
+  await ApiClient.put(`/product/${id}`, payload);
+
+  // ambil data terbaru
+  const response = await ApiClient.get(`/product/${id}`);
+  return response.data.data;
+}
 
   static async deleteProduct(id: string): Promise<void> {
     await ApiClient.delete(`/delete/${id}`);

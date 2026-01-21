@@ -19,7 +19,7 @@ const ProdukEdit = () => {
     nama: "",
     kode: "",
     kategori: "",
-    status: "Aktif", // ❗ tetap string, TIDAK diubah
+    status: true, // ✅ BOOLEAN
     harga: "",
     stok: "",
     deskripsi: "",
@@ -37,7 +37,6 @@ const ProdukEdit = () => {
 
         const product = await ProductServices.getProductById(id);
 
-        // 🔥 NORMALISASI STATUS DARI API
         const isActive =
           product.is_active === true ||
           product.is_active === "true" ||
@@ -47,7 +46,7 @@ const ProdukEdit = () => {
           nama: product.product_name ?? "",
           kode: product.product_code ?? "",
           kategori: product.category_id ?? "",
-          status: isActive ? "Aktif" : "Tidak Aktif",
+          status: isActive, // ✅ BOOLEAN
           harga: product.price?.toString() ?? "",
           stok: product.stock?.toString() ?? "",
           deskripsi: product.description ?? "",
@@ -75,6 +74,13 @@ const ProdukEdit = () => {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setForm((prev) => ({
+      ...prev,
+      status: e.target.value === "true",
+    }));
+  };
+
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -86,6 +92,7 @@ const ProdukEdit = () => {
     }));
   };
 
+  /* ================== SUBMIT ================== */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -98,18 +105,13 @@ const ProdukEdit = () => {
       payload.append("stock", String(Number(form.stok)));
       payload.append("category_id", form.kategori);
       payload.append("description", form.deskripsi);
-
-      // ❗ TETAP STRING, SESUAI PERMINTAAN
-      payload.append(
-        "is_active",
-        form.status === "Aktif" ? "true" : "false"
-      );
+      payload.append("is_active", String(form.status)); // ✅ true / false
 
       if (form.gambar) {
         payload.append("image", form.gambar);
       }
 
-      await ProductServices.updateProduct(id!, payload as any);
+      await ProductServices.updateProduct(id!, payload);
       navigate("/admin/produk");
     } catch (err: any) {
       alert(err.response?.data?.message || "Gagal mengubah produk");
@@ -143,9 +145,7 @@ const ProdukEdit = () => {
             <Input label="Kode Produk" value={form.kode} disabled />
 
             <div>
-              <Label>
-                Kategori<span className="text-red-500">*</span>
-              </Label>
+              <Label>Kategori<span className="text-red-500">*</span></Label>
               <select
                 name="kategori"
                 value={form.kategori}
@@ -163,17 +163,17 @@ const ProdukEdit = () => {
               </select>
             </div>
 
-            <Select
-              label="Status"
-              name="status"
-              value={form.status}
-              onChange={handleChange}
-              required
-              options={[
-                { value: "Aktif", label: "Aktif" },
-                { value: "Tidak Aktif", label: "Tidak Aktif" },
-              ]}
-            />
+            <div>
+              <Label>Status<span className="text-red-500">*</span></Label>
+              <select
+                value={String(form.status)}
+                onChange={handleStatusChange}
+                className="mt-2 w-full h-10 px-4 border border-gray-200 rounded-md text-sm"
+              >
+                <option value="true">Aktif</option>
+                <option value="false">Tidak Aktif</option>
+              </select>
+            </div>
 
             <PriceInput
               label="Harga"
@@ -265,25 +265,6 @@ const Input = ({ label, required, ...props }: any) => (
       {...props}
       className="mt-2 w-full h-10 px-4 border border-gray-200 rounded-md text-sm"
     />
-  </div>
-);
-
-const Select = ({ label, options, required, ...props }: any) => (
-  <div>
-    <Label>
-      {label}
-      {required && <span className="text-red-500">*</span>}
-    </Label>
-    <select
-      {...props}
-      className="mt-2 w-full h-10 px-4 border border-gray-200 rounded-md text-sm"
-    >
-      {options.map((o: any) => (
-        <option key={o.value} value={o.value}>
-          {o.label}
-        </option>
-      ))}
-    </select>
   </div>
 );
 
