@@ -19,21 +19,26 @@ export const getAllCategories = async ({
         *,
         products:products(id)
       `,
-      { count: "exact" }
+      { count: "exact" },
     );
 
+    // if (created_at) {
+    //   query = query
+    //     .gte("created_at", `${created_at}T00:00:00`)
+    //     .lte("created_at", `${created_at}T23:59:59`);
+    // }
+
     if (created_at) {
-      query = query
-        .gte("created_at", `${created_at}T00:00:00`)
-        .lte("created_at", `${created_at}T23:59:59`);
+      query = query.order("created_at", { ascending: false });
     }
+
     if (search) {
       query = query.ilike("category_name", `%${search}%`);
     }
 
     const { data, count, error } = await query.range(
       offset,
-      offset + limit - 1
+      offset + limit - 1,
     );
     if (error) throw error;
 

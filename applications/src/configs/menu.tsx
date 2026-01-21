@@ -18,7 +18,7 @@ export const menu: MenuGroup[] = [
     items: [
       {
         label: "Kasir",
-        path: "/dashboard-kasir",
+        path: "/kasir",
         roles: ["cashier"],
         icon: <Icons.CashRegister />,
       },

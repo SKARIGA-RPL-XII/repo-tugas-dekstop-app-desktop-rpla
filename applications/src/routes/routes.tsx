@@ -7,6 +7,7 @@ import Category from "../pages/admin/categories";
 import ProtectedRoute from "../components/ProtectedRoute";
 import App from "../App";
 import DashboardKasir from "../pages/kasir/dashboards";
+import Kasir from "./../pages/kasir/kasir/index";
 import ProtectedAuth from "../components/ProtectedAuth";
 import Forbidden from "../pages/errors/Forbidden";
 import { ProfilePage } from "../pages/auth/profile";
@@ -42,12 +43,9 @@ const router = createBrowserRouter([
           { path: "produk/tambah", element: <ProdukTambah /> },
           { path: "produk/:id/detail", element: <ProdukDetail /> },
           { path: "produk/:id/edit", element: <ProdukEdit /> },
-
-
           { path: "profil-saya", element: <ProfilePage /> },
         ],
       },
-
       {
         path: "/cashier",
         element: (
@@ -58,6 +56,7 @@ const router = createBrowserRouter([
         children: [
           { index: true, element: <DashboardKasir /> },
           { path: "dashboard", element: <DashboardKasir /> },
+          { path: "kasir", element: <Kasir /> },
           { path: "profil-saya", element: <ProfilePage /> },
         ],
       },

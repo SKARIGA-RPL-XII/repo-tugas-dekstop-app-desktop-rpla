@@ -33,13 +33,13 @@ const Navbar = () => {
     try {
       await logout();
       addToast({
-        title: "Logout berhasil",
+        title: "Keluar berhasil",
         description: "Sampai jumpa lagi 👋",
         type: "success",
       });
     } catch (err) {
       addToast({
-        title: "Logout gagal",
+        title: "Keluar gagal",
         description: "Terjadi kesalahan saat logout",
         type: "error",
       });
@@ -123,7 +123,7 @@ const Navbar = () => {
                   </>
                 ) : (
                   <>
-                    <span>Logout</span>
+                    <span>Keluar</span>
                     <LogOut className="w-4 h-4" />
                   </>
                 )}

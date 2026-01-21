@@ -8,6 +8,9 @@ export class Users {
       const page = parseInt(query.page, 10) || 1;
       const limit = parseInt(query.limit, 10) || 10;
       const search = query.search || "";
+      const role = query.role || "";
+      const is_blocked = query.is_blocked || "";
+      const created_at = query.created_at || "";
 
       let supabaseQuery = db
         .from(this.tableName)
@@ -15,6 +18,18 @@ export class Users {
 
       if (search) {
         supabaseQuery = supabaseQuery.ilike("username", `%${search}%`);
+      }
+
+      if (is_blocked) {
+        supabaseQuery = supabaseQuery.eq("is_blocked", `${is_blocked}`);
+      }
+
+      if (created_at) {
+        supabaseQuery = supabaseQuery.order("created_at", { ascending: false });
+      }
+
+      if (role) {
+        supabaseQuery = supabaseQuery.eq("role", `${role}`);
       }
 
       const from = (page - 1) * limit;
@@ -53,7 +68,9 @@ export class Users {
 
     if (error) throw new Error(error.message);
 
-    return data;
+    const { password, ...safeData } = data;
+
+    return safeData;
   }
 
   static async findById(db, id) {
@@ -101,7 +118,9 @@ export class Users {
 
     if (error) throw new Error(error.message);
 
-    return data;
+    const { password, ...safeData } = data;
+
+    return safeData;
   }
 
   static async block(db, id) {

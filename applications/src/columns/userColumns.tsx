@@ -14,8 +14,10 @@ interface UserColumnsProps {
 export const getUserColumns = ({
   openEdit,
   openDelete,
+  openDetail,
   isLoading,
 }: UserColumnsProps): ColumnDef<User>[] => [
+
   {
     id: "no",
     header: "#",
@@ -24,7 +26,7 @@ export const getUserColumns = ({
 
   {
     accessorKey: "username",
-    header: "Username",
+    header: "Name",
   },
 
   {

@@ -3,14 +3,14 @@ export interface Product {
   id: string;
   name: string;
   code?: string;
-
+  url_image?: string;
   category_id: string;
   category_name?: string;
-
+  product_name?: string;
+  product_code?: string;
   price: number;
   stock: number;
   is_active: boolean;
-
   created_at: string;
 }
 
