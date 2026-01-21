@@ -55,9 +55,10 @@ const Produk = () => {
     deleteProduct,
     refetch,
   } = useProducts({
-    page: filters.page,
-    limit: filters.limit,
-    search: filters.search,
+  page: 1,
+  limit: 10,
+  search: "",
+    // search: filters.search,
   });
 
   const isLoading = loading;
@@ -140,10 +141,19 @@ const Produk = () => {
         <HeaderTableContainer>
           <HeaderTableSearch
             placeholder="Telusuri produk..."
-            value={filters.search}
-            onChange={(val) => setSearch(val)}
+            value={productFilters.search}
+            onChange={(val) =>
+              setProductFilters({
+                ...productFilters,
+                search: val,
+              })
+            }
             onSearch={(val) =>
-              setProductFilters({ ...productFilters, page: 1, search: val })
+              setProductFilters({
+                ...productFilters,
+                page: 1,      // 🔥 reset page
+                search: val,
+              })
             }
           />
         </HeaderTableContainer>
@@ -155,13 +165,17 @@ const Produk = () => {
           loadingSkeletonRows={6}
           noDataComponent={<EmptyNoData onRefresh={refetch} />}
           noResultsComponent={<EmptyNoResults onRefresh={refetch} />}
-          page={productFilters.page}
-          pageSize={meta.limit}
-          total={meta.count}
+          page={productFilters.page}       // ✅ current page
+          pageSize={meta.limit}            // ✅ limit per page
+          total={meta.count}               // ✅ total data
           onPageChange={(page) =>
-            setProductFilters({ ...productFilters, page })
+            setProductFilters({
+              ...productFilters,
+              page,                         // ✅ update page
+            })
           }
         />
+
       </Card>
       <DeleteAlert
         open={openDeleteState}

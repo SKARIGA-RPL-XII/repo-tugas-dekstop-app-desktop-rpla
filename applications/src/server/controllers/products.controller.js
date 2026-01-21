@@ -25,8 +25,20 @@ export class ProductsController {
         limit: parseInt(limit, 10),
         search
       };
-      const data = await Products.filterProducts(supabase, params);
-      return successResponse(res, data, "Filtered products fetched successfully");
+const result = await Products.filterProducts(supabase, params);
+
+return successResponse(
+  res,
+  result.data,
+  "Filtered products fetched successfully",
+  200,
+  {
+    page: result.page,
+    limit: result.limit,
+    count: result.count,
+  }
+);
+
     } catch (e) {
       return errorResponse(res, e.message, 400);
     }
@@ -106,16 +118,15 @@ static async createProduct(req, res) {
 
   static async updateProduct(req, res) {
   try {
-    const id = req.params.id;
+    const { id } = req.params;
 
     const {
       product_name,
       product_code,
       price,
       description,
-      url_image,
       category_id,
-      is_active, // 🔥 AMBIL DARI BODY
+      is_active,
       stock
     } = req.body;
 
@@ -124,12 +135,36 @@ static async createProduct(req, res) {
       product_code,
       price,
       description,
-      url_image,
       category_id,
       stock,
       is_active: is_active === "true" || is_active === true,
     };
 
+    // 🔥 JIKA ADA GAMBAR BARU
+    if (req.file) {
+      const fileExt = req.file.originalname.split(".").pop();
+      const fileName = `${Date.now()}.${fileExt}`;
+      const filePath = `products/${fileName}`;
+
+      const { error } = await supabase.storage
+        .from("product_image")
+        .upload(filePath, req.file.buffer, {
+          contentType: req.file.mimetype,
+          upsert: false,
+        });
+
+      if (error) {
+        return errorResponse(res, error.message, 400);
+      }
+
+      const { data: publicUrl } = supabase.storage
+        .from("product_image")
+        .getPublicUrl(filePath);
+
+      payload.url_image = publicUrl.publicUrl;
+    }
+
+    // 🔥 hapus undefined
     Object.keys(payload).forEach(
       key => payload[key] === undefined && delete payload[key]
     );

@@ -16,14 +16,12 @@ export const getProductColumns = ({
   const navigate = useNavigate();
 
   return [
-    /* ================= NO ================= */
     {
       id: "no",
       header: "#",
       cell: ({ row }) => row.index + 1,
     },
 
-    /* ================= NAMA PRODUK + GAMBAR ================= */
     {
       accessorKey: "product_name",
       header: "Nama Produk",
@@ -55,13 +53,11 @@ export const getProductColumns = ({
       },
     },
 
-    /* ================= KATEGORI ================= */
     {
       header: "Kategori",
-      cell: () => <span className="text-gray-600">Snack</span>,
+      cell: ({ row }) =>
+        row.original.categories?.category_name ?? "-",
     },
-
-    /* ================= HARGA ================= */
     {
       accessorKey: "price",
       header: "Harga",
@@ -70,7 +66,6 @@ export const getProductColumns = ({
       ),
     },
 
-    /* ================= STOK ================= */
     {
       accessorKey: "stock",
       header: "Stok",
@@ -83,7 +78,6 @@ export const getProductColumns = ({
       },
     },
 
-    /* ================= STATUS ================= */
     {
       accessorKey: "is_active",
       header: "Status",
@@ -93,20 +87,18 @@ export const getProductColumns = ({
             Aktif
           </span>
         ) : (
-          <span className="px-3 py-1 text-xs rounded-full bg-gray-200 text-gray-600">
-            Tidak Aktif
+          <span className="px-3 py-1 text-xs rounded-full bg-red-200 text-red-600">
+            Non-Aktif
           </span>
         ),
     },
 
-    /* ================= TANGGAL ================= */
     {
       accessorKey: "created_at",
       header: "Dibuat Tanggal",
       cell: ({ row }) => formatDate(row.original.created_at),
     },
 
-    /* ================= AKSI ================= */
     {
       id: "actions",
       header: "Aksi",

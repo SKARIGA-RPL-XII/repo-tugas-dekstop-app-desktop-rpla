@@ -17,13 +17,37 @@ const ProdukTambah = () => {
   const [form, setForm] = useState({
     nama: "",
     kategori: "",
-    status: true, // ✅ BOOLEAN
+    status: true,
     harga: "",
     stok: "",
     deskripsi: "",
     gambar: null as File | null,
     imageUrl: "",
   });
+
+  /* ================== FORMAT ANGKA ================== */
+  const formatNumber = (value: string) => {
+    const clean = value.replace(/\D/g, "");
+    return clean.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  };
+
+  const unformatNumber = (value: string) => {
+    return value.replace(/\./g, "");
+  };
+
+  const handleHargaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setForm((prev) => ({
+      ...prev,
+      harga: formatNumber(e.target.value),
+    }));
+  };
+
+  const handleStokChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setForm((prev) => ({
+      ...prev,
+      stok: formatNumber(e.target.value),
+    }));
+  };
 
   /* ================== HANDLERS ================== */
   const handleChange = (
@@ -74,12 +98,12 @@ const ProdukTambah = () => {
 
       const payload = new FormData();
       payload.append("product_name", form.nama);
-      payload.append("price", String(Number(form.harga)));
-      payload.append("stock", String(Number(form.stok)));
+      payload.append("price", unformatNumber(form.harga)); // ✅ FIX
+      payload.append("stock", unformatNumber(form.stok)); // ✅ FIX
       payload.append("category_id", form.kategori);
       payload.append("description", form.deskripsi);
-      payload.append("is_active", String(form.status)); // ✅ true / false
-      payload.append("image", form.gambar); // ✅ WAJIB
+      payload.append("is_active", String(form.status));
+      payload.append("image", form.gambar);
 
       await ProductServices.createProduct(payload);
       navigate("/admin/produk");
@@ -102,7 +126,6 @@ const ProdukTambah = () => {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* INFORMASI */}
         <div className="bg-white rounded-xl border border-gray-100 p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Input
@@ -127,6 +150,7 @@ const ProdukTambah = () => {
               >
                 <option value="">Pilih kategori</option>
                 {categories.map((c: any) => (
+                  // 🔴 jika data kamu pakai category_id → ganti c.id jadi c.category_id
                   <option key={c.id} value={c.id}>
                     {c.category_name}
                   </option>
@@ -142,23 +166,21 @@ const ProdukTambah = () => {
                 className="mt-2 w-full h-10 px-4 border border-gray-200 rounded-md text-sm"
               >
                 <option value="true">Aktif</option>
-                <option value="false">Tidak Aktif</option>
+                <option value="false">Non-Aktif</option>
               </select>
             </div>
 
             <PriceInput
               label="Harga"
-              name="harga"
               value={form.harga}
-              onChange={handleChange}
+              onChange={handleHargaChange}
               required
             />
 
             <Input
               label="Stok"
-              name="stok"
               value={form.stok}
-              onChange={handleChange}
+              onChange={handleStokChange}
               required
             />
           </div>
@@ -172,15 +194,8 @@ const ProdukTambah = () => {
           />
         </div>
 
-        {/* GAMBAR */}
-        <div className="bg-white rounded-xl border border-gray-100 p-6">
-          {form.imageUrl && (
-            <img
-              src={form.imageUrl}
-              alt="Preview"
-              className="w-32 h-32 object-cover rounded-md mb-4"
-            />
-          )}
+        <div className="w-250 h-50 bg-white rounded-xl border border-gray-100 p-6">
+
 
           <label
             htmlFor="upload-image"
@@ -188,6 +203,13 @@ const ProdukTambah = () => {
             flex items-center justify-center cursor-pointer text-gray-400"
           >
             <span className="text-xs">
+              {form.imageUrl && (
+                <img
+                  src={form.imageUrl}
+                  alt="Preview"
+                  className="w-32 h-32 object-cover rounded-md mt-8 mb-4"
+                />
+              )}
               {form.gambar ? "Gambar Dipilih" : "Unggah Gambar"}
             </span>
           </label>
@@ -251,7 +273,8 @@ const PriceInput = ({ label, required, ...props }: any) => (
       <span className="px-4 text-sm text-gray-500">Rp</span>
       <input
         {...props}
-        type="number"
+        type="text"          // ✅ WAJIB
+        inputMode="numeric"  // ✅ mobile-friendly
         className="flex-1 h-10 pr-4 text-sm outline-none"
       />
     </div>
