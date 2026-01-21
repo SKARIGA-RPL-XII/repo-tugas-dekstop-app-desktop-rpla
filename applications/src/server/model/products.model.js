@@ -39,7 +39,7 @@ export class Products {
     static async findById(db, id) {
         const { data, error } = await db
             .from(this.tableName)
-            .select("id, product_name, price, description, url_image, created_at, stock, category_id, product_code")
+            .select("id, product_name, price, description, url_image, created_at, stock, category_id, product_code, is_active")
             .eq("id", id)
             .single();
         if (error) throw new Error("Product not found");
