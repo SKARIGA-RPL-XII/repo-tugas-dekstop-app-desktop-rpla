@@ -14,4 +14,13 @@ router.post(
   TransactionsController.createTransaction,
 );
 
+router.get(
+  "/transaction/:transaction_id",
+  authMiddleware,
+  cashierMiddleware,
+  TransactionsController.getTransactionDetail,
+);
+
+
+
 export default router;
