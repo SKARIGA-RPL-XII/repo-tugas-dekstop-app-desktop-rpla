@@ -54,125 +54,109 @@ const ProdukDetail = () => {
     );
   }
 
-  /* ================== NORMALISASI STATUS ================== */
   const isActive =
     produk.is_active === true ||
     produk.is_active === "true" ||
     produk.is_active === 1;
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-6 font-montserrat">
-      {/* HEADER */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold text-gray-800">
-          Detail Produk
-        </h1>
-        <p className="text-sm text-gray-400 mt-1">
-          Beranda / Daftar Produk /{" "}
-          <span className="text-indigo-600">Detail Produk</span>
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* GAMBAR */}
-        <div className="bg-white rounded-2xl shadow-sm p-6 flex justify-center items-center">
-          {produk.url_image ? (
-            <img
-              src={produk.url_image}
-              alt={produk.product_name}
-              className="w-48 h-48 object-cover rounded-lg"
-            />
-          ) : (
-            <div className="w-48 h-48 bg-gray-100 flex items-center justify-center text-gray-400 rounded-lg">
-              No Image
-            </div>
-          )}
-        </div>
-
-        {/* INFORMASI */}
-        <div className="md:col-span-2 bg-white rounded-2xl shadow-sm p-6">
-          <h2 className="text-xl font-semibold text-gray-800 mb-1">
-            {produk.product_name}
-          </h2>
-
-          <p className="text-sm text-gray-500 mb-4">
-            {produk.product_code ?? "-"} • {produk.category_name ?? "-"}
+    <div className="bg-gray-50 min-h-screen px-6 py-6">
+      <div className="max-w-7xl mx-auto">
+        {/* HEADER */}
+        <div className="mb-6">
+          <h1 className="text-xl font-semibold text-gray-800">
+            Detail Produk
+          </h1>
+          <p className="text-sm text-gray-400 mt-1">
+            Beranda / Daftar Produk /{" "}
+            <span className="text-indigo-600">Detail Produk</span>
           </p>
+        </div>
 
-          <hr className="mb-4" />
-
-          {/* HARGA & STOK */}
-          <div className="mb-4 grid grid-cols-2 gap-4">
-            <div>
-              <h3 className="text-sm font-medium text-gray-700 mb-1">
-                Harga:
-              </h3>
-              <p className="text-sm text-gray-500">
-                Rp {Number(produk.price).toLocaleString("id-ID")}
-              </p>
+        {/* CARD */}
+        <div className="bg-white rounded-xl p-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* IMAGE */}
+            <div className="flex justify-center">
+              {produk.url_image ? (
+                <img
+                  src={produk.url_image}
+                  alt={produk.product_name}
+                  className="w-40 object-contain"
+                />
+              ) : (
+                <div className="w-40 h-40 bg-gray-100 flex items-center justify-center text-gray-400 rounded">
+                  No Image
+                </div>
+              )}
             </div>
 
-            <div>
-              <h3 className="text-sm font-medium text-gray-700 mb-1">
-                Stok:
-              </h3>
-              <p className="text-sm text-gray-500">
-                {produk.stock}
+            {/* INFO */}
+            <div className="md:col-span-2">
+              <h2 className="text-lg font-semibold text-gray-800">
+                {produk.product_name}
+              </h2>
+
+              <p className="text-sm text-gray-500 mt-1">
+                {produk.product_code ?? "-"} &nbsp;•&nbsp;{" "}
+                {produk.categories?.category_name ?? "-"}
               </p>
+
+
+              <hr className="my-4" />
+
+              {/* DESKRIPSI */}
+              <div className="mb-4">
+                <p className="text-sm font-medium text-gray-700 mb-1">
+                  Deskripsi Produk:
+                </p>
+                <p className="text-sm text-gray-500 leading-relaxed">
+                  {produk.description || "-"}
+                </p>
+              </div>
+
+              {/* TANGGAL */}
+              <div className="mb-4">
+                <p className="text-sm font-medium text-gray-700 mb-1">
+                  Tanggal Pembuatan:
+                </p>
+                <p className="text-sm text-gray-500">
+                  {produk.created_at
+                    ? new Date(produk.created_at).toLocaleDateString("id-ID", {
+                        day: "2-digit",
+                        month: "long",
+                        year: "numeric",
+                      })
+                    : "-"}
+                </p>
+              </div>
+
+              {/* STATUS */}
+              <div>
+                <p className="text-sm font-medium text-gray-700 mb-1">
+                  Status Produk:
+                </p>
+                <p
+                  className={`text-sm font-medium ${
+                    isActive ? "text-emerald-600" : "text-red-500"
+                  }`}
+                >
+                  {isActive ? "Aktif" : "Non-Aktif"}
+                </p>
+              </div>
             </div>
           </div>
 
-          {/* DESKRIPSI */}
-          <div className="mb-4">
-            <h3 className="text-sm font-medium text-gray-700 mb-1">
-              Deskripsi:
-            </h3>
-            <p className="text-sm text-gray-500">
-              {produk.description || "-"}
-            </p>
-          </div>
-
-          {/* TANGGAL */}
-          <div className="mb-4">
-            <h3 className="text-sm font-medium text-gray-700 mb-1">
-              Tanggal Dibuat:
-            </h3>
-            <p className="text-sm text-gray-500">
-              {produk.created_at
-                ? new Date(produk.created_at).toLocaleDateString("id-ID", {
-                    day: "2-digit",
-                    month: "long",
-                    year: "numeric",
-                  })
-                : "-"}
-            </p>
-          </div>
-
-          {/* STATUS */}
-          <div>
-            <h3 className="text-sm font-medium text-gray-700 mb-1">
-              Status Produk:
-            </h3>
-            <span
-              className={`inline-block px-3 py-1 rounded-md text-xs font-medium ${
-                isActive
-                  ? "bg-emerald-100 text-emerald-600"
-                  : "bg-gray-200 text-gray-500"
-              }`}
+          {/* FOOTER BUTTON */}
+          <div className="flex justify-end mt-6">
+            <button
+              onClick={() => navigate(-1)}
+              className="px-5 py-2 bg-gray-400 text-white rounded-md text-sm hover:bg-gray-500"
             >
-              {isActive ? "Aktif" : "Tidak Aktif"}
-            </span>
+              Kembali
+            </button>
           </div>
         </div>
-      </div>
-
-      <div className="flex justify-end mt-6">
-        <button
-          onClick={() => navigate(-1)}
-          className="px-6 py-2 rounded-md bg-gray-400 text-white text-sm hover:bg-gray-500"
-        >
-          Kembali
-        </button>
       </div>
     </div>
   );
