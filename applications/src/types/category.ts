@@ -11,13 +11,15 @@ export interface Category {
   product_count?: number;
   created_at?: string;
 }
-
 export interface GetCategoriesParams {
   search?: string;
   page?: number;
   limit?: number;
-  created_at?: string;
+
+  start_date?: string; // ✅ TAMBAH
+  end_date?: string;   // (opsional)
 }
+
 
 export interface CategoryForm {
   category_name: string;
