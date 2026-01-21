@@ -3,16 +3,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { UserServices } from "../../services/userService";
 import type { User, GetUsersParams } from "../../types/user";
 
-export const useUsers = (initialFilters?: GetUsersParams) => {
+export const useUsers = (filters: GetUsersParams) => {
   const queryClient = useQueryClient();
-
-  /* ================== FILTER ================== */
-  const [filters, setFilters] = useState<GetUsersParams>({
-    page: 1,
-    limit: 10,
-    search: "",
-    ...initialFilters,
-  });
 
   /* ================== SORT ================== */
   const [sortBy, setSortBy] = useState<keyof User>("created_at");
@@ -27,12 +19,23 @@ export const useUsers = (initialFilters?: GetUsersParams) => {
     }
   };
 
+  /* ================== NORMALIZE DATE (FIX UTAMA) ================== */
+  const normalizedFilters: GetUsersParams = {
+    ...filters,
+    start_date: filters.start_date
+      ? `${filters.start_date}T00:00:00`
+      : undefined,
+    end_date: filters.end_date
+      ? `${filters.end_date}T23:59:59`
+      : undefined,
+  };
+
   /* ================== QUERY ================== */
   const usersQuery = useQuery({
-    queryKey: ["users", filters, sortBy, sortOrder],
+    queryKey: ["users", normalizedFilters, sortBy, sortOrder],
     queryFn: () =>
       UserServices.getUsers({
-        ...filters,
+        ...normalizedFilters,
         sortBy,
         sortOrder,
       }),
@@ -87,9 +90,6 @@ export const useUsers = (initialFilters?: GetUsersParams) => {
     data,
     meta,
     pages,
-
-    filters,
-    setFilters,
 
     sortBy,
     sortOrder,

@@ -13,7 +13,6 @@ export class ProductServices {
     meta: { page: number; limit: number; count: number };
   }> {
     const response = await ApiClient.get("/products", { params });
-
     return {
       data: response.data.data.data,
       meta: response.data.meta,
@@ -25,9 +24,9 @@ export class ProductServices {
     return response.data.data;
   }
 
-  static async createProduct(payload: Partial<Product>): Promise<Product> {
-    const response = await ApiClient.post("/product", payload);
-    return response.data.data;
+  // ✅ INI SUDAH BENAR
+  static async createProduct(payload: FormData) {
+    return ApiClient.post("/product", payload);
   }
 
   static async updateProduct(
@@ -42,14 +41,14 @@ export class ProductServices {
     await ApiClient.delete(`/delete/${id}`);
   }
 
-    static async getCategories(params?: GetCategoriesParams): Promise<{
-      data: Category[];
-      meta: { page: number; limit: number; count: number };
-    }> {
-      const response = await ApiClient.get("/categories", { params });
-      return {
-        data: response.data.data,
-        meta: response.data.meta,
-      };
-    }
+  static async getCategories(params?: GetCategoriesParams): Promise<{
+    data: Category[];
+    meta: { page: number; limit: number; count: number };
+  }> {
+    const response = await ApiClient.get("/categories", { params });
+    return {
+      data: response.data.data,
+      meta: response.data.meta,
+    };
+  }
 }

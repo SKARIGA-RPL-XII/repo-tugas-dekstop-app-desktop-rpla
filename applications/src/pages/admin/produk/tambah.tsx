@@ -7,13 +7,13 @@ const ProdukTambah = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 
-  /* ================== KATEGORI (PERUBAHAN SATU-SATUNYA) ================== */
-  const { data: categories, loading: categoryLoading } = useCategories({
+  /* ================== KATEGORI ================== */
+  const { data: categories = [], loading: categoryLoading } = useCategories({
     page: 1,
     limit: 100,
   });
-  /* ====================================================================== */
 
+  /* ================== FORM STATE ================== */
   const [form, setForm] = useState({
     nama: "",
     kategori: "",
@@ -24,54 +24,73 @@ const ProdukTambah = () => {
     gambar: null as File | null,
   });
 
-
-
+  /* ================== HANDLERS ================== */
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
     >
   ) => {
     const { name, value } = e.target;
-    setForm((p) => ({ ...p, [name]: value }));
+    setForm((prev) => ({ ...prev, [name]: value }));
   };
+  const MAX_SIZE = 2 * 1024 * 1024; // 2MB
+const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files?.[0]) {
-      setForm((p) => ({ ...p, gambar: e.target.files![0] }));
-    }
-  };
-
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-
-  try {
-    setLoading(true);
-
-    const payload = new FormData();
-    payload.append("product_name", form.nama);
-    payload.append("price", String(Number(form.harga)));
-    payload.append("stock", String(Number(form.stok)));
-    payload.append("category_id", form.kategori);
-    payload.append("description", form.deskripsi);
-    payload.append(
-      "is_active",
-      form.status === "Aktif" ? "true" : "false"
-    );
-
-    if (form.gambar) {
-      payload.append("image", form.gambar);
-    }
-
-    await ProductServices.createProduct(payload);
-    navigate("/admin/produk");
-  } catch (err: any) {
-    alert(err.response?.data?.message || "Gagal menambahkan produk");
-  } finally {
-    setLoading(false);
+  if (file.size > MAX_SIZE) {
+    alert("Ukuran gambar maksimal 2MB");
+    e.target.value = "";
+    return;
   }
+
+  setForm((prev) => ({
+    ...prev,
+    gambar: file,
+    imageUrl: URL.createObjectURL(file),
+  }));
 };
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
+    if (!form.gambar) {
+      alert("Gambar produk wajib diunggah");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const payload = new FormData();
+      payload.append("product_name", form.nama);
+      payload.append("price", String(Number(form.harga)));
+      payload.append("stock", String(Number(form.stok)));
+      payload.append("category_id", form.kategori);
+      payload.append("description", form.deskripsi);
+      payload.append(
+        "is_active",
+        form.status === "Aktif" ? "true" : "false"
+      );
+
+      // 🔥 FIELD IMAGE YANG BENAR
+      payload.append("image", form.gambar);
+
+      // DEBUG (boleh dihapus nanti)
+      for (const p of payload.entries()) {
+        console.log(p[0], p[1]);
+      }
+
+      await ProductServices.createProduct(payload);
+      navigate("/admin/produk");
+    } catch (err: any) {
+      alert(err.response?.data?.message || "Gagal menambahkan produk");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /* ================== RENDER ================== */
   return (
     <div className="max-w-7xl mx-auto px-6 py-6">
       {/* HEADER */}
@@ -99,18 +118,12 @@ const handleSubmit = async (e: React.FormEvent) => {
               name="nama"
               value={form.nama}
               onChange={handleChange}
-              placeholder="Masukkan nama produk"
               required
             />
 
-            <Input
-              label="Kode Produk"
-              value="Otomatis dari sistem"
-              disabled
-            />
+            <Input label="Kode Produk" value="Otomatis dari sistem" disabled />
 
-
-            {/* ================== KATEGORI (DINAMIS) ================== */}
+            {/* KATEGORI */}
             <div>
               <Label>
                 Kategori<span className="text-red-500">*</span>
@@ -124,14 +137,13 @@ const handleSubmit = async (e: React.FormEvent) => {
                 required
               >
                 <option value="">Pilih kategori produk</option>
-                {categories.map((cat) => (
+                {categories.map((cat: any) => (
                   <option key={cat.id} value={cat.id}>
                     {cat.category_name}
                   </option>
                 ))}
               </select>
             </div>
-            {/* ========================================================= */}
 
             <Select
               label="Status"
@@ -140,7 +152,6 @@ const handleSubmit = async (e: React.FormEvent) => {
               onChange={handleChange}
               required
               options={[
-                { value: "", label: "Pilih status produk" },
                 { value: "Aktif", label: "Aktif" },
                 { value: "Tidak Aktif", label: "Tidak Aktif" },
               ]}
@@ -159,17 +170,15 @@ const handleSubmit = async (e: React.FormEvent) => {
               name="stok"
               value={form.stok}
               onChange={handleChange}
-              placeholder="Masukkan stok produk"
               required
             />
           </div>
 
           <Textarea
-            label="Masukkan Deskripsi"
+            label="Deskripsi"
             name="deskripsi"
             value={form.deskripsi}
             onChange={handleChange}
-            placeholder="Masukkan deskripsi produk yang Anda buat"
             required
           />
         </div>
@@ -181,17 +190,32 @@ const handleSubmit = async (e: React.FormEvent) => {
           </h2>
           <p className="text-xs text-gray-400 mb-6">
             Tambahkan gambar produk Anda.
+            
           </p>
 
-          <label className="w-32 h-32 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center cursor-pointer text-gray-400 hover:border-indigo-400 hover:text-indigo-500 transition">
-            <input
-              type="file"
-              hidden
-              accept="image/*"
-              onChange={handleImageChange}
-            />
-            <span className="text-xs">Unggah Gambar</span>
+          <label
+            htmlFor="upload-image"
+            className="w-32 h-32 border-2 border-dashed border-gray-300 rounded-lg
+            flex flex-col items-center justify-center cursor-pointer text-gray-400
+            hover:border-indigo-400 hover:text-indigo-500 transition"
+          >
+            <span className="text-xs">
+              {form.gambar ? "Gambar Dipilih" : "Unggah Gambar"}
+            </span>
+            
           </label>
+          <p className="text-xs text-gray-400 mt-2">
+            Format: JPG / PNG • Maksimal 2MB
+          </p>
+
+
+          <input
+            id="upload-image"
+            type="file"
+            accept="image/*"
+            hidden
+            onChange={handleImageChange}
+          />
         </div>
 
         {/* ACTION */}
@@ -219,9 +243,7 @@ const handleSubmit = async (e: React.FormEvent) => {
 /* ================= SMALL COMPONENTS ================= */
 
 const Label = ({ children }: any) => (
-  <label className="text-xs font-medium text-gray-700">
-    {children}
-  </label>
+  <label className="text-xs font-medium text-gray-700">{children}</label>
 );
 
 const Input = ({ label, required, ...props }: any) => (

@@ -5,69 +5,85 @@ import { useCategories } from "../../../hooks/categories/useCategories";
 
 const ProdukEdit = () => {
   const navigate = useNavigate();
-  const { id } = useParams();
+  const { id } = useParams<{ id: string }>();
   const [loading, setLoading] = useState(false);
 
-  const { data: categories, loading: categoryLoading } = useCategories({
+  /* ================== KATEGORI ================== */
+  const { data: categories = [], loading: categoryLoading } = useCategories({
     page: 1,
     limit: 100,
   });
 
+  /* ================== FORM STATE ================== */
   const [form, setForm] = useState({
     nama: "",
     kode: "",
     kategori: "",
-    status: "",
+    status: "Aktif", // ❗ tetap string, TIDAK diubah
     harga: "",
     stok: "",
     deskripsi: "",
     gambar: null as File | null,
+    imageUrl: "",
   });
 
   /* ================== FETCH DETAIL ================== */
-useEffect(() => {
-  const fetchProduct = async () => {
-    try {
-      setLoading(true);
+  useEffect(() => {
+    if (!id) return;
 
-      const product = await ProductServices.getProductById(id!);
+    const fetchProduct = async () => {
+      try {
+        setLoading(true);
 
-      setForm({
-        nama: product.product_name ?? "",
-        kode: product.product_code ?? "",
-        kategori: product.category_id ?? "",
-        status: product.is_active ? "Aktif" : "Tidak Aktif",
-        harga: product.price?.toString() ?? "",
-        stok: product.stock?.toString() ?? "",
-        deskripsi: product.description ?? "",
-        gambar: null,
-      });
-    } catch (error) {
-      console.error(error);
-      alert("Gagal memuat data produk");
-    } finally {
-      setLoading(false);
-    }
-  };
+        const product = await ProductServices.getProductById(id);
 
-  fetchProduct();
-}, [id]);
+        // 🔥 NORMALISASI STATUS DARI API
+        const isActive =
+          product.is_active === true ||
+          product.is_active === "true" ||
+          product.is_active === 1;
 
-  /* ================================================= */
+        setForm({
+          nama: product.product_name ?? "",
+          kode: product.product_code ?? "",
+          kategori: product.category_id ?? "",
+          status: isActive ? "Aktif" : "Tidak Aktif",
+          harga: product.price?.toString() ?? "",
+          stok: product.stock?.toString() ?? "",
+          deskripsi: product.description ?? "",
+          gambar: null,
+          imageUrl: product.url_image ?? "",
+        });
+      } catch (error) {
+        console.error(error);
+        alert("Gagal memuat data produk");
+      } finally {
+        setLoading(false);
+      }
+    };
 
+    fetchProduct();
+  }, [id]);
+
+  /* ================== HANDLERS ================== */
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
     >
   ) => {
     const { name, value } = e.target;
-    setForm((p) => ({ ...p, [name]: value }));
+    setForm((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files?.[0]) {
-      setForm((p) => ({ ...p, gambar: e.target.files![0] }));
-    }
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setForm((prev) => ({
+      ...prev,
+      gambar: file,
+      imageUrl: URL.createObjectURL(file),
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -78,16 +94,20 @@ useEffect(() => {
 
       const payload = new FormData();
       payload.append("product_name", form.nama);
-      payload.append("price", form.harga);
-      payload.append("stock", form.stok);
+      payload.append("price", String(Number(form.harga)));
+      payload.append("stock", String(Number(form.stok)));
       payload.append("category_id", form.kategori);
       payload.append("description", form.deskripsi);
+
+      // ❗ TETAP STRING, SESUAI PERMINTAAN
       payload.append(
         "is_active",
         form.status === "Aktif" ? "true" : "false"
       );
 
-      if (form.gambar) payload.append("image", form.gambar);
+      if (form.gambar) {
+        payload.append("image", form.gambar);
+      }
 
       await ProductServices.updateProduct(id!, payload as any);
       navigate("/admin/produk");
@@ -98,9 +118,9 @@ useEffect(() => {
     }
   };
 
+  /* ================== RENDER ================== */
   return (
     <div className="max-w-7xl mx-auto px-6 py-6">
-      {/* HEADER */}
       <div className="mb-6">
         <h1 className="text-xl font-semibold text-gray-800">Edit Produk</h1>
         <p className="text-sm text-gray-400 mt-1">
@@ -110,15 +130,7 @@ useEffect(() => {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* INFORMASI PRODUK */}
         <div className="bg-white rounded-xl border border-gray-100 p-6">
-          <h2 className="text-sm font-semibold text-gray-800 mb-1">
-            Informasi Produk
-          </h2>
-          <p className="text-xs text-gray-400 mb-6">
-            Ubah informasi produk sesuai kebutuhan.
-          </p>
-
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Input
               label="Nama Produk"
@@ -128,12 +140,7 @@ useEffect(() => {
               required
             />
 
-            <Input
-              label="Kode Produk"
-              name="kode"
-              value={form.kode}
-              disabled
-            />
+            <Input label="Kode Produk" value={form.kode} disabled />
 
             <div>
               <Label>
@@ -144,11 +151,11 @@ useEffect(() => {
                 value={form.kategori}
                 onChange={handleChange}
                 disabled={categoryLoading}
-                className="mt-2 w-full h-10 px-4 border border-gray-200 rounded-md text-sm outline-none focus:ring-1 focus:ring-indigo-500"
+                className="mt-2 w-full h-10 px-4 border border-gray-200 rounded-md text-sm"
                 required
               >
                 <option value="">Pilih kategori</option>
-                {categories.map((c) => (
+                {categories.map((c: any) => (
                   <option key={c.id} value={c.id}>
                     {c.category_name}
                   </option>
@@ -194,27 +201,33 @@ useEffect(() => {
           />
         </div>
 
-        {/* GAMBAR */}
         <div className="bg-white rounded-xl border border-gray-100 p-6">
-          <h2 className="text-sm font-semibold text-gray-800 mb-1">
-            Gambar Produk
-          </h2>
-          <p className="text-xs text-gray-400 mb-6">
-            Unggah gambar baru jika ingin mengganti.
-          </p>
-
-          <label className="w-32 h-32 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center cursor-pointer text-gray-400 hover:border-indigo-400 hover:text-indigo-500 transition">
-            <input
-              type="file"
-              hidden
-              accept="image/*"
-              onChange={handleImageChange}
+          {form.imageUrl && (
+            <img
+              src={form.imageUrl}
+              alt="Preview"
+              className="w-32 h-32 object-cover rounded-md mb-4"
             />
+          )}
+
+          <label
+            htmlFor="upload-image"
+            className="w-32 h-32 border-2 border-dashed border-gray-300 rounded-lg
+            flex items-center justify-center cursor-pointer text-gray-400
+            hover:border-indigo-400 hover:text-indigo-500 transition"
+          >
             <span className="text-xs">Ganti Gambar</span>
           </label>
+
+          <input
+            id="upload-image"
+            type="file"
+            accept="image/*"
+            hidden
+            onChange={handleImageChange}
+          />
         </div>
 
-        {/* ACTION */}
         <div className="flex justify-end gap-3">
           <button
             type="button"
@@ -236,7 +249,8 @@ useEffect(() => {
   );
 };
 
-/* ==== SMALL COMPONENTS (SAMA DENGAN TAMBAH) ==== */
+/* ================= SMALL COMPONENTS ================= */
+
 const Label = ({ children }: any) => (
   <label className="text-xs font-medium text-gray-700">{children}</label>
 );
@@ -249,7 +263,7 @@ const Input = ({ label, required, ...props }: any) => (
     </Label>
     <input
       {...props}
-      className="mt-2 w-full h-10 px-4 border border-gray-200 rounded-md text-sm outline-none focus:ring-1 focus:ring-indigo-500"
+      className="mt-2 w-full h-10 px-4 border border-gray-200 rounded-md text-sm"
     />
   </div>
 );
@@ -262,7 +276,7 @@ const Select = ({ label, options, required, ...props }: any) => (
     </Label>
     <select
       {...props}
-      className="mt-2 w-full h-10 px-4 border border-gray-200 rounded-md text-sm outline-none focus:ring-1 focus:ring-indigo-500"
+      className="mt-2 w-full h-10 px-4 border border-gray-200 rounded-md text-sm"
     >
       {options.map((o: any) => (
         <option key={o.value} value={o.value}>
@@ -299,7 +313,7 @@ const Textarea = ({ label, required, ...props }: any) => (
     <textarea
       {...props}
       rows={4}
-      className="mt-2 w-full px-4 py-3 border border-gray-200 rounded-md text-sm outline-none focus:ring-1 focus:ring-indigo-500"
+      className="mt-2 w-full px-4 py-3 border border-gray-200 rounded-md text-sm"
     />
   </div>
 );

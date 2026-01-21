@@ -2,53 +2,67 @@ import bcrypt from "bcryptjs";
 
 export class Users {
   static tableName = "users";
+static async getAll(db, query = {}) {
+  try {
+    const page = parseInt(query.page, 10) || 1;
+    const limit = parseInt(query.limit, 10) || 10;
 
-  static async getAll(db, query = {}) {
-    try {
-      const page = parseInt(query.page, 10) || 1;
-      const limit = parseInt(query.limit, 10) || 10;
-      const search = query.search || "";
-      const role = query.role || "";
-      const is_blocked = query.is_blocked || "";
-      const created_at = query.created_at || "";
+    const search = query.search || "";
+    const role = query.role || "";
+    const is_blocked = query.is_blocked;
+    const created_date = query.start_date;
 
-      let supabaseQuery = db
-        .from(this.tableName)
-        .select("*", { count: "exact" });
+    let supabaseQuery = db
+      .from(this.tableName)
+      .select("*", { count: "exact" });
 
-      if (search) {
-        supabaseQuery = supabaseQuery.ilike("username", `%${search}%`);
-      }
-
-      if (is_blocked) {
-        supabaseQuery = supabaseQuery.eq("is_blocked", `${is_blocked}`);
-      }
-
-      if (created_at) {
-        supabaseQuery = supabaseQuery.order("created_at", { ascending: false });
-      }
-
-      if (role) {
-        supabaseQuery = supabaseQuery.eq("role", `${role}`);
-      }
-
-      const from = (page - 1) * limit;
-      const to = from + limit - 1;
-
-      supabaseQuery = supabaseQuery.range(from, to);
-
-      const { data, error, count } = await supabaseQuery;
-
-      if (error) throw new Error(error.message);
-
-      return {
-        data: data || [],
-        count: count ?? data?.length ?? 0,
-      };
-    } catch (err) {
-      throw new Error(err.message);
+    if (search) {
+      supabaseQuery = supabaseQuery.ilike("username", `%${search}%`);
     }
+
+    if (role) {
+      supabaseQuery = supabaseQuery.eq("role", role);
+    }
+
+    if (is_blocked !== "" && is_blocked !== undefined) {
+      supabaseQuery = supabaseQuery.eq("is_blocked", is_blocked);
+    }
+
+    if (created_date) {
+      let dateOnly = created_date;
+
+      if (created_date.includes("T")) {
+        dateOnly = created_date.split("T")[0];
+      }
+
+      const startUTC = `${dateOnly}T00:00:00.000Z`;
+      const endUTC   = `${dateOnly}T23:59:59.999Z`;
+
+      supabaseQuery = supabaseQuery
+        .gte("created_at", startUTC)
+        .lte("created_at", endUTC);
+    }
+
+    supabaseQuery = supabaseQuery.order("created_at", { ascending: false });
+
+    const from = (page - 1) * limit;
+    const to = from + limit - 1;
+    supabaseQuery = supabaseQuery.range(from, to);
+
+    const { data, error, count } = await supabaseQuery;
+
+    if (error) throw new Error(error.message);
+
+    return {
+      data: data || [],
+      count: count ?? 0,
+    };
+  } catch (err) {
+    throw new Error(err.message);
   }
+}
+
+
 
   static async create(db, payload) {
     const { username, email, passwordHash, role = "user" } = payload;

@@ -21,3 +21,15 @@ export interface GetUsersParams {
   page?: number;
   limit?: number;
 }
+
+
+export interface GetUsersParams {
+  search?: string;
+  page?: number;
+  limit?: number;
+
+  role?: "admin" | "cashier" | "";
+  status?: "active" | "blocked" | "";
+  start_date?: string;
+  end_date?: string;
+}
