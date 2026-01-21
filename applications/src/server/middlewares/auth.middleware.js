@@ -46,6 +46,28 @@ export const adminMiddleware = (req, res, next) => {
       message: "Forbidden: Admin only",
     });
   }
+  if (req.user.role !== "cashier") {
+    return res.status(403).json({
+      success: false,
+      message: "Forbidden: Cashier only",
+    });
+  }
+
+  next();
+};
+export const cashierMiddleware = (req, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({
+      success: false,
+      message: "Unauthorized",
+    });
+  }
+  if (req.user.role !== "cashier") {
+    return res.status(403).json({
+      success: false,
+      message: "Forbidden: Cashier only",
+    });
+  }
 
   next();
 };
