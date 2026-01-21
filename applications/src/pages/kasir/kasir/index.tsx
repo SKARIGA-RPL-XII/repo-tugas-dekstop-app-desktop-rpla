@@ -24,7 +24,6 @@ export default function Kasir() {
   const { addToast } = useToast();
   const { submitTransaction } = useCashier();
 
-  // Ambil produk
   const {
     data: products = [],
     loading,
@@ -35,22 +34,18 @@ export default function Kasir() {
     meta,
   } = useProducts({ page: 1, limit: 20 });
 
-  // Ambil kategori
   const { data: categoriesData = [] } = useCategories({ page: 1, limit: 50 });
 
-  // Buat array kategori untuk display
   const categories = useMemo(
     () => ["Semua Kategori", ...categoriesData.map((cat) => cat.category_name)],
     [categoriesData]
   );
 
-  // Filter produk berdasarkan category_id di frontend
   const filteredProducts = useMemo(() => {
     if (!filters.category_id) return products;
     return products.filter((p) => p.category_id === filters.category_id);
   }, [products, filters.category_id]);
 
-  // Cart & pembayaran
   const [cart, setCart] = useState([]);
   const [buyerName, setBuyerName] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("cash");
@@ -156,9 +151,7 @@ export default function Kasir() {
 
   return (
     <div className="w-full flex flex-col md:flex-row gap-6">
-      {/* Produk List */}
       <div className="py-7.5 px-4 md:px-6 w-full md:w-1/2 bg-white rounded-2xl h-fit">
-        {/* Header */}
         <div className="flex flex-col md:flex-row justify-between mb-7 gap-4 md:gap-0">
           <div>
             <h1 className="text-l font-semibold text-[#000405]">
@@ -176,7 +169,6 @@ export default function Kasir() {
           </div>
         </div>
 
-        {/* Kategori */}
         <div className="w-full flex flex-nowrap overflow-x-auto overflow-y-hidden whitespace-nowrap mb-9 gap-2">
           <h4
             key="all"
@@ -209,7 +201,6 @@ export default function Kasir() {
           ))}
         </div>
 
-        {/* Produk */}
         {loading ? (
           <p>Loading produk...</p>
         ) : error ? (
@@ -234,9 +225,7 @@ export default function Kasir() {
         <Pagination currentPage={meta.page} totalPages={pages} />
       </div>
 
-      {/* Cart + Pembayaran */}
       <div className="w-full md:w-1/2 flex flex-col gap-6">
-        {/* Informasi Pembeli */}
         <div className="py-7.5 px-4 md:px-6 w-full bg-white rounded-2xl">
           <h2 className="font-semibold text-[14px] flex gap-2 mb-7.5">
             <IdCard className="w-6 h-6" /> Informasi Pembeli
@@ -249,7 +238,6 @@ export default function Kasir() {
           />
         </div>
 
-        {/* Produk Ditambahkan */}
         <div className="py-7.5 px-4 md:px-6 w-full bg-white rounded-2xl">
           <div className="font-semibold text-[14px] flex justify-between mb-7.5">
             <div className="font-semibold text-[14px] flex gap-2">
@@ -319,7 +307,6 @@ export default function Kasir() {
           )}
         </div>
 
-        {/* Pembayaran */}
         <div className="py-7.5 px-4 md:px-6 w-full bg-white rounded-2xl">
           <h2 className="font-semibold text-[14px] flex mb-7.5 gap-2">
             <CreditCard className="w-6 h-6" /> Pembayaran

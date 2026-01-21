@@ -7,7 +7,7 @@ import type {
 import { ApiError } from "../../types/Api";
 
 interface UseCashierDialogProps {
-  cashierId: number; // harus dari user login
+  cashierId: number;
 }
 
 export function useCashierDialog({ cashierId }: UseCashierDialogProps) {
@@ -98,7 +98,7 @@ export function useCashierDialog({ cashierId }: UseCashierDialogProps) {
 
     try {
       await onValid({
-        cashier_id: cashierId, // ambil dari props
+        cashier_id: cashierId, 
         buyer_name: buyerName,
         payment_method: paymentMethod,
         paid_amount: paidAmount,
@@ -111,7 +111,6 @@ export function useCashierDialog({ cashierId }: UseCashierDialogProps) {
         })),
       });
 
-      // reset setelah submit
       clearCart();
       setBuyerName("");
       setPaidAmount(0);

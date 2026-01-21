@@ -29,7 +29,6 @@ export interface CashierTransactionResponse {
   created_at: string;
 }
 
-// <-- baru ditambahkan untuk validasi form
 export interface CashierTransactionFormErrors {
   buyer_name?: string;
   payment_method?: string;

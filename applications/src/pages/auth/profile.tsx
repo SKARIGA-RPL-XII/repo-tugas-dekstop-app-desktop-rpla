@@ -16,6 +16,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
 } from "../../components/UI/AlertDialog";
+import { useToast } from "../../components/UI/ToastContext";
 import { Input } from "../../components/UI/Input";
 import { useAuth } from "../../context/AuthContext";
 import { formatDate } from "../../utils/formatDate";
@@ -23,10 +24,40 @@ import { formatDate } from "../../utils/formatDate";
 export const ProfilePage = () => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const { user, setUser } = useAuth();
+  const { addToast } = useToast();
 
   const profile = useProfileDialog(user);
 
   const handleSaveProfile = async () => {
+    if (!profile.form.username || profile.form.username.trim().length < 3) {
+      addToast({
+        type: "error",
+        title: "Username tidak valid",
+        description: "Username minimal 3 karakter",
+      });
+      return;
+    }
+
+    if (profile.form.password) {
+      if (profile.form.password.length < 6) {
+        addToast({
+          type: "error",
+          title: "Password terlalu pendek",
+          description: "Password minimal 6 karakter",
+        });
+        return;
+      }
+
+      if (profile.form.password !== profile.form.confirmPassword) {
+        addToast({
+          type: "error",
+          title: "Password tidak cocok",
+          description: "Password dan konfirmasi harus sama",
+        });
+        return;
+      }
+    }
+
     const success = await profile.submit(async (payload) => {
       const updatedFromApi = await UserServices.updateUser(user.id, payload);
 
@@ -39,7 +70,10 @@ export const ProfilePage = () => {
     });
 
     if (success) {
-      console.log("Profile updated successfully");
+      addToast({
+        type: "success",
+        title: "Profil berhasil diperbarui",
+      });
     }
   };
 
@@ -123,12 +157,18 @@ export const ProfilePage = () => {
           </div>
 
           <div className="flex justify-end mt-6">
-            <Button onClick={profile.openEdit} className="bg-primary">Ubah Informasi Saya</Button>
+            <Button onClick={profile.openEdit} className="bg-primary">
+              Ubah Informasi Saya
+            </Button>
           </div>
         </Card>
       </div>
 
-      <AlertDialog open={profile.open} onOpenChange={profile.close} className="w-full min-w-3xl">
+      <AlertDialog
+        open={profile.open}
+        onOpenChange={profile.close}
+        className="w-full min-w-3xl"
+      >
         <AlertDialogHeader onClose={profile.close}>
           Ubah Informasi Saya
         </AlertDialogHeader>
@@ -169,7 +209,12 @@ export const ProfilePage = () => {
           </div>
 
           <AlertDialogFooter>
-            <Button onClick={profile.close} className="px-5 py-2 text-sm rounded-md bg-muted-foreground hover:bg-muted/50 text-white">Batal</Button>
+            <Button
+              onClick={profile.close}
+              className="px-5 py-2 text-sm rounded-md bg-muted-foreground hover:bg-muted/50 text-white"
+            >
+              Batal
+            </Button>
             <Button
               onClick={handleSaveProfile}
               className="px-5 py-2 text-sm bg-orange-400 text-white rounded-md hover:bg-orange-200"
