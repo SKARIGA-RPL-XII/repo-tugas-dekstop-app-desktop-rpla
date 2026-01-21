@@ -70,7 +70,7 @@ export default function Login() {
       {/* FORM LOGIN */}
       <div className="relative z-10 w-full lg:w-[60%] flex flex-col justify-center items-center lg:items-start px-6 lg:px-20 h-screen lg:h-auto lg:pl-60 mx-auto">
         <h2 className="text-[40px] lg:text-[55px] font-bold mb-2 text-center lg:text-left">
-          Login
+          Masuk
         </h2>
         <p className="text-gray-400 text-sm mb-10 font-semibold text-center lg:text-left">
           Selamat datang kembali ke SkarPOS
@@ -132,7 +132,7 @@ export default function Login() {
             variant="primary"
             className="w-full text-white py-3 rounded-full text-sm font-semibold cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {loading ? "Loading..." : "Login"}
+            {loading ? "Loading..." : "Masuk"}
           </Button>
         </form>
       </div>

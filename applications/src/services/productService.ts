@@ -12,10 +12,10 @@ export class ProductServices {
     data: Product[];
     meta: { page: number; limit: number; count: number };
   }> {
-    const response = await ApiClient.get("/product", { params });
+    const response = await ApiClient.get("/products", { params });
 
     return {
-      data: response.data.data,
+      data: response.data.data.data,
       meta: response.data.meta,
     };
   }
