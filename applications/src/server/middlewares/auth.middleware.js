@@ -32,40 +32,36 @@ export const authMiddleware = (req, res, next) => {
   }
 };
 
+// Hanya untuk admin
 export const adminMiddleware = (req, res, next) => {
-  if (!req.user) {
-    return res.status(401).json({
-      success: false,
-      message: "Unauthorized",
-    });
-  }
+  if (!req.user) return res.status(401).json({ success: false, message: "Unauthorized" });
 
   if (req.user.role !== "admin") {
-    return res.status(403).json({
-      success: false,
-      message: "Forbidden: Admin only",
-    });
-  }
-  if (req.user.role !== "cashier") {
-    return res.status(403).json({
-      success: false,
-      message: "Forbidden: Cashier only",
-    });
+    return res.status(403).json({ success: false, message: "Forbidden: Admin only" });
   }
 
   next();
 };
+
+// Hanya untuk cashier
 export const cashierMiddleware = (req, res, next) => {
-  if (!req.user) {
-    return res.status(401).json({
-      success: false,
-      message: "Unauthorized",
-    });
-  }
+  if (!req.user) return res.status(401).json({ success: false, message: "Unauthorized" });
+
   if (req.user.role !== "cashier") {
+    return res.status(403).json({ success: false, message: "Forbidden: Cashier only" });
+  }
+
+  next();
+};
+
+export const roleMiddleware = (allowedRoles) => (req, res, next) => {
+  if (!req.user)
+    return res.status(401).json({ success: false, message: "Unauthorized" });
+
+  if (!allowedRoles.includes(req.user.role)) {
     return res.status(403).json({
       success: false,
-      message: "Forbidden: Cashier only",
+      message: `Forbidden: ${allowedRoles.join(", ")} only`,
     });
   }
 

@@ -1,13 +1,13 @@
 import { Router } from "express";
 import { ProductsController } from "../controllers/products.controller.js";
-import { authMiddleware, adminMiddleware } from "../middlewares/auth.middleware.js";
+import { authMiddleware, adminMiddleware, roleMiddleware } from "../middlewares/auth.middleware.js";
 import { upload } from "../middlewares/upload.js";
 
 const router = Router();
 
-router.get("/products", authMiddleware, adminMiddleware, ProductsController.filterProducts);
+router.get("/products", authMiddleware, roleMiddleware(["admin","cashier"]), ProductsController.filterProducts);
 // router.get("/product", authMiddleware, adminMiddleware, ProductsController.getProducts);
-router.get("/product/:id", authMiddleware, adminMiddleware, ProductsController.getProducts);
+router.get("/product/:id", authMiddleware, roleMiddleware(["admin","cashier"]), ProductsController.getProducts);
 router.post("/product",authMiddleware,adminMiddleware,upload.single("image"), ProductsController.createProduct);
 router.put(
   "/product/:id",

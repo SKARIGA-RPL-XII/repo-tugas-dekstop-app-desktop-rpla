@@ -17,7 +17,6 @@ export class TransactionsController {
         .from("products")
         .select("id, price, stock")
         .in("id", productIds)
-        .eq("is_active", true);
 
       if (productError) throw productError;
 
