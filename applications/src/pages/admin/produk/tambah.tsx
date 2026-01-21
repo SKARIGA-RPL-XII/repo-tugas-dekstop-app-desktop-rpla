@@ -14,24 +14,16 @@ const ProdukTambah = () => {
   });
   /* ====================================================================== */
 
-  const generateProductCode = () => {
-    const lastNumber = Number(localStorage.getItem("lastProductCode") || "0") + 1;
-    localStorage.setItem("lastProductCode", String(lastNumber));
-
-    return `PROD${String(lastNumber).padStart(3, "0")}`;
-  };
-
-
   const [form, setForm] = useState({
     nama: "",
-    kode: generateProductCode(),
     kategori: "",
-    status: "",
+    status: "Aktif",
     harga: "",
     stok: "",
     deskripsi: "",
     gambar: null as File | null,
   });
+
 
 
   const handleChange = (
@@ -49,34 +41,36 @@ const ProdukTambah = () => {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
 
-    try {
-      setLoading(true);
+  try {
+    setLoading(true);
 
-      const payload = new FormData();
-      payload.append("product_name", form.nama);
-      payload.append("product_code", form.kode);
-      payload.append("price", form.harga);
-      payload.append("stock", form.stok);
-      payload.append("category_id", form.kategori);
-      payload.append("description", form.deskripsi);
-      payload.append(
-        "is_active",
-        form.status === "Aktif" ? "true" : "false"
-      );
+    const payload = new FormData();
+    payload.append("product_name", form.nama);
+    payload.append("price", String(Number(form.harga)));
+    payload.append("stock", String(Number(form.stok)));
+    payload.append("category_id", form.kategori);
+    payload.append("description", form.deskripsi);
+    payload.append(
+      "is_active",
+      form.status === "Aktif" ? "true" : "false"
+    );
 
-      if (form.gambar) payload.append("image", form.gambar);
-
-      await ProductServices.createProduct(payload as any);
-      navigate("/admin/produk");
-    } catch (err: any) {
-      alert(err.response?.data?.message || "Gagal menambahkan produk");
-    } finally {
-      setLoading(false);
+    if (form.gambar) {
+      payload.append("image", form.gambar);
     }
-  };
+
+    await ProductServices.createProduct(payload);
+    navigate("/admin/produk");
+  } catch (err: any) {
+    alert(err.response?.data?.message || "Gagal menambahkan produk");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-6">
@@ -111,11 +105,10 @@ const ProdukTambah = () => {
 
             <Input
               label="Kode Produk"
-              name="kode"
-              value={form.kode}
+              value="Otomatis dari sistem"
               disabled
-              required
             />
+
 
             {/* ================== KATEGORI (DINAMIS) ================== */}
             <div>

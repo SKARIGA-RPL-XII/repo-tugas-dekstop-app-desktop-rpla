@@ -67,7 +67,6 @@ const ProdukDetail = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* GAMBAR (PLACEHOLDER) */}
         <div className="bg-white rounded-2xl shadow-sm p-6 flex justify-center items-center">
           <div className="w-48 h-48 bg-gray-100 flex items-center justify-center text-gray-400 rounded-lg">
             No Image
