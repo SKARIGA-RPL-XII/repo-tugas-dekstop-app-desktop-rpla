@@ -39,6 +39,7 @@ const router = createBrowserRouter([
           { path: "kategori", element: <Category /> },
           { path: "pengguna", element: <Pengguna /> },
           { path: "pengguna/:id/detail", element: <PenggunaDetail /> },
+           { path: "riwayat-penjualan", element: <Riwayat /> },
 
           // ================== PRODUK ==================
           { path: "produk", element: <Produk /> },

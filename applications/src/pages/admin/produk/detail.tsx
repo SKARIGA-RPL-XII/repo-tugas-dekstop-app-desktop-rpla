@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ProductServices } from "../../../services/productService";
 import type { Product } from "../../../types/product";
+import { Separator } from "../../../components/UI/Separator";
+import { ContainerHeaderPage, HeaderTitle } from "../../../components/UI/component-header-page";
 
 const ProdukDetail = () => {
   const navigate = useNavigate();
@@ -62,16 +64,10 @@ const ProdukDetail = () => {
   return (
     <div className="bg-gray-50 min-h-screen px-6 py-6">
       <div className="max-w-7xl mx-auto">
-        {/* HEADER */}
-        <div className="mb-6">
-          <h1 className="text-xl font-semibold text-gray-800">
-            Detail Produk
-          </h1>
-          <p className="text-sm text-gray-400 mt-1">
-            Beranda / Daftar Produk /{" "}
-            <span className="text-indigo-600">Detail Produk</span>
-          </p>
-        </div>
+         <ContainerHeaderPage className="mb-5">
+        <HeaderTitle>Detail Produk</HeaderTitle>
+        
+      </ContainerHeaderPage>
 
         {/* CARD */}
         <div className="bg-white rounded-xl p-6">
@@ -82,7 +78,7 @@ const ProdukDetail = () => {
                 <img
                   src={produk.url_image}
                   alt={produk.product_name}
-                  className="w-40 object-contain"
+                  className="w-80 object-contain"
                 />
               ) : (
                 <div className="w-40 h-40 bg-gray-100 flex items-center justify-center text-gray-400 rounded">
@@ -103,7 +99,7 @@ const ProdukDetail = () => {
               </p>
 
 
-              <hr className="my-4" />
+              <Separator className="my-4" />
 
               {/* DESKRIPSI */}
               <div className="mb-4">

@@ -7,7 +7,7 @@ export const menu: MenuGroup[] = [
     items: [
       {
         label: "Beranda",
-        path: "/dashboard",
+        path: "dashboard",
         roles: ["admin", "cashier"],
         icon: <Icons.Dashboard />,
       },
@@ -18,13 +18,13 @@ export const menu: MenuGroup[] = [
     items: [
       {
         label: "Kasir",
-        path: "/kasir",
+        path: "kasir",
         roles: ["cashier"],
         icon: <Icons.CashRegister />,
       },
       {
         label: "Riwayat Penjualan",
-        path: "/riwayat-penjualan",
+        path: "riwayat-penjualan",
         roles: ["admin", "cashier"],
         icon: <Icons.History />,
       },
@@ -36,12 +36,12 @@ export const menu: MenuGroup[] = [
     items: [
       {
         label: "Kategori",
-        path: "/kategori",
+        path: "kategori",
         icon: <Icons.Shapes />,
       },
       {
         label: "Produk",
-        path: "/produk",
+        path: "produk",
         icon: <Icons.Cart />,
       },
     ],
@@ -51,13 +51,13 @@ export const menu: MenuGroup[] = [
     items: [
       {
         label: "Pengguna",
-        path: "/pengguna",
+        path: "pengguna",
         roles: ["admin"],
         icon: <Icons.Users />,
       },
       {
         label: "Profil Saya",
-        path: "/profil-saya",
+        path: "profil-saya",
         icon: <Icons.User />,
       },
     ],

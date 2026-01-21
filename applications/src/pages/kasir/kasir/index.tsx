@@ -18,6 +18,7 @@ import { Separator } from "../../../components/UI/Separator";
 import { useProducts } from "../../../hooks/products/useProducts";
 import { useCategories } from "../../../hooks/categories/useCategories";
 import { useCashier } from "../../../hooks/cashiers/useCashiers";
+import { Button } from "../../../components/UI/Button";
 
 export default function Kasir() {
   const { user } = useAuth();
@@ -34,11 +35,13 @@ export default function Kasir() {
     meta,
   } = useProducts({ page: 1, limit: 20 });
 
-  const { data: categoriesData = [] } = useCategories({ page: 1, limit: 50 });
+  const { data: categoriesData = [], loading: loadingCatgeory } = useCategories(
+    { page: 1, limit: 50 },
+  );
 
   const categories = useMemo(
     () => ["Semua Kategori", ...categoriesData.map((cat) => cat.category_name)],
-    [categoriesData]
+    [categoriesData],
   );
 
   const filteredProducts = useMemo(() => {
@@ -50,13 +53,34 @@ export default function Kasir() {
   const [buyerName, setBuyerName] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("cash");
   const [paidAmount, setPaidAmount] = useState(0);
+  const date = new Date();
+
+  const day = date.getDate();
+  const year = date.getFullYear();
+
+  const months = [
+    "januari",
+    "februari",
+    "maret",
+    "april",
+    "mei",
+    "juni",
+    "juli",
+    "agustus",
+    "september",
+    "oktober",
+    "november",
+    "desember",
+  ];
+
+  const formatted = `${day} - ${months[date.getMonth()]} - ${year}`;
 
   const addToCart = (product) => {
     setCart((prev) => {
       const existing = prev.find((item) => item.id === product.id);
       if (existing) {
         return prev.map((item) =>
-          item.id === product.id ? { ...item, qty: item.qty + 1 } : item
+          item.id === product.id ? { ...item, qty: item.qty + 1 } : item,
         );
       }
       return [...prev, { ...product, qty: 1 }];
@@ -66,18 +90,16 @@ export default function Kasir() {
   const increaseQty = (id) => {
     setCart((prev) =>
       prev.map((item) =>
-        item.id === id ? { ...item, qty: item.qty + 1 } : item
-      )
+        item.id === id ? { ...item, qty: item.qty + 1 } : item,
+      ),
     );
   };
 
   const decreaseQty = (id) => {
     setCart((prev) =>
       prev
-        .map((item) =>
-          item.id === id ? { ...item, qty: item.qty - 1 } : item
-        )
-        .filter((item) => item.qty > 0)
+        .map((item) => (item.id === id ? { ...item, qty: item.qty - 1 } : item))
+        .filter((item) => item.qty > 0),
     );
   };
 
@@ -150,14 +172,14 @@ export default function Kasir() {
   };
 
   return (
-    <div className="w-full flex flex-col md:flex-row gap-6">
-      <div className="py-7.5 px-4 md:px-6 w-full md:w-1/2 bg-white rounded-2xl h-fit">
+    <div className="w-full flex flex-col lg:flex-row gap-6">
+      <div className="py-7.5 px-4 md:px-6 w-full lg:w-1/2 bg-white rounded-2xl h-fit">
         <div className="flex flex-col md:flex-row justify-between mb-7 gap-4 md:gap-0">
           <div>
             <h1 className="text-l font-semibold text-[#000405]">
               Selamat Datang, {user?.username}
             </h1>
-            <p className="text-xs text-[#000405B2]">12 Desember 2026</p>
+            <p className="text-xs text-[#000405B2]">{formatted}</p>
           </div>
           <div className="relative w-full md:w-1/2">
             <SearchInput
@@ -184,25 +206,43 @@ export default function Kasir() {
             Semua Kategori
           </h4>
 
-          {categoriesData.map((cat) => (
-            <h4
-              key={cat.id}
-              className={`w-fit py-1.5 px-3 rounded-full text-xs font-semibold cursor-pointer ${
-                filters.category_id === cat.id
-                  ? "bg-[#3A47B0] text-white"
-                  : "bg-none text-black/60 font-normal"
-              }`}
-              onClick={() =>
-                setFilters({ ...filters, category_id: cat.id, page: 1 })
-              }
-            >
-              {cat.category_name}
-            </h4>
-          ))}
+          {loadingCatgeory ? (
+            Array.from({length:4}).map((_,i) => (
+              <div key={i + 1} className="w-full flex items-center">
+                <div className="text-sm bg-slate-200 animate-pulse rounded-full w-full h-7"/>
+              </div>
+            ))
+          ) : (
+            categoriesData.map((cat) => {
+              const active = filters.category_id === cat.id;
+
+              return (
+                <h4
+                  key={cat.id}
+                  onClick={() =>
+                    setFilters({ ...filters, category_id: cat.id, page: 1 })
+                  }
+                  className={`w-fit py-1.5 px-3 rounded-full text-xs cursor-pointer transition
+          ${
+            active
+              ? "bg-[#3A47B0] text-white"
+              : "text-black/60 hover:bg-gray-100"
+          }
+        `}
+                >
+                  {cat.category_name}
+                </h4>
+              );
+            })
+          )}
         </div>
 
         {loading ? (
-          <p>Loading produk...</p>
+          <div className="w-full grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {Array.from({ length: 9 }).map((_, i) => (
+              <div key={i + 1} className="bg-muted-foreground animate-pulse w-full h-60 rounded-xl"></div>
+            ))}
+          </div>
         ) : error ? (
           <p>Error: {error.message}</p>
         ) : filteredProducts.length === 0 ? (
@@ -211,12 +251,14 @@ export default function Kasir() {
             <h2 className="text-base text-[#00000099]">Belum ada produk</h2>
           </div>
         ) : (
-          <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="w-full grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredProducts.map((product) => (
               <CardProduct
                 key={product.id}
                 product={product}
                 onAdd={addToCart}
+                removeProduct={removeItem}
+                carts={cart}
               />
             ))}
           </div>
@@ -225,7 +267,7 @@ export default function Kasir() {
         <Pagination currentPage={meta.page} totalPages={pages} />
       </div>
 
-      <div className="w-full md:w-1/2 flex flex-col gap-6">
+      <div className="w-full flex flex-col gap-6">
         <div className="py-7.5 px-4 md:px-6 w-full bg-white rounded-2xl">
           <h2 className="font-semibold text-[14px] flex gap-2 mb-7.5">
             <IdCard className="w-6 h-6" /> Informasi Pembeli
@@ -268,11 +310,11 @@ export default function Kasir() {
             cart.map((item) => (
               <div
                 key={item.id}
-                className="p-3.75 rounded-lg border-[0.8px] border-[#D9D9D9] flex flex-col md:flex-row justify-between relative mb-3.75"
+                className="p-3.75 rounded-lg border-[0.8px] border-[#D9D9D9] flex items-center flex-row justify-between relative mb-3.75"
               >
                 <div className="w-full md:w-1/4">
                   <img
-                    className="w-full"
+                    className="w-full rounded-xl"
                     src={item.url_image}
                     alt={item.name}
                   />
@@ -346,13 +388,13 @@ export default function Kasir() {
               Rp {total.toLocaleString("id-ID")}
             </h2>
           </div>
-          <button
+          <Button
             onClick={handlePayment}
             disabled={loading || !cart.length}
             className="text-white flex bg-[#5565FF] py-3 w-full rounded-xl justify-center items-center gap-2.5"
           >
             {loading ? "Memproses..." : "Bayar Sekarang"}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

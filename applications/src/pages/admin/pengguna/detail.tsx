@@ -1,12 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import {
-  User as UserIcon,
-  Mail,
-  Shield,
-  Calendar,
-  Info,
-} from "lucide-react";
+import { User as UserIcon, Mail, Shield, Calendar, Info } from "lucide-react";
 
 import { UserServices } from "../../../services/userService";
 import { formatDate } from "../../../utils/formatDate";
@@ -60,19 +54,10 @@ const DetailPengguna = () => {
 
   return (
     <div className="w-full px-4">
-      {/* HEADER */}
-      {/* HEADER */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold text-gray-800">
-          Detail Produk
-        </h1>
-        <p className="text-sm text-gray-400 mt-1">
-          Beranda / Daftar Produk /{" "}
-          <span className="text-indigo-600">Detail Produk</span>
-        </p>
-      </div>
+      <ContainerHeaderPage className="mb-5">
+        <HeaderTitle>Detail Pengguna</HeaderTitle>
+      </ContainerHeaderPage>
       <div className="max-w-6xl flex flex-col lg:flex-row gap-6 mt-4">
-
         <Card className="w-full lg:w-[260px] shadow-none rounded-3xl p-6 flex flex-col items-center text-center">
           <img
             src={`https://ui-avatars.com/api/?name=${user.username}&background=6366f1&color=fff`}
@@ -84,9 +69,7 @@ const DetailPengguna = () => {
             {user.username}
           </h2>
 
-          <p className="text-xs text-gray-400 mb-3">
-            {user.email}
-          </p>
+          <p className="text-xs text-gray-400 mb-3">{user.email}</p>
 
           <span className="px-3 py-1 rounded-full bg-indigo-100 text-indigo-600 text-xs font-medium">
             {user.role}
@@ -114,17 +97,9 @@ const DetailPengguna = () => {
             value={user.username}
           />
 
-          <InfoRow
-            icon={<Mail size={14} />}
-            label="Email"
-            value={user.email}
-          />
+          <InfoRow icon={<Mail size={14} />} label="Email" value={user.email} />
 
-          <InfoRow
-            icon={<Shield size={14} />}
-            label="Role"
-            value={user.role}
-          />
+          <InfoRow icon={<Shield size={14} />} label="Role" value={user.role} />
 
           <InfoRow
             icon={<Calendar size={14} />}
@@ -140,7 +115,6 @@ const DetailPengguna = () => {
 
 export default DetailPengguna;
 
-/* ================= HELPER ================= */
 
 const InfoRow = ({
   icon,
@@ -158,16 +132,10 @@ const InfoRow = ({
       !noBorder ? "border-b border-gray-100" : ""
     }`}
   >
-    <div className="text-indigo-600 mt-1">
-      {icon}
-    </div>
+    <div className="text-indigo-600 mt-1">{icon}</div>
     <div>
-      <p className="text-xs text-gray-400 mb-1">
-        {label}
-      </p>
-      <p className="text-sm text-gray-600">
-        {value}
-      </p>
+      <p className="text-xs text-gray-400 mb-1">{label}</p>
+      <p className="text-sm text-gray-600">{value}</p>
     </div>
   </div>
 );
