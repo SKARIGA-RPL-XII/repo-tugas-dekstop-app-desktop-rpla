@@ -3,6 +3,7 @@ import { createUserSchema, updateUserSchema } from "../schemas/user.schema.js";
 import { errorResponse, successResponse } from "../utils/response.js";
 import { supabase } from "../config/supabase.js";
 import { formatFieldError } from "../utils/formatFieldError.js";
+import bcrypt from "bcryptjs";
 
 export class UsersController {
   static async getUsers(req, res) {
@@ -14,7 +15,7 @@ export class UsersController {
         count
       } = await Users.getAll(supabase, req.query);
 
-      return successResponse(res, data , "Users retrieved successfully", 200, {
+      return successResponse(res, data, "Users retrieved successfully", 200, {
         page: parseInt(page, 10),
         limit: parseInt(limit, 10),
         count,
@@ -89,37 +90,48 @@ export class UsersController {
           res,
           "Validation error",
           400,
-          validation.error.errors.map((e) => e.message).join(", "),
+          validation.error.errors.map(e => e.message).join(", ")
         );
       }
 
-      const payload = validation.data;
+      const payload = { ...validation.data };
+      const userId = req.params.id;
 
-      const updatedUser = await Users.update(supabase, req.params.id, payload);
+      if (payload.password) {
+        const salt = await bcrypt.genSalt(10);
+        payload.password = await bcrypt.hash(payload.password, salt);
+      } else {
+        delete payload.password;
+      }
+
+      if (req.file) {
+        const avatarPath = await uploadOrReplaceAvatar({
+          supabase,
+          userId,
+          file: req.file,
+        });
+
+        payload.avatar_image = avatarPath;
+      }
+
+      const updatedUser = await Users.update(supabase, userId, payload);
 
       if (!updatedUser) {
         return errorResponse(
           res,
-          `User with ID ${req.params.id} not found`,
-          404,
+          `User with ID ${userId} not found`,
+          404
         );
       }
 
       return successResponse(res, updatedUser, "User updated successfully");
+
     } catch (error) {
-      if (error.name === "ZodError") {
-        return errorResponse(
-          res,
-          "Validation error",
-          400,
-          error.errors.map((e) => e.message).join(", "),
-        );
-      }
       return errorResponse(
         res,
         "Internal Server Error during update",
         500,
-        formatFieldError(error.message),
+        error.message
       );
     }
   }
@@ -146,4 +158,19 @@ export class UsersController {
       );
     }
   }
+}
+async function uploadOrReplaceAvatar({ supabase, userId, file }) {
+  const filePath = `user-${userId}.png`;
+
+  const { error } = await supabase.storage
+    .from("avatars")
+    .upload(filePath, file.buffer, {
+      upsert: true,              
+      contentType: file.mimetype,
+      cacheControl: "no-cache", 
+    });
+
+  if (error) throw error;
+
+  return filePath;
 }
