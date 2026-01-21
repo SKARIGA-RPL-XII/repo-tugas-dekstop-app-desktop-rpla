@@ -6,7 +6,7 @@ const TABLE_NAME = "categories";
  * @returns {Promise<Array<Object> | null>} return array type
  */
 export const getAllCategories = async ({
-  created_at,
+  start_date, // ✅ SESUAI FRONTEND
   page = 1,
   limit = 10,
   search = "",
@@ -14,32 +14,35 @@ export const getAllCategories = async ({
   try {
     const offset = (page - 1) * limit;
 
-    let query = supabase.from("categories").select(
+    let query = supabase.from(TABLE_NAME).select(
       `
         *,
         products:products(id)
       `,
-      { count: "exact" },
+      { count: "exact" }
     );
 
-    // if (created_at) {
-    //   query = query
-    //     .gte("created_at", `${created_at}T00:00:00`)
-    //     .lte("created_at", `${created_at}T23:59:59`);
-    // }
-
-    if (created_at) {
-      query = query.order("created_at", { ascending: false });
+    /* ===================== DATE FILTER (FIX UTAMA) ===================== */
+    if (start_date) {
+      query = query
+        .gte("created_at", `${start_date}T00:00:00`)
+        .lte("created_at", `${start_date}T23:59:59`);
     }
 
+    /* ===================== SEARCH ===================== */
     if (search) {
       query = query.ilike("category_name", `%${search}%`);
     }
 
+    /* ===================== SORT DEFAULT ===================== */
+    query = query.order("created_at", { ascending: false });
+
+    /* ===================== PAGINATION ===================== */
     const { data, count, error } = await query.range(
       offset,
-      offset + limit - 1,
+      offset + limit - 1
     );
+
     if (error) throw error;
 
     const dataWithProductCount = (data || []).map((cat) => ({
@@ -51,7 +54,7 @@ export const getAllCategories = async ({
     return {
       success: true,
       status: 200,
-      message: "Categories retrieved successful",
+      message: "Categories retrieved successfully",
       data: dataWithProductCount,
       meta: {
         page,

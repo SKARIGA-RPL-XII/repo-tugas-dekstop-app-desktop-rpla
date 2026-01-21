@@ -42,6 +42,7 @@ const Category = () => {
     closeDelete,
     filters,
     setSearch,
+    setFilterField,
   } = useCategoryDialog();
 
   const {
@@ -58,10 +59,12 @@ const Category = () => {
     deleteCategory,
     deleteLoading,
   } = useCategories({
-    page: filters.page,
-    limit: filters.limit,
-    search: filters.search,
-  });
+  page: filters.page,
+  limit: filters.limit,
+  search: filters.search,
+  start_date: filters.start_date, // ✅ WAJIB
+});
+
   const { addToast } = useToast();
 
   const isLoading = loading || createLoading || updateLoading || deleteLoading;
@@ -152,14 +155,24 @@ const Category = () => {
         <HeaderTableContainer>
           <HeaderTableSearch
             value={filters.search}
-            onChange={(val) => {
-              setSearch(val);
-            }}
-            onSearch={(val) => {
-              setCategoryFilters({ ...categoryFilters, page: 1, search: val });
-            }}
+            onChange={setSearch}
             placeholder="Cari kategori..."
           />
+
+          <label className="flex items-center gap-2 h-10 px-4 border border-gray-200 rounded-full bg-white text-sm cursor-pointer hover:bg-gray-50">
+            <span className="text-gray-400">
+              <i className="lucide lucide-calendar w-4 h-4" />
+            </span>
+              <input
+                type="date"
+                className="bg-transparent outline-none text-sm cursor-pointer"
+                value={filters.start_date}
+                onChange={(e) =>
+                  setFilterField("start_date", e.target.value)
+                }
+              />
+
+          </label>
         </HeaderTableContainer>
 
         <DataTable

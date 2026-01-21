@@ -20,6 +20,7 @@ const ProdukDetail = () => {
         const data = await ProductServices.getProductById(id);
         setProduk(data);
       } catch (err) {
+        console.error(err);
         setError("Gagal memuat data produk");
       } finally {
         setLoading(false);
@@ -53,6 +54,12 @@ const ProdukDetail = () => {
     );
   }
 
+  /* ================== NORMALISASI STATUS ================== */
+  const isActive =
+    produk.is_active === true ||
+    produk.is_active === "true" ||
+    produk.is_active === 1;
+
   return (
     <div className="max-w-7xl mx-auto px-6 py-6 font-montserrat">
       {/* HEADER */}
@@ -67,21 +74,29 @@ const ProdukDetail = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* GAMBAR (PLACEHOLDER) */}
+        {/* GAMBAR */}
         <div className="bg-white rounded-2xl shadow-sm p-6 flex justify-center items-center">
-          <div className="w-48 h-48 bg-gray-100 flex items-center justify-center text-gray-400 rounded-lg">
-            No Image
-          </div>
+          {produk.url_image ? (
+            <img
+              src={produk.url_image}
+              alt={produk.product_name}
+              className="w-48 h-48 object-cover rounded-lg"
+            />
+          ) : (
+            <div className="w-48 h-48 bg-gray-100 flex items-center justify-center text-gray-400 rounded-lg">
+              No Image
+            </div>
+          )}
         </div>
 
         {/* INFORMASI */}
         <div className="md:col-span-2 bg-white rounded-2xl shadow-sm p-6">
           <h2 className="text-xl font-semibold text-gray-800 mb-1">
-            {produk.name}
+            {produk.product_name}
           </h2>
 
           <p className="text-sm text-gray-500 mb-4">
-            {produk.code ?? "-"} • {produk.category_name ?? "-"}
+            {produk.product_code ?? "-"} • {produk.category_name ?? "-"}
           </p>
 
           <hr className="mb-4" />
@@ -93,7 +108,7 @@ const ProdukDetail = () => {
                 Harga:
               </h3>
               <p className="text-sm text-gray-500">
-                Rp {produk.price.toLocaleString("id-ID")}
+                Rp {Number(produk.price).toLocaleString("id-ID")}
               </p>
             </div>
 
@@ -101,8 +116,20 @@ const ProdukDetail = () => {
               <h3 className="text-sm font-medium text-gray-700 mb-1">
                 Stok:
               </h3>
-              <p className="text-sm text-gray-500">{produk.stock}</p>
+              <p className="text-sm text-gray-500">
+                {produk.stock}
+              </p>
             </div>
+          </div>
+
+          {/* DESKRIPSI */}
+          <div className="mb-4">
+            <h3 className="text-sm font-medium text-gray-700 mb-1">
+              Deskripsi:
+            </h3>
+            <p className="text-sm text-gray-500">
+              {produk.description || "-"}
+            </p>
           </div>
 
           {/* TANGGAL */}
@@ -111,11 +138,13 @@ const ProdukDetail = () => {
               Tanggal Dibuat:
             </h3>
             <p className="text-sm text-gray-500">
-              {new Date(produk.created_at).toLocaleDateString("id-ID", {
-                day: "2-digit",
-                month: "long",
-                year: "numeric",
-              })}
+              {produk.created_at
+                ? new Date(produk.created_at).toLocaleDateString("id-ID", {
+                    day: "2-digit",
+                    month: "long",
+                    year: "numeric",
+                  })
+                : "-"}
             </p>
           </div>
 
@@ -126,12 +155,12 @@ const ProdukDetail = () => {
             </h3>
             <span
               className={`inline-block px-3 py-1 rounded-md text-xs font-medium ${
-                produk.is_active
+                isActive
                   ? "bg-emerald-100 text-emerald-600"
                   : "bg-gray-200 text-gray-500"
               }`}
             >
-              {produk.is_active ? "Aktif" : "Nonaktif"}
+              {isActive ? "Aktif" : "Tidak Aktif"}
             </span>
           </div>
         </div>

@@ -61,13 +61,18 @@ const DetailPengguna = () => {
   return (
     <div className="w-full px-4">
       {/* HEADER */}
-      <ContainerHeaderPage>
-        <HeaderTitle>Detail Pengguna</HeaderTitle>
-      </ContainerHeaderPage>
-
+      {/* HEADER */}
+      <div className="mb-6">
+        <h1 className="text-2xl font-semibold text-gray-800">
+          Detail Produk
+        </h1>
+        <p className="text-sm text-gray-400 mt-1">
+          Beranda / Daftar Produk /{" "}
+          <span className="text-indigo-600">Detail Produk</span>
+        </p>
+      </div>
       <div className="max-w-6xl flex flex-col lg:flex-row gap-6 mt-4">
 
-        {/* ================= LEFT CARD ================= */}
         <Card className="w-full lg:w-[260px] shadow-none rounded-3xl p-6 flex flex-col items-center text-center">
           <img
             src={`https://ui-avatars.com/api/?name=${user.username}&background=6366f1&color=fff`}
@@ -95,7 +100,6 @@ const DetailPengguna = () => {
           </Button>
         </Card>
 
-        {/* ================= RIGHT CARD ================= */}
         <Card className="flex-1 shadow-none rounded-3xl p-8">
           <div className="flex items-center gap-2 mb-6">
             <Info size={16} className="text-indigo-600" />

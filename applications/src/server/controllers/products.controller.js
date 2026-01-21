@@ -40,7 +40,6 @@ export class ProductsController {
   //   }
   // }
   
-
 static async createProduct(req, res) {
   try {
     const {
@@ -48,7 +47,8 @@ static async createProduct(req, res) {
       price,
       description,
       category_id,
-      stock
+      stock,
+      is_active // 🔥 AMBIL DARI BODY
     } = req.body;
 
     if (!product_name || !price || !category_id) {
@@ -85,11 +85,12 @@ static async createProduct(req, res) {
 
     const payload = {
       product_name,
-      product_code, 
+      product_code,
       price,
       description,
       category_id,
       stock,
+      is_active: is_active === "true" || is_active === true, // 🔥 KUNCI
       url_image: publicUrl.publicUrl
     };
 
@@ -104,41 +105,46 @@ static async createProduct(req, res) {
 
 
   static async updateProduct(req, res) {
-    try {
-      const id = req.params.id;
+  try {
+    const id = req.params.id;
 
-      const {
-        product_name,
-        product_code,
-        price,
-        description,
-        url_image,
-        category_id
-      } = req.body;
+    const {
+      product_name,
+      product_code,
+      price,
+      description,
+      url_image,
+      category_id,
+      is_active, // 🔥 AMBIL DARI BODY
+      stock
+    } = req.body;
 
-      const payload = {
-        product_name,
-        product_code,
-        price,
-        description,
-        url_image,
-        category_id
-      };
+    const payload = {
+      product_name,
+      product_code,
+      price,
+      description,
+      url_image,
+      category_id,
+      stock,
+      is_active: is_active === "true" || is_active === true,
+    };
 
-      Object.keys(payload).forEach(
-        key => payload[key] === undefined && delete payload[key]
-      );
+    Object.keys(payload).forEach(
+      key => payload[key] === undefined && delete payload[key]
+    );
 
-      if (Object.keys(payload).length === 0) {
-        return errorResponse(res, "No data to update", 400);
-      }
-
-      const data = await Products.update(supabase, id, payload);
-      return successResponse(res, data, "Product updated successfully");
-    } catch (e) {
-      return errorResponse(res, e.message, 400);
+    if (Object.keys(payload).length === 0) {
+      return errorResponse(res, "No data to update", 400);
     }
+
+    const data = await Products.update(supabase, id, payload);
+    return successResponse(res, data, "Product updated successfully");
+  } catch (e) {
+    return errorResponse(res, e.message, 400);
   }
+}
+
 
 
 static async deleteProduct(req, res) {

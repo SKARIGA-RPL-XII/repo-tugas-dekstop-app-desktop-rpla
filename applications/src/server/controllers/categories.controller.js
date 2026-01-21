@@ -12,10 +12,11 @@ import { formatFieldError } from "../utils/formatFieldError.js";
 export class CategoryController {
  static async getCategories(req, res) {
   try {
-    const { created_at, page = 1, limit = 10, search = "" } = req.query;
+    // ✅ SAMAKAN DENGAN FRONTEND
+    const { start_date, page = 1, limit = 10, search = "" } = req.query;
 
     const params = {
-      created_at,
+      start_date, // ✅ FIX UTAMA
       page: parseInt(page, 10),
       limit: parseInt(limit, 10),
       search,
@@ -31,7 +32,7 @@ export class CategoryController {
       {
         page: params.page,
         limit: params.limit,
-        count: result.meta.count
+        count: result.meta.count,
       }
     );
   } catch (error) {

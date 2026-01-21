@@ -1,8 +1,6 @@
 import { Eye, EyeOff, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
-
 import {
   ContainerHeaderPage,
   HeaderActions,
@@ -17,10 +15,8 @@ import {
 } from "../../../components/UI/header-table";
 import DeleteAlert from "../../../components/Modals/DeleteAlert";
 import { EmptyNoData, EmptyNoResults } from "../../../components/UI/EmptyState";
-
 import { useUsers } from "../../../hooks/users/useUsers";
 import { useUserDialog } from "../../../hooks/users/useUserDialog";
-
 import {
   AlertDialog,
   AlertDialogContent,
@@ -50,16 +46,16 @@ const Pengguna = () => {
     closeDelete,
     openDeleteState,
     open,
-    filters,      // ✅ TAMBAH
+    filters,     
     setSearch,
+    setFilterField,  
+    resetFilters, 
   } = useUserDialog();
 
 
   const {
     data,
     meta,
-    filters: userFilters,
-    setFilters: setUserFilters,
     loading,
     refetch,
     createUser,
@@ -68,11 +64,7 @@ const Pengguna = () => {
     updateLoading,
     deleteUser,
     deleteLoading,
-  } = useUsers({
-  page: filters.page,
-  limit: filters.limit,
-  search: filters.search,
-});
+  } = useUsers(filters);
 
   useEffect(() => {
     refetch();
@@ -300,21 +292,61 @@ const Pengguna = () => {
       </ContainerHeaderPage>
 
       <Card>
-        <HeaderTableContainer>
+      <HeaderTableContainer className="flex flex-wrap items-center gap-3">
+
+        <div className="relative">
           <HeaderTableSearch
             value={filters.search}
             onChange={(val) => setSearch(val)}
-            onSearch={(val) =>
-              setUserFilters({
-                ...userFilters,
-                page: 1,
-                search: val,
-              })
-            }
-            placeholder="Cari pengguna..."
+            onSearch={(val) => setSearch(val)}
+            placeholder="Telusuri sesuatu..."
+            className="w-64"
           />
+        </div>
 
-        </HeaderTableContainer>
+        <label className="flex items-center gap-2 h-10 px-4 border border-gray-200 rounded-full bg-white text-sm cursor-pointer hover:bg-gray-50">
+          <span className="text-gray-400">
+            <i className="lucide lucide-user w-4 h-4" />
+          </span>
+          <select
+            className="bg-transparent outline-none text-sm cursor-pointer"
+            value={filters.role}
+            onChange={(e) => setFilterField("role", e.target.value)}
+          >
+            <option value="">Role</option>
+            <option value="admin">Admin</option>
+            <option value="cashier">cashier</option>
+          </select>
+        </label>
+
+        <label className="flex items-center gap-2 h-10 px-4 border border-gray-200 rounded-full bg-white text-sm cursor-pointer hover:bg-gray-50">
+          <span className="text-gray-400">
+            <i className="lucide lucide-check-circle w-4 h-4" />
+          </span>
+          <select
+            className="bg-transparent outline-none text-sm cursor-pointer"
+            value={filters.status}
+            onChange={(e) => setFilterField("status", e.target.value)}
+          >
+            <option value="">Status</option>
+            <option value="active">Aktif</option>
+            <option value="blocked">Di Blokir</option>
+          </select>
+        </label>
+
+        <label className="flex items-center gap-2 h-10 px-4 border border-gray-200 rounded-full bg-white text-sm cursor-pointer hover:bg-gray-50">
+          <span className="text-gray-400">
+            <i className="lucide lucide-calendar w-4 h-4" />
+          </span>
+          <input
+            type="date"
+            className="bg-transparent outline-none text-sm cursor-pointer"
+            value={filters.start_date}
+            onChange={(e) => setFilterField("start_date", e.target.value)}
+          />
+        </label>
+
+      </HeaderTableContainer>
 
         <DataTable
           columns={columns}
@@ -322,28 +354,20 @@ const Pengguna = () => {
           isLoading={isLoading}
           noDataComponent={<EmptyNoData onRefresh={refetch} />}
           noResultsComponent={<EmptyNoResults onRefresh={refetch} />}
-          page={userFilters.page}
           pageSize={meta.limit}
           total={meta.count}
+          page={filters.page}
           onPageChange={(newPage) =>
-            setUserFilters((prev) => ({
-              ...prev,
-              page: newPage,
-            }))
+            setFilterField("page", Number(newPage))
           }
-
         />
 
-
       </Card>
-
       <AlertDialog
         open={open}
         onOpenChange={(v) => !v && close()}
         className="max-w-5xl w-full"
       >
-
-
         <AlertDialogHeader className="bg-gray-100 px-8 py-4 font-semibold">
           {mode === "edit" ? "Edit Pengguna" : "Tambah Pengguna Baru"}
         </AlertDialogHeader>

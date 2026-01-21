@@ -9,7 +9,13 @@ router.get("/products", authMiddleware, adminMiddleware, ProductsController.filt
 // router.get("/product", authMiddleware, adminMiddleware, ProductsController.getProducts);
 router.get("/product/:id", authMiddleware, adminMiddleware, ProductsController.getProducts);
 router.post("/product",authMiddleware,adminMiddleware,upload.single("image"), ProductsController.createProduct);
-router.put("/product/:id", authMiddleware, adminMiddleware, ProductsController.updateProduct);
+router.put(
+  "/product/:id",
+  authMiddleware,
+  adminMiddleware,
+  upload.single("image"),
+  ProductsController.updateProduct
+);
 router.delete("/delete/:id", authMiddleware, adminMiddleware, ProductsController.deleteProduct);
 
 export default router;
