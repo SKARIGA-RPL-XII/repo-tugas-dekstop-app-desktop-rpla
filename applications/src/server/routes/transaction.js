@@ -18,9 +18,13 @@ router.get(
   "/transaction/:transaction_id",
   authMiddleware,
   cashierMiddleware,
-  TransactionsController.getTransactionDetail,
+  TransactionsController.getTransaction,
 );
-
-
+router.get(
+  "/transaction/",
+  authMiddleware,
+  cashierMiddleware,
+  TransactionsController.getTransaction,
+);
 
 export default router;

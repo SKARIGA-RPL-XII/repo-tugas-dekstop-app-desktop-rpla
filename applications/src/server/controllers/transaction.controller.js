@@ -103,67 +103,85 @@ export class TransactionsController {
     }
   }
 
-  static async getTransactionDetail(req, res) {
+  static async getTransaction(req, res) {
     try {
       const { transaction_id } = req.params;
 
-      if (!transaction_id) {
-        return errorResponse(res, "transaction_id is required", 400);
-      }
-
-      const { data: transaction, error: transactionError } = await supabase
-        .from("transactions")
-        .select(
-          `
+      let query = supabase.from("transactions").select(`
         id,
         invoice_number,
         total_price,
         created_at,
-        user_id
-      `,
+        user_id,
+        transaction_detail (
+          id,
+          qty,
+          price,
+          product:products (
+            id,
+            product_name
+          )
         )
-        .eq("id", transaction_id)
-        .single();
+      `);
 
-      if (transactionError || !transaction) {
-        return errorResponse(res, "Transaction not found", 404);
+      // 👉 kalau ada param → ambil 1 transaksi
+      if (transaction_id) {
+        query = query.eq("id", transaction_id).single();
       }
 
-      const { data: details, error: detailError } = await supabase
-        .from("transaction_detail")
-        .select(
-          `
-        id,
-        qty,
-        price,
-        product:products (
-          id,
-          product_name
-        )
-      `,
-        )
-        .eq("transaction_id", transaction_id);
+      const { data, error } = await query;
 
-      if (detailError) throw detailError;
+      if (error) {
+        return errorResponse(res, error.message, 400);
+      }
 
-      const items = details.map((item) => ({
-        product_id: item.product.id,
-        product_name: item.product.product_name,
-        qty: item.qty,
-        price: item.price,
-        subtotal: item.qty * item.price,
+      // 👉 jika ambil 1 transaksi
+      if (transaction_id) {
+        if (!data) {
+          return errorResponse(res, "Transaction not found", 404);
+        }
+
+        const items = data.transaction_detail.map((item) => ({
+          product_id: item.product.id,
+          product_name: item.product.product_name,
+          qty: item.qty,
+          price: item.price,
+          subtotal: item.qty * item.price,
+        }));
+
+        return successResponse(
+          res,
+          {
+            id: data.id,
+            invoice_number: data.invoice_number,
+            total_price: data.total_price,
+            created_at: data.created_at,
+            user_id: data.user_id,
+            items,
+          },
+          "Success get transaction detail",
+        );
+      }
+
+      // 👉 jika TANPA param → ambil semua transaksi
+      const transactions = data.map((trx) => ({
+        id: trx.id,
+        invoice_number: trx.invoice_number,
+        total_price: trx.total_price,
+        created_at: trx.created_at,
+        user_id: trx.user_id,
+        items: trx.transaction_detail.map((item) => ({
+          product_id: item.product.id,
+          product_name: item.product.product_name,
+          qty: item.qty,
+          price: item.price,
+          subtotal: item.qty * item.price,
+        })),
       }));
 
-      return successResponse(
-        res,
-        {
-          transaction,
-          items,
-        },
-        "Success get transaction detail",
-      );
+      return successResponse(res, transactions, "Success get transactions");
     } catch (e) {
-      return errorResponse(res, e.message, 400);
+      return errorResponse(res, e.message, 500);
     }
   }
 }
