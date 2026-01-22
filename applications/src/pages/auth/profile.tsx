@@ -20,6 +20,7 @@ import { useToast } from "../../components/UI/ToastContext";
 import { Input } from "../../components/UI/Input";
 import { useAuth } from "../../context/AuthContext";
 import { formatDate } from "../../utils/formatDate";
+import { getInitial, getRandomColor } from "../../utils/avatar";
 
 export const ProfilePage = () => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -27,6 +28,9 @@ export const ProfilePage = () => {
   const { addToast } = useToast();
 
   const profile = useProfileDialog(user);
+
+  const displayName = user?.username || user?.email || "User";
+  const avatarColor = getRandomColor(displayName);
 
   const handleSaveProfile = async () => {
     if (!profile.form.username || profile.form.username.trim().length < 3) {
@@ -94,11 +98,11 @@ export const ProfilePage = () => {
         <Card className="flex rounded-2xl shadow-none flex-col items-center space-y-2 w-full lg:w-62.5 overflow-hidden">
           <div className="max-w-xl flex justify-center flex-col items-center pt-10">
             <div className="relative">
-              <img
-                src={profileImage}
-                alt="Profile"
-                className="w-28 h-28 rounded-lg object-cover bg-accent-foreground"
-              />
+              <div
+                className={`w-28 h-28 rounded-lg flex items-center justify-center text-white text-3xl font-bold select-none ${avatarColor}`}
+              >
+                {getInitial(displayName)}
+              </div>
 
               <Button
                 onClick={() => fileInputRef.current?.click()}
