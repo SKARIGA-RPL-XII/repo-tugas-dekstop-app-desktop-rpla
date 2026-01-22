@@ -85,7 +85,7 @@ const DetailPengguna = () => {
                   <th className="py-3 px-3 text-right">Jumlah Item</th>
                 </tr>
               </thead>
-              {/* <tbody>
+              <tbody>
                 {transaction.items.map((item, index) => (
                   <tr
                     key={index}
@@ -97,7 +97,7 @@ const DetailPengguna = () => {
                     <td className="py-3 px-3 text-right">{item.qty}</td>
                   </tr>
                 ))}
-              </tbody> */}
+              </tbody>
             </table>
           </div>
         </Card>
