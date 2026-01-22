@@ -9,7 +9,6 @@ const router = Router();
 router.get("/users", authMiddleware, adminMiddleware,UsersController.getUsers);
 router.get("/user/:id", authMiddleware,adminMiddleware, UsersController.getUserById);
 router.post("/users", authMiddleware,adminMiddleware, UsersController.createUser);
-router.put("/user/:id", authMiddleware, UsersController.updateUser);
 router.put("/user/:id",authMiddleware,adminMiddleware,upload.single("avatar"),UsersController.updateUser);
 router.delete("/user/:id", authMiddleware, adminMiddleware, UsersController.deleteUser);
 

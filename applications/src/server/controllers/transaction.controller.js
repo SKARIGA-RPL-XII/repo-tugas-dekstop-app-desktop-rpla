@@ -4,27 +4,36 @@ import { supabase } from "../config/supabase.js";
 export class TransactionsController {
   static async createTransaction(req, res) {
     try {
-      const { user_id, items } = req.body;
+      const { user_id, items, payment_amount, payment_method } = req.body;
 
-      if (!user_id || !Array.isArray(items) || items.length === 0) {
-        return errorResponse(res, "user_id and items are required", 400);
+      // Validasi dasar
+      if (
+        !user_id ||
+        !Array.isArray(items) ||
+        items.length === 0 ||
+        payment_amount == null ||
+        !payment_method
+      ) {
+        return errorResponse(
+          res,
+          "user_id, items, payment_amount, and payment_method are required",
+          400,
+        );
       }
 
-      // 1. Ambil data product
-      const productIds = items.map(item => item.product_id);
+      const productIds = items.map((item) => item.product_id);
 
       const { data: products, error: productError } = await supabase
         .from("products")
         .select("id, price, stock")
-        .in("id", productIds)
+        .in("id", productIds);
 
       if (productError) throw productError;
 
-      // 2. Validasi & hitung total
       let total_price = 0;
 
-      const transactionDetails = items.map(item => {
-        const product = products.find(p => p.id === item.product_id);
+      const transactionDetails = items.map((item) => {
+        const product = products.find((p) => p.id === item.product_id);
 
         if (!product) {
           throw new Error(`Product not found: ${item.product_id}`);
@@ -40,11 +49,15 @@ export class TransactionsController {
         return {
           product_id: item.product_id,
           qty: item.qty,
-          price: product.price
+          price: product.price,
         };
       });
 
-      // 3. Insert transactions
+      // Optional: validasi pembayaran
+      if (payment_amount < total_price) {
+        return errorResponse(res, "Jumlah bayar kurang", 400);
+      }
+
       const invoice_number = `INV-${Date.now()}`;
 
       const { data: transaction, error: transactionError } = await supabase
@@ -52,17 +65,18 @@ export class TransactionsController {
         .insert({
           user_id,
           invoice_number,
-          total_price
+          total_price,
+          payment_amount,
+          payment_method,
         })
         .select()
         .single();
 
       if (transactionError) throw transactionError;
 
-      // 4. Insert transaction_detail
-      const detailPayload = transactionDetails.map(detail => ({
+      const detailPayload = transactionDetails.map((detail) => ({
         ...detail,
-        transaction_id: transaction.id
+        transaction_id: transaction.id,
       }));
 
       const { error: detailError } = await supabase
@@ -71,15 +85,83 @@ export class TransactionsController {
 
       if (detailError) throw detailError;
 
-      // 5. Update stock product
+      // Kurangi stok
       for (const item of transactionDetails) {
         await supabase.rpc("decrease_stock", {
           p_product_id: item.product_id,
-          p_qty: item.qty
+          p_qty: item.qty,
         });
       }
 
-      return successResponse(res, transaction, "Transaction created successfully");
+      return successResponse(
+        res,
+        transaction,
+        "Transaction created successfully",
+      );
+    } catch (e) {
+      return errorResponse(res, e.message, 400);
+    }
+  }
+
+  static async getTransactionDetail(req, res) {
+    try {
+      const { transaction_id } = req.params;
+
+      if (!transaction_id) {
+        return errorResponse(res, "transaction_id is required", 400);
+      }
+
+      const { data: transaction, error: transactionError } = await supabase
+        .from("transactions")
+        .select(
+          `
+        id,
+        invoice_number,
+        total_price,
+        created_at,
+        user_id
+      `,
+        )
+        .eq("id", transaction_id)
+        .single();
+
+      if (transactionError || !transaction) {
+        return errorResponse(res, "Transaction not found", 404);
+      }
+
+      const { data: details, error: detailError } = await supabase
+        .from("transaction_detail")
+        .select(
+          `
+        id,
+        qty,
+        price,
+        product:products (
+          id,
+          product_name
+        )
+      `,
+        )
+        .eq("transaction_id", transaction_id);
+
+      if (detailError) throw detailError;
+
+      const items = details.map((item) => ({
+        product_id: item.product.id,
+        product_name: item.product.product_name,
+        qty: item.qty,
+        price: item.price,
+        subtotal: item.qty * item.price,
+      }));
+
+      return successResponse(
+        res,
+        {
+          transaction,
+          items,
+        },
+        "Success get transaction detail",
+      );
     } catch (e) {
       return errorResponse(res, e.message, 400);
     }
