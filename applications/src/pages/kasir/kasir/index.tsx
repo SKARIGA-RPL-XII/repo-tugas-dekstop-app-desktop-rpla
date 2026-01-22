@@ -206,41 +206,42 @@ export default function Kasir() {
             Semua Kategori
           </h4>
 
-          {loadingCatgeory ? (
-            Array.from({length:4}).map((_,i) => (
-              <div key={i + 1} className="w-full flex items-center">
-                <div className="text-sm bg-slate-200 animate-pulse rounded-full w-full h-7"/>
-              </div>
-            ))
-          ) : (
-            categoriesData.map((cat) => {
-              const active = filters.category_id === cat.id;
+          {loadingCatgeory
+            ? Array.from({ length: 4 }).map((_, i) => (
+                <div key={i + 1} className="w-full flex items-center">
+                  <div className="text-sm bg-slate-200 animate-pulse rounded-full w-full h-7" />
+                </div>
+              ))
+            : categoriesData.map((cat) => {
+                const active = filters.category_id === cat.id;
 
-              return (
-                <h4
-                  key={cat.id}
-                  onClick={() =>
-                    setFilters({ ...filters, category_id: cat.id, page: 1 })
-                  }
-                  className={`w-fit py-1.5 px-3 rounded-full text-xs cursor-pointer transition
+                return (
+                  <h4
+                    key={cat.id}
+                    onClick={() =>
+                      setFilters({ ...filters, category_id: cat.id, page: 1 })
+                    }
+                    className={`w-fit py-1.5 px-3 rounded-full text-xs cursor-pointer transition
           ${
             active
               ? "bg-[#3A47B0] text-white"
               : "text-black/60 hover:bg-gray-100"
           }
         `}
-                >
-                  {cat.category_name}
-                </h4>
-              );
-            })
-          )}
+                  >
+                    {cat.category_name}
+                  </h4>
+                );
+              })}
         </div>
 
         {loading ? (
           <div className="w-full grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {Array.from({ length: 9 }).map((_, i) => (
-              <div key={i + 1} className="bg-muted-foreground animate-pulse w-full h-60 rounded-xl"></div>
+              <div
+                key={i + 1}
+                className="bg-muted-foreground animate-pulse w-full h-60 rounded-xl"
+              ></div>
             ))}
           </div>
         ) : error ? (
@@ -361,16 +362,32 @@ export default function Kasir() {
             value={paymentMethod}
             onChange={(e) => setPaymentMethod(e.target.value)}
             className="mb-6"
+            readOnly
           />
           <label className="block mb-2 ml-2 text-xs text-black font-medium">
             Jumlah Dibayarkan
           </label>
           <Input
             type="number"
-            value={paidAmount}
-            onChange={(e) => setPaidAmount(Number(e.target.value))}
+            min={0}
+            value={paidAmount === 0 ? "" : paidAmount}
+            onChange={(e) => {
+              const val = e.target.value;
+
+              if (val === "") {
+                setPaidAmount(0);
+                return;
+              }
+
+              const numberVal = Number(val);
+
+              if (numberVal >= 0) {
+                setPaidAmount(numberVal);
+              }
+            }}
             className="mb-6"
           />
+
           <label className="block mb-2 ml-2 text-xs text-black font-medium">
             Kembali
           </label>
