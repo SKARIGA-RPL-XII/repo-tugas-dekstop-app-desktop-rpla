@@ -10,20 +10,20 @@ const router = Router();
 router.post(
   "/transaction/create",
   authMiddleware,
-  cashierMiddleware,
+  // cashierMiddleware,
   TransactionsController.createTransaction,
 );
 
 router.get(
   "/transaction/:transaction_id",
   authMiddleware,
-  cashierMiddleware,
+  // cashierMiddleware,
   TransactionsController.getTransaction,
 );
 router.get(
   "/transaction/",
   authMiddleware,
-  cashierMiddleware,
+  // cashierMiddleware,
   TransactionsController.getTransaction,
 );
 

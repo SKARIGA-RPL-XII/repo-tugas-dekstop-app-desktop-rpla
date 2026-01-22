@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import {
@@ -13,37 +13,54 @@ import {
 } from "../../../components/UI/header-table";
 import { EmptyNoData, EmptyNoResults } from "../../../components/UI/EmptyState";
 
-import { useUsers } from "../../../hooks/users/useUsers";
 import { getUserColumns } from "../../../columns/userColumns";
+import ApiClient from "../../../utils/apiClient";
+import { getTransactionColumns } from "../../../columns/transactionColumns";
+import { useAuth } from "../../../context/AuthContext";
 
 const Pengguna = () => {
   const navigate = useNavigate();
+  const {user} = useAuth();
 
-  const {
-    data,
-    meta,
-    filters,
-    setFilters,
-    loading,
-    refetch,
-  } = useUsers({
-    page: 1,
-    limit: 10,
+  const [data, setData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [filters, setFilters] = useState({
     search: "",
+    page: 1,
   });
 
-  useEffect(() => {
-    refetch();
-  }, []);
-
-  const openDetail = (user: any) => {
-    navigate(`/admin/pengguna/${user.id}/detail`);
+  const getData = async () => {
+    try {
+      setLoading(true);
+      const res = await ApiClient.get("/transaction");
+      setData(res?.data?.data || []);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const columns = getUserColumns({
-    openDetail,
-    isLoading: loading,
-  });
+  useEffect(() => {
+    getData();
+  }, []);
+
+  const openDetail = (row: any) => {
+    navigate(`/${user.role}/riwayat-penjualan/detail/${row.id}`);
+  };
+
+
+  const columns = getTransactionColumns({
+  openDetail,
+  isLoading: loading,
+});
+
+
+  const filteredData = data.filter((item) =>
+    JSON.stringify(item)
+      .toLowerCase()
+      .includes(filters.search.toLowerCase())
+  );
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-6">
@@ -56,10 +73,7 @@ const Pengguna = () => {
           <HeaderTableSearch
             value={filters.search}
             onChange={(val) =>
-              setFilters((prev) => ({
-                ...prev,
-                search: val,
-              }))
+              setFilters((prev) => ({ ...prev, search: val }))
             }
             onSearch={(val) =>
               setFilters((prev) => ({
@@ -74,18 +88,15 @@ const Pengguna = () => {
 
         <DataTable
           columns={columns}
-          data={data}
+          data={filteredData}
           isLoading={loading}
-          noDataComponent={<EmptyNoData onRefresh={refetch} />}
-          noResultsComponent={<EmptyNoResults onRefresh={refetch} />}
+          noDataComponent={<EmptyNoData onRefresh={getData} />}
+          noResultsComponent={<EmptyNoResults onRefresh={getData} />}
           page={filters.page}
-          pageSize={meta.limit}
-          total={meta.count}
+          pageSize={10}
+          total={filteredData.length}
           onPageChange={(newPage) =>
-            setFilters((prev) => ({
-              ...prev,
-              page: newPage,
-            }))
+            setFilters((prev) => ({ ...prev, page: newPage }))
           }
         />
       </Card>

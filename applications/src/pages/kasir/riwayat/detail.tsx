@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { User as UserIcon, Mail, Shield, Calendar, Info } from "lucide-react";
 
 import {
@@ -9,6 +9,8 @@ import { Card } from "../../../components/UI/Card";
 import Logo from "../../../assets/logo.png";
 import { Button } from "../../../components/UI/Button";
 import { formatDate } from "../../../utils/formatDate";
+import { useEffect, useState } from "react";
+import ApiClient from "../../../utils/apiClient";
 
 /*
 import { useEffect, useState } from "react";
@@ -18,76 +20,38 @@ import { UserServices } from "../../../services/userService";
 
 const DetailPengguna = () => {
   const navigate = useNavigate();
+  const { id } = useParams();
+  const [transaction, setTransaction] = useState([]);
 
-  // ================= DUMMY DATA =================
-  const transaction = {
-    invoice: "12345678",
-    date: "12 Desember 2026",
-    time: "06:56 PM",
-    buyer: "Draco Malfoy",
-    cashier: "Harry Potter",
-    items: [
-      {
-        name: "Keripik Kentang Keju Lamborghini",
-        price: "Rp 120.000",
-        qty: 13,
-      },
-      {
-        name: "Keripik Kentang Keju Lamborghini",
-        price: "Rp 120.000",
-        qty: 13,
-      },
-      {
-        name: "Keripik Kentang Keju Lamborghini",
-        price: "Rp 120.000",
-        qty: 13,
-      },
-    ],
+  const getData = async () => {
+    try {
+      const res = await ApiClient.get(`/transaction/${id}`);
+      const data = res.data.data;
+      setTransaction(data);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
-  /*
-  const { id } = useParams<{ id: string }>();
-  const [user, setUser] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-
   useEffect(() => {
-    if (!id) return;
-
-    const fetchUser = async () => {
-      try {
-        const res = await UserServices.getUserById(id);
-        setUser(res?.data ?? res);
-      } catch (err) {
-        console.error(err);
-        setUser(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUser();
-  }, [id]);
-  */
+    getData();
+  }, []);
 
   return (
     <div className="w-full px-6">
       {/* HEADER */}
       <ContainerHeaderPage>
-        <HeaderTitle>Detail Pengguna</HeaderTitle>
+        <HeaderTitle>Detail Transsaction</HeaderTitle>
       </ContainerHeaderPage>
 
-      {/* GRID 6 COLS (4 : 2) */}
       <div className="max-w-6xl grid grid-cols-1 lg:grid-cols-6 gap-6 mt-6">
-        {/* ================= LEFT (4) ================= */}
         <Card className="lg:col-span-4 shadow-none rounded-3xl p-8">
-          {/* LOGO */}
           <img src={Logo} alt="SkarPOS" className="h-10 mb-6" />
 
-          {/* INVOICE + DATE */}
           <div className="flex justify-between items-start mb-6">
             <div>
               <p className="text-sm font-semibold text-gray-600 text-[16px]">
-                No. Invoice: <span>{transaction.invoice}</span>
+                No. Invoice: <span>{transaction.invoice_number}</span>
               </p>
             </div>
 
@@ -121,7 +85,7 @@ const DetailPengguna = () => {
                   <th className="py-3 px-3 text-right">Jumlah Item</th>
                 </tr>
               </thead>
-              <tbody>
+              {/* <tbody>
                 {transaction.items.map((item, index) => (
                   <tr
                     key={index}
@@ -133,7 +97,7 @@ const DetailPengguna = () => {
                     <td className="py-3 px-3 text-right">{item.qty}</td>
                   </tr>
                 ))}
-              </tbody>
+              </tbody> */}
             </table>
           </div>
         </Card>

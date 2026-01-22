@@ -101,7 +101,7 @@ export const ProfilePage = () => {
               />
 
               <Button
-                onClick={() => fileInputRef.current?.click()}
+                onClick={profile.openEdit}
                 className="absolute -bottom-2 -right-2 bg-[#F59200] p-1.5 rounded-md hover:bg-orange-300 cursor-pointer"
               >
                 <Pencil size={14} className="text-white" />

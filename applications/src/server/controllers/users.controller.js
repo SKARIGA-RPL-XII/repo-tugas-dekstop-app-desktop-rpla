@@ -2,7 +2,6 @@ import { Users } from "../model/users.model.js";
 import { createUserSchema, updateUserSchema } from "../schemas/user.schema.js";
 import { errorResponse, successResponse } from "../utils/response.js";
 import { supabase } from "../config/supabase.js";
-import { formatFieldError } from "../utils/formatFieldError.js";
 import bcrypt from "bcryptjs";
 
 export class UsersController {
@@ -12,7 +11,7 @@ export class UsersController {
         data,
         page = 1,
         limit = 10,
-        count
+        count,
       } = await Users.getAll(supabase, req.query);
 
       return successResponse(res, data, "Users retrieved successfully", 200, {
@@ -53,31 +52,25 @@ export class UsersController {
 
       const { email, password, username, role, is_blocked } = validation.data;
 
+      const hashedPassword = await bcrypt.hash(password, 10);
+
       const payload = {
-        email: email,
-        password: password,
-        username: username,
-        role: role,
-        is_blocked: is_blocked,
+        email,
+        password: hashedPassword,
+        username,
+        role,
+        is_blocked,
       };
 
       const newUser = await Users.create(supabase, payload);
 
       return successResponse(res, newUser, "User created successfully", 201);
     } catch (error) {
-      if (error.name === "ZodError") {
-        return errorResponse(
-          res,
-          "Validation error",
-          400,
-          error.errors.map((e) => e.message).join(", "),
-        );
-      }
       return errorResponse(
         res,
         "Internal Server Error during creation",
         500,
-        formatFieldError(error.message),
+        error.message,
       );
     }
   }
@@ -90,7 +83,7 @@ export class UsersController {
           res,
           "Validation error",
           400,
-          validation.error.errors.map(e => e.message).join(", ")
+          validation.error.errors.map((e) => e.message).join(", "),
         );
       }
 
@@ -117,21 +110,16 @@ export class UsersController {
       const updatedUser = await Users.update(supabase, userId, payload);
 
       if (!updatedUser) {
-        return errorResponse(
-          res,
-          `User with ID ${userId} not found`,
-          404
-        );
+        return errorResponse(res, `User with ID ${userId} not found`, 404);
       }
 
       return successResponse(res, updatedUser, "User updated successfully");
-
     } catch (error) {
       return errorResponse(
         res,
         "Internal Server Error during update",
         500,
-        error.message
+        error.message,
       );
     }
   }
@@ -165,9 +153,9 @@ async function uploadOrReplaceAvatar({ supabase, userId, file }) {
   const { error } = await supabase.storage
     .from("avatars")
     .upload(filePath, file.buffer, {
-      upsert: true,              
+      upsert: true,
       contentType: file.mimetype,
-      cacheControl: "no-cache", 
+      cacheControl: "no-cache",
     });
 
   if (error) throw error;

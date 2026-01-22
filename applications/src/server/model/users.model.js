@@ -62,30 +62,34 @@ static async getAll(db, query = {}) {
   }
 }
 
+static async create(db, payload) {
+  const {
+    username,
+    email,
+    password: hashedPassword,
+    role = "user",
+  } = payload;
 
+  const { data, error } = await db
+    .from(this.tableName)
+    .insert([
+      {
+        username,
+        email,
+        password: hashedPassword,
+        role,
+      },
+    ])
+    .select()
+    .single();
 
-  static async create(db, payload) {
-    const { username, email, passwordHash, role = "user" } = payload;
+  if (error) throw new Error(error.message);
 
-    const { data, error } = await db
-      .from(this.tableName)
-      .insert([
-        {
-          username,
-          email,
-          password: passwordHash,
-          role,
-        },
-      ])
-      .select()
-      .single();
+  const { password: _, ...safeData } = data;
 
-    if (error) throw new Error(error.message);
+  return safeData;
+}
 
-    const { password, ...safeData } = data;
-
-    return safeData;
-  }
 
   static async findById(db, id) {
     const { data, error } = await db

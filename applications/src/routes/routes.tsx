@@ -39,7 +39,7 @@ const router = createBrowserRouter([
           { path: "kategori", element: <Category /> },
           { path: "pengguna", element: <Pengguna /> },
           { path: "pengguna/:id/detail", element: <PenggunaDetail /> },
-           { path: "riwayat-penjualan", element: <Riwayat /> },
+          { path: "riwayat-penjualan", element: <Riwayat /> },
 
           // ================== PRODUK ==================
           { path: "produk", element: <Produk /> },
@@ -47,6 +47,7 @@ const router = createBrowserRouter([
           { path: "produk/:id/detail", element: <ProdukDetail /> },
           { path: "produk/:id/edit", element: <ProdukEdit /> },
           { path: "profil-saya", element: <ProfilePage /> },
+          { path: "riwayat-penjualan/detail/:id", element: <RiwayatDetail /> },
         ],
       },
       {
@@ -61,7 +62,7 @@ const router = createBrowserRouter([
           { path: "dashboard", element: <DashboardKasir /> },
           { path: "kasir", element: <Kasir /> },
           { path: "riwayat-penjualan", element: <Riwayat /> },
-          { path: "riwayat-penjualan/detail", element: <RiwayatDetail /> },
+          { path: "riwayat-penjualan/detail/:id", element: <RiwayatDetail /> },
           { path: "profil-saya", element: <ProfilePage /> },
         ],
       },
