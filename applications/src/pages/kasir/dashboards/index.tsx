@@ -1,39 +1,95 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ArrowUpFromLine, Calendar } from "lucide-react";
 import { useAuth } from "../../../context/AuthContext";
 import Chart from "react-apexcharts";
 import { ApexOptions } from "apexcharts";
 import kasirLogo from "../../../assets/kasir-logo.svg";
+import { useDashboard } from "../../../hooks/dashboard/useDashboard";
+import { useNavigate } from "react-router-dom";
 
 const DashboardKasir = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const displayName = user?.username || user?.email || "User";
   const [openDate, setOpenDate] = useState(false);
+  const [range, setRange] = useState<"daily" | "monthly" | "yearly">("daily");
   const [startDate, setStartDate] = useState("2025-12-01");
   const [endDate, setEndDate] = useState("2025-12-31");
+
+  const { data, loading, error } = useDashboard({
+    startDate,
+    endDate,
+  });
+
+  if (loading) {
+    return (
+      <div className="w-full h-full flex items-center justify-center">
+        <p className="text-gray-500">Memuat data dashboard...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="w-full h-full flex items-center justify-center">
+        <p className="text-red-500">Error: {error}</p>
+      </div>
+    );
+  }
+
+  const summary = data?.summary || {
+    total_transactions: 0,
+    total_products: 0,
+    total_revenue: 0,
+  };
+
+  const latestProducts = data?.latest_products || [];
+  const latestTransactions = data?.latest_transactions || [];
+  const chartData = data?.chart || [];
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      minimumFractionDigits: 0,
+    }).format(amount);
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("id-ID");
+  };
+
+  const formatTime = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleTimeString("id-ID", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
 
   /* ================= CARD ATAS ================= */
   const cards = [
     {
-      label: "Pendapatan Mingguan",
-      value: "Rp 1.500.000",
+      label: "Pendapatan Total",
+      value: formatCurrency(summary.total_revenue),
       bg: "bg-white",
       text: "text-green-600",
-      percent: "4%",
+      percent: "+12%",
       percentBg: "#E0F9F2",
       percentText: "#009966",
-      description: "Meningkat dari minggu sebelumnya",
+      description: "Dibandingkan periode sebelumnya",
       svg: (
         <img src={kasirLogo} alt="Kasir Logo" className="w-[80px] h-[80px]" />
       ),
       fullWidth: true,
     },
     {
-      label: "Pelanggan",
-      value: "12k",
+      label: "Total Transaksi",
+      value: summary.total_transactions.toString(),
       bg: "bg-[#FFFFFF]",
       text: "text-[#F59200]",
-      percent: "6%",
+      percent: "+8%",
       percentBg: "#E0F9F2",
       percentText: "#009966",
       svg: (
@@ -55,11 +111,11 @@ const DashboardKasir = () => {
       ),
     },
     {
-      label: "Penjualan",
-      value: "6,5k",
+      label: "Total Produk",
+      value: summary.total_products.toString(),
       bg: "bg-[#FFFFFF]",
       text: "text-[#5565FF]",
-      percent: "4%",
+      percent: "+5%",
       percentBg: "#E0F9F2",
       percentText: "#009966",
       svg: (
@@ -84,9 +140,17 @@ const DashboardKasir = () => {
     },
   ];
 
-  /* ================= CHART ================= */
+    /* ================= CHART ================= */
+  const chartLabels = chartData.map((item: any) => {
+    const date = new Date(item.date);
+    return date.toLocaleDateString("id-ID", {
+      month: "short",
+      day: "numeric",
+    });
+  });
+  const chartValues = chartData.map((item: any) => item.total);
 
-  const [chartOptions] = useState<ApexOptions>({
+  const chartOptions: ApexOptions = {
     chart: {
       type: "bar",
       height: 248,
@@ -102,26 +166,37 @@ const DashboardKasir = () => {
     dataLabels: { enabled: false },
     stroke: { show: true, width: 2, colors: ["transparent"] },
     xaxis: {
-      categories: [
-        "Feb",
-        "Mar",
-        "Apr",
-        "May",
-        "Jun",
-        "Jul",
-        "Aug",
-        "Sep",
-        "Oct",
-      ],
+      categories: chartLabels.length > 0 ? chartLabels : ["No Data"],
     },
     fill: { opacity: 1 },
-    colors: ["#5565FF", "#00E096"],
-  });
+    colors: ["#5565FF"],
+    tooltip: {
+      y: {
+        formatter: (value: number) => {
+          return formatCurrency(value);
+        },
+      },
+      x: {
+        formatter: (value: any, { series, seriesIndex, dataPointIndex }: any) => {
+          const fullDate = new Date(chartData[dataPointIndex]?.date);
+          return fullDate.toLocaleDateString("id-ID", {
+            weekday: "long",
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          });
+        },
+      },
+    },
+  };
 
-  const [series] = useState([
-    { name: "Tertinggi", data: [44, 55, 57, 56, 61, 58, 63, 60, 66] },
-    { name: "Terendah", data: [76, 85, 101, 98, 87, 105, 91, 114, 94] },
-  ]);
+  const series = [
+    { name: "Total Penjualan", data: chartValues.length > 0 ? chartValues : [0] },
+  ];
+
+  const handleViewDetail = (transactionId: string) => {
+    navigate(`/kasir/riwayat/${transactionId}`);
+  };
 
   return (
     <div className="w-full h-full flex flex-col gap-5 ">
@@ -190,7 +265,7 @@ const DashboardKasir = () => {
         >
           {/* Kalender */}
           <div className="w-10 h-10 flex justify-center items-center bg-[#E6F0F7] rounded-sm">
-          <Calendar className="w-12 h-12 p-2 text-[#5565FF]" />
+            <Calendar className="w-12 h-12 p-2 text-[#5565FF]" />
           </div>
 
           {/* Filter Text */}
@@ -222,34 +297,34 @@ const DashboardKasir = () => {
             </svg>
           </div>
           {openDate && (
-          <div className="absolute right-0 top-full mt-6 bg-white border border-[#EBF1F6] rounded-[12px] p-5 z-20">
-            <div className="flex gap-3">
-              <div className="flex flex-col gap-1">
-                <label className="text-[11px] text-[#314158] font-semibold">
-                  Tanggal Awal
-                </label>
-                <input
-                  type="date"
-                  value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
-                  className="border rounded-md px-2 py-1 text-[12px]"
-                />
-              </div>
+            <div className="absolute right-0 top-full mt-6 bg-white border border-[#EBF1F6] rounded-[12px] p-5 z-20 shadow-lg">
+              <div className="flex gap-3">
+                <div className="flex flex-col gap-1">
+                  <label className="text-[11px] text-[#314158] font-semibold">
+                    Tanggal Awal
+                  </label>
+                  <input
+                    type="date"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    className="border rounded-md px-2 py-1 text-[12px]"
+                  />
+                </div>
 
-              <div className="flex flex-col gap-1">
-                <label className="text-[11px] text-[#314158] font-semibold">
-                  Tanggal Akhir
-                </label>
-                <input
-                  type="date"
-                  value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
-                  className="border rounded-md px-2 py-1 text-[12px]"
-                />
+                <div className="flex flex-col gap-1">
+                  <label className="text-[11px] text-[#314158] font-semibold">
+                    Tanggal Akhir
+                  </label>
+                  <input
+                    type="date"
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
+                    className="border rounded-md px-2 py-1 text-[12px]"
+                  />
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
         </div>
       </div>
 
@@ -260,7 +335,7 @@ const DashboardKasir = () => {
             key={card.label}
             className={`rounded-[15px] p-5 flex items-center justify-between ${
               card.bg
-            } ${card.fullWidth ? "md:col-span-2" : "md:col-span-1"}`}
+            } ${card.fullWidth ? "md:col-span-2" : "md:col-span-1"} shadow-sm`}
           >
             {/* KIRI: Text */}
             <div className="flex-1">
@@ -304,81 +379,111 @@ const DashboardKasir = () => {
       {/* ================= BAGIAN TENGAH ================= */}
       <div className="flex flex-col md:flex-row gap-6">
         {/* LAPORAN PENJUALAN */}
-        <div className="w-full md:flex-[2] bg-white border border-[#EBF1F6] rounded-[16px] p-6">
+        <div className="w-full md:flex-[2] bg-white border border-[#EBF1F6] rounded-[16px] p-6 shadow-sm">
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-[17px] font-semibold text-[#314158]">
               Laporan Penjualan
             </h3>
             <div className="flex gap-2">
-              <button className="px-3 py-1 text-xs rounded-md bg-[#EEF2FF] text-[#5565FF]">
+              <button 
+                onClick={() => setRange("daily")}
+                className={`px-3 py-1 text-xs rounded-md transition ${
+                  range === "daily"
+                    ? "bg-[#EEF2FF] text-[#5565FF] font-medium"
+                    : "bg-gray-100 text-gray-400 hover:bg-gray-200"
+                }`}
+              >
                 Harian
               </button>
-              <button className="px-3 py-1 text-xs rounded-md text-gray-400">
+              <button 
+                onClick={() => setRange("monthly")}
+                className={`px-3 py-1 text-xs rounded-md transition ${
+                  range === "monthly"
+                    ? "bg-[#EEF2FF] text-[#5565FF] font-medium"
+                    : "bg-gray-100 text-gray-400 hover:bg-gray-200"
+                }`}
+              >
                 Bulanan
               </button>
-              <button className="px-3 py-1 text-xs rounded-md text-gray-400">
+              <button 
+                onClick={() => setRange("yearly")}
+                className={`px-3 py-1 text-xs rounded-md transition ${
+                  range === "yearly"
+                    ? "bg-[#EEF2FF] text-[#5565FF] font-medium"
+                    : "bg-gray-100 text-gray-400 hover:bg-gray-200"
+                }`}
+              >
                 Tahunan
               </button>
             </div>
           </div>
-          <Chart
-            options={chartOptions}
-            series={series}
-            type="bar"
-            height={248}
-          />
+          {chartData.length > 0 ? (
+            <Chart
+              options={chartOptions}
+              series={series}
+              type="bar"
+              height={248}
+            />
+          ) : (
+            <div className="flex items-center justify-center h-[248px] text-gray-400">
+              Tidak ada data penjualan
+            </div>
+          )}
         </div>
 
         {/* PRODUK BARU */}
-        <div className="w-full md:flex-1 bg-white border border-[#EBF1F6] rounded-[16px] p-6">
+        <div className="w-full md:flex-1 bg-white border border-[#EBF1F6] rounded-[16px] p-6 shadow-sm">
           <h3 className="text-[17px] font-semibold text-[#314158] mb-4">
-            Produk Yang Baru Ditambahkan
+            Produk Terbaru
           </h3>
-          <div className="flex flex-col gap-8">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="flex items-center gap-3">
-                <img
-                  src="https://via.placeholder.com/40"
-                  className="w-10 h-10 rounded-md"
-                />
-                <div className="flex-1">
-                  <p className="text-[13px] font-medium text-[#314158]">
-                    Snack Piattos
-                  </p>
-                  <p className="text-[13px] text-[#5565FF]">Stok: 120</p>
+          <div className="flex flex-col gap-4">
+            {latestProducts.length > 0 ? (
+              latestProducts.map((product: any) => (
+                <div key={product.id} className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-md bg-[#EEF2FF] flex items-center justify-center">
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 20 20"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M10 1L2 6V14C2 16.2091 5.58172 18 10 18C14.4183 18 18 16.2091 18 14V6L10 1Z"
+                        fill="#5565FF"
+                        fillOpacity="0.2"
+                      />
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-[13px] font-medium text-[#314158]">
+                      {product.product_name}
+                    </p>
+                    <p className="text-[13px] text-[#5565FF]">
+                      Stok: {product.stock}
+                    </p>
+                  </div>
                 </div>
-                <svg
-                  width="30"
-                  height="30"
-                  viewBox="0 0 30 30"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <rect
-                    width="30"
-                    height="30"
-                    rx="15"
-                    transform="matrix(-1 0 0 1 30 0)"
-                    fill="#5565FF"
-                  />
-                  <path
-                    d="M15.1875 10.9871C15.3501 10.8247 15.5705 10.7334 15.8003 10.7334C16.0301 10.7334 16.2505 10.8247 16.413 10.9871L20.313 14.8871C20.4755 15.0497 20.5667 15.2701 20.5667 15.4999C20.5667 15.7297 20.4755 15.9501 20.313 16.1126L16.413 20.0126C16.2495 20.1705 16.0306 20.2578 15.8034 20.2559C15.5761 20.2539 15.3588 20.1627 15.1981 20.0021C15.0374 19.8414 14.9463 19.624 14.9443 19.3968C14.9423 19.1695 15.0297 18.9506 15.1875 18.7871L17.5336 16.3665H9.30026C9.07041 16.3665 8.84997 16.2752 8.68743 16.1127C8.5249 15.9502 8.43359 15.7297 8.43359 15.4999C8.43359 15.27 8.5249 15.0496 8.68743 14.8871C8.84997 14.7245 9.07041 14.6332 9.30026 14.6332H17.5336L15.1875 12.2126C15.0251 12.0501 14.9338 11.8297 14.9338 11.5999C14.9338 11.3701 15.0251 11.1497 15.1875 10.9871Z"
-                    fill="white"
-                  />
-                </svg>
+              ))
+            ) : (
+              <div className="text-center py-4 text-gray-400">
+                Tidak ada produk terbaru
               </div>
-            ))}
+            )}
           </div>
         </div>
       </div>
 
       {/* TRANSAKSI TERBARU */}
-      <div className="bg-white border border-[#EBF1F6] rounded-[16px] p-6 min-w-0">
+      <div className="bg-white border border-[#EBF1F6] rounded-[16px] p-6 min-w-0 shadow-sm">
         <div className="flex justify-between items-center mb-6">
           <h3 className="text-[17px] font-semibold text-[#314158]">
             Transaksi Terbaru
           </h3>
-          <button className="flex items-center gap-1 text-sm font-semibold text-[#5565FF] hover:underline">
+          <button
+            onClick={() => navigate("/kasir/riwayat")}
+            className="flex items-center gap-1 text-sm font-semibold text-[#5565FF] hover:underline"
+          >
             Lihat Semua <span className="text-base font-extrabold">&gt;</span>
           </button>
         </div>
@@ -390,60 +495,65 @@ const DashboardKasir = () => {
                 <th className="py-3 px-4 text-left">Nomor Invoice</th>
                 <th className="py-3 px-4 text-left">Tanggal Transaksi</th>
                 <th className="py-3 px-4 text-left">Nama Kasir</th>
-                <th className="py-3 px-4 text-left">Nama Pembeli</th>
                 <th className="py-3 px-4 text-left">Total Harga</th>
                 <th className="py-3 px-4 text-left">Jumlah Item</th>
                 <th className="py-3 px-4 text-center">Aksi</th>
               </tr>
             </thead>
             <tbody>
-              {[1, 2, 3, 4, 5].map((i) => (
-                <tr
-                  key={i}
-                  className="border-b last:border-none border-[#E2E8F0] text-[14px]"
-                >
-                  <td className="px-4 py-3">12345678</td>
-                  <td className="px-4 py-3">
-                    <div className="font-semibold">12 Desember 2026</div>
-                    <div className="text-[13px] text-[#8B8B8B]">06.12 AM</div>
-                  </td>
-                  <td className="px-4 py-3">Harry Potter</td>
-                  <td className="px-4 py-3">Draco Malfoy</td>
-                  <td className="px-4 py-3">Rp. 120.000</td>
-                  <td className="px-4 py-3">10 Item</td>
-                  <td className="px-4 py-3 text-center">
-                    <button className="w-[26px] h-[26px] flex items-center justify-center rounded-lg bg-white border border-[#5565FF]/70 text-[#5565FF]">
-                      <svg
-                        width="26"
-                        height="26"
-                        viewBox="0 0 26 26"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
+              {latestTransactions.length > 0 ? (
+                latestTransactions.map((transaction: any) => (
+                  <tr
+                    key={transaction.id}
+                    className="border-b last:border-none border-[#E2E8F0] text-[14px] hover:bg-gray-50"
+                  >
+                    <td className="px-4 py-3 font-medium">{transaction.invoice}</td>
+                    <td className="px-4 py-3">
+                      <div className="font-semibold">{formatDate(transaction.date)}</div>
+                      <div className="text-[13px] text-[#8B8B8B]">
+                        {formatTime(transaction.date)}
+                      </div>
+                    </td>
+                    <td className="px-4 py-3">{transaction.cashier || "-"}</td>
+                    <td className="px-4 py-3 font-medium">
+                      {formatCurrency(transaction.total)}
+                    </td>
+                    <td className="px-4 py-3">{transaction.item_count} Item</td>
+                    <td className="px-4 py-3 text-center">
+                      <button
+                        onClick={() => handleViewDetail(transaction.id)}
+                        className="w-[26px] h-[26px] flex items-center justify-center rounded-lg bg-white border border-[#5565FF]/70 text-[#5565FF] hover:bg-[#5565FF] hover:text-white transition"
+                        title="Lihat Detail"
                       >
-                        <rect
-                          x="0.5"
-                          y="0.5"
-                          width="25"
-                          height="25"
-                          rx="6.5"
-                          fill="white"
-                          fillOpacity="0.01"
-                        />
-                        <path
-                          d="M13.0001 14.625C13.8976 14.625 14.6251 13.8975 14.6251 13C14.6251 12.1025 13.8976 11.375 13.0001 11.375C12.1027 11.375 11.3751 12.1025 11.3751 13C11.3751 13.8975 12.1027 14.625 13.0001 14.625Z"
-                          fill="#5565FF"
-                        />
-                        <path
-                          fillRule="evenodd"
-                          clipRule="evenodd"
-                          d="M5.24707 13C6.2824 9.70362 9.36202 7.3125 13.0001 7.3125C16.6382 7.3125 19.7178 9.70359 20.7531 13C19.7178 16.2964 16.6382 18.6875 13.0001 18.6875C9.36202 18.6875 6.28242 16.2964 5.24707 13ZM16.2501 13C16.2501 14.7949 14.7951 16.25 13.0001 16.25C11.2052 16.25 9.75014 14.7949 9.75014 13C9.75014 11.2051 11.2052 9.75 13.0001 9.75C14.7951 9.75 16.2501 11.2051 16.2501 13Z"
-                          fill="#5565FF"
-                        />
-                      </svg>
-                    </button>
+                        <svg
+                          width="14"
+                          height="14"
+                          viewBox="0 0 26 26"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M13.0001 14.625C13.8976 14.625 14.6251 13.8975 14.6251 13C14.6251 12.1025 13.8976 11.375 13.0001 11.375C12.1027 11.375 11.3751 12.1025 11.3751 13C11.3751 13.8975 12.1027 14.625 13.0001 14.625Z"
+                            fill="currentColor"
+                          />
+                          <path
+                            fillRule="evenodd"
+                            clipRule="evenodd"
+                            d="M5.24707 13C6.2824 9.70362 9.36202 7.3125 13.0001 7.3125C16.6382 7.3125 19.7178 9.70359 20.7531 13C19.7178 16.2964 16.6382 18.6875 13.0001 18.6875C9.36202 18.6875 6.28242 16.2964 5.24707 13ZM16.2501 13C16.2501 14.7949 14.7951 16.25 13.0001 16.25C11.2052 16.25 9.75014 14.7949 9.75014 13C9.75014 11.2051 11.2052 9.75 13.0001 9.75C14.7951 9.75 16.2501 11.2051 16.2501 13Z"
+                            fill="currentColor"
+                          />
+                        </svg>
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={6} className="px-4 py-8 text-center text-gray-400">
+                    Tidak ada transaksi terbaru
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>
