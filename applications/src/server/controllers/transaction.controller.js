@@ -108,21 +108,26 @@ export class TransactionsController {
       const { transaction_id } = req.params;
 
       let query = supabase.from("transactions").select(`
+      id,
+      invoice_number,
+      total_price,
+      payment_method,
+      created_at,
+      user_id,
+      user:users (
         id,
-        invoice_number,
-        total_price,
-        created_at,
-        user_id,
-        transaction_detail (
+        username
+      ),
+      transaction_detail (
+        id,
+        qty,
+        price,
+        product:products (
           id,
-          qty,
-          price,
-          product:products (
-            id,
-            product_name
-          )
+          product_name
         )
-      `);
+      )
+    `);
 
       // 👉 kalau ada param → ambil 1 transaksi
       if (transaction_id) {
@@ -155,8 +160,12 @@ export class TransactionsController {
             id: data.id,
             invoice_number: data.invoice_number,
             total_price: data.total_price,
+            payment_method: data.payment_method,
             created_at: data.created_at,
-            user_id: data.user_id,
+            user: {
+              id: data.user_id,
+              username: data.user?.username,
+            },
             items,
           },
           "Success get transaction detail",
@@ -168,8 +177,12 @@ export class TransactionsController {
         id: trx.id,
         invoice_number: trx.invoice_number,
         total_price: trx.total_price,
+        payment_method: trx.payment_method,
         created_at: trx.created_at,
-        user_id: trx.user_id,
+        cashier: {
+          id: trx.user_id,
+          username: trx.user?.username,
+        },
         items: trx.transaction_detail.map((item) => ({
           product_id: item.product.id,
           product_name: item.product.product_name,
